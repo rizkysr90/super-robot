@@ -1,7 +1,7 @@
 # for local development
 version: '3.9'
 services:
-  go-rest-api:
+  restapi:
     image: "golang:1.21.5-bookworm"
     restart: on-failure
     ports:
@@ -10,7 +10,7 @@ services:
       - ./:/app
     working_dir: /app
     depends_on:
-      mysql:
+      postgres:
         condition: service_started
       db-migration:
         condition: service_completed_successfully
@@ -28,11 +28,11 @@ services:
       - ./:/app
     working_dir: /app
     depends_on:
-      mysql:
+      postgres:
         condition: service_started
     environment:
-      - DATABASE_URL=mysql://root:root@mysql:3306/dev-api-fd
-      - DBMATE_MIGRATIONS_DIR=/app/resources/mysql/migrations
+      - DATABASE_URL=postgres://root:root@postgres:5432/pos_rizki?sslmode=disable
+      - DBMATE_MIGRATIONS_DIR=/app/resources/pgsql/migrations
       - DBMATE_NO_DUMP_SCHEMA=true
       - DBMATE_VERBOSE=true
       - DBMATE_STRICT=true
@@ -45,23 +45,22 @@ services:
     image: adminer:4-standalone
     restart: on-failure
     depends_on:
-      mysql:
+      postgres:
         condition: service_started
     ports:
       - "8888:8080/tcp"
  # ------------------------------------------ INFRASTRUCTURES ------------------------------------------
-  mysql:
-    container_name: mysql
-    image: mysql:8.0-debian
+  postgres:
+    container_name: postgres
+    image: postgres:15-alpine
     restart: on-failure
     volumes:
-      - mysql-data:/var/lib/mysql
+      - postgres-data:/var/lib/postgresql/data
     expose:
-      - 3306
-    ports:
-      - 3306:3306
+      - 5432
     environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: dev-api-fd
+      - POSTGRES_DB=pos_rizki
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD=root
 volumes:
-  mysql-data:
+  postgres-data:

@@ -1,7 +1,7 @@
 package config
 
 import (
-	"api-iad-ams/pkg/mysql"
+	pgx "api-iad-ams/pkg/pgx"
 
 	"github.com/caarlos0/env/v8"
 )
@@ -10,13 +10,13 @@ type flatEnv struct {
 	AppName           string `env:"APP_NAME"`
 	AppEnv            string `env:"APP_ENV"` // local|dev|uat|sit|prod
 	RestAPIPort       string `env:"REST_API_PORT"`
-	MySQLHost         string `env:"MYSQL_HOST"`
-	MySQLPort         int    `env:"MYSQL_PORT"`
-	MySQLDatabase     string `env:"MYSQL_DATABASE"`
-	MySQLUsername     string `env:"MYSQL_USERNAME"`
-	MySQLPassword     string `env:"MYSQL_PASSWORD,unset"` // sensitive, unset from environment after parse!
-	MySQLConnMaxOpen  int    `env:"MYSQL_CONN_MAX_OPEN"`
-	MySQLConnMaxIdle  int    `env:"MYSQL_CONN_MAX_IDLE"`
+	DBHost            string `env:"DB_HOST"`
+	DBPort            int    `env:"DB_PORT"`
+	DBDatabase        string `env:"DB_DATABASE"`
+	DBUsername        string `env:"DB_USERNAME"`
+	DBPassword        string `env:"DB_PASSWORD,unset"` // sensitive, unset from environment after parse!
+	DBConnMaxOpen     int    `env:"DB_CONN_MAX_OPEN"`
+	DBConnMaxIdle     int    `env:"DB_CONN_MAX_IDLE"`
 	ApiKey            string `env:"API_KEY,unset"`
 	ApiVersionBaseURL string `env:"API_VERSION_BASE_URL"`
 }
@@ -24,14 +24,7 @@ type Config struct {
 	AppName           string
 	AppEnv            string
 	RestAPIPort       string
-	MySQL             mysql.Config
-	MySQLHost         string
-	MySQLPort         int
-	MySQLDatabase     string
-	MySQLUsername     string
-	MySQLPassword     string
-	MySQLConnMaxOpen  int
-	MySQLConnMaxIdle  int
+	PgSQL             pgx.Config
 	APIKey            string
 	ApiVersionBaseURL string
 }
@@ -49,14 +42,12 @@ func newConfig(envCfg flatEnv) *Config {
 		AppName:     envCfg.AppName,
 		AppEnv:      envCfg.AppEnv,
 		RestAPIPort: envCfg.RestAPIPort,
-		MySQL: mysql.Config{
-			Username:    envCfg.MySQLUsername,
-			Password:    envCfg.MySQLPassword,
-			Database:    envCfg.MySQLDatabase,
-			Host:        envCfg.MySQLHost,
-			Port:        envCfg.MySQLPort,
-			ConnMaxOpen: envCfg.MySQLConnMaxOpen,
-			ConnMaxIdle: envCfg.MySQLConnMaxIdle,
+		PgSQL: pgx.Config{
+			Username: envCfg.DBUsername,
+			Password: envCfg.DBPassword,
+			Database: envCfg.DBDatabase,
+			Host:     envCfg.DBHost,
+			Port:     envCfg.DBPort,
 		},
 		APIKey:            envCfg.ApiKey,
 		ApiVersionBaseURL: envCfg.ApiVersionBaseURL,

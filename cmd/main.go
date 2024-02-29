@@ -2,31 +2,34 @@ package main
 
 import (
 	"api-iad-ams/internal/config"
-	"api-iad-ams/internal/server"
-	"api-iad-ams/pkg/mysql"
+	"api-iad-ams/internal/restapi"
+	pgx "api-iad-ams/pkg/pgx"
+	"context"
 	"log"
 )
 
 func main() {
+	ctx := context.Background()
 	// -----------------------------------------------------------------------------------------------------------------
 	// LOAD APPLICATION CONFIG FROM ENVIRONMENT VARIABLES
 	// -----------------------------------------------------------------------------------------------------------------
 	cfg, err := config.LoadFromEnv()
 	if err != nil {
-		log.Fatalf("restapi: main failed to load and parse config: %s", err)
+		log.Fatalf("restApi: main failed to load and parse config: %s", err)
 		return
 	}
-	// -----------------------------------------------------------------------------------------------------------------
-	// INFRASTRUCTURE OBJECTS
-	// -----------------------------------------------------------------------------------------------------------------
-	// MYSQL
-	sqlDB, sqlDBErr := mysql.NewDB(cfg.MySQL)
+	// // -----------------------------------------------------------------------------------------------------------------
+	// // INFRASTRUCTURE OBJECTS
+	// // -----------------------------------------------------------------------------------------------------------------
+	// PgSQL
+	sqlDB, sqlDBErr := pgx.NewDB(cfg.PgSQL, ctx)
 	if sqlDBErr != nil {
-		log.Fatalf("restapi: main failed to construct mysql %s", sqlDBErr)
+		log.Fatalf("pgSql: main failed to construct pgSql %s", sqlDBErr)
 		return
 	}
-	defer func() { _ = sqlDB.Close() }()
-	restAPIserver, err := server.New(cfg, sqlDB)
+	defer func() { sqlDB.Close() }()
+
+	restAPIserver, err := restapi.New(cfg, sqlDB)
 	if err != nil {
 		log.Fatalf("restapi: main failed to construct server: %s", err)
 	}

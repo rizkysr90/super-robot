@@ -1,7 +1,7 @@
 
 .PHONY: server/start
 server/start:
-	docker-compose -f docker-compose.yml up -d 
+	docker-compose -f docker-compose.yml up -d  --remove-orphans
 
 .PHONY: server/stop
 server/stop:
@@ -9,7 +9,7 @@ server/stop:
 
 .PHONY: server/restart
 server/restart:
-	docker-compose -f docker-compose.yml restart go-rest-api db-migration
+	docker-compose -f docker-compose.yml restart restapi db-migration
 ################
 # BUILD BINARY
 ################
