@@ -19,6 +19,7 @@ type flatEnv struct {
 	DBConnMaxIdle     int    `env:"DB_CONN_MAX_IDLE"`
 	ApiKey            string `env:"API_KEY,unset"`
 	ApiVersionBaseURL string `env:"API_VERSION_BASE_URL"`
+	LogLevel          string `env:"LOG_LEVEL"`
 }
 type Config struct {
 	AppName           string
@@ -27,18 +28,19 @@ type Config struct {
 	PgSQL             pgx.Config
 	APIKey            string
 	ApiVersionBaseURL string
+	LogLevel          string
 }
 
-func LoadFromEnv() (*Config, error) {
+func LoadFromEnv() (Config, error) {
 	var envCfg flatEnv
 	err := env.Parse(&envCfg)
 	if err != nil {
-		return nil, err
+		return Config{}, err
 	}
 	return newConfig(envCfg), nil
 }
-func newConfig(envCfg flatEnv) *Config {
-	return &Config{
+func newConfig(envCfg flatEnv) Config {
+	return Config{
 		AppName:     envCfg.AppName,
 		AppEnv:      envCfg.AppEnv,
 		RestAPIPort: envCfg.RestAPIPort,
@@ -51,5 +53,6 @@ func newConfig(envCfg flatEnv) *Config {
 		},
 		APIKey:            envCfg.ApiKey,
 		ApiVersionBaseURL: envCfg.ApiVersionBaseURL,
+		LogLevel:          envCfg.LogLevel,
 	}
 }

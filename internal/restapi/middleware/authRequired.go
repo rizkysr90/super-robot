@@ -10,7 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func AuthRequired(cfg *config.Config) gin.HandlerFunc {
+func AuthRequired(cfg config.Config) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		getAPIKey := ctx.Request.Header.Get("API_KEY")
 		if getAPIKey != cfg.APIKey {

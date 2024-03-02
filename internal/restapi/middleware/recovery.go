@@ -8,9 +8,10 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/rs/zerolog"
 )
 
-func Recovery() gin.HandlerFunc {
+func Recovery(logger zerolog.Logger) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		defer func() {
 			if err := recover(); err != nil {
@@ -27,20 +28,18 @@ func Recovery() gin.HandlerFunc {
 						}
 					}
 				}
-				if brokenPipe {
-					// If the connection is dead, we can't write a status to it.
-					c.Error(err.(error)) //nolint: errcheck
-					c.Abort()
-				} else {
-					c.AbortWithStatusJSON(http.StatusInternalServerError, "error")
+				if !brokenPipe {
+					c.Error(err.(error))
+					c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+						"code":    500,
+						"message": "Internal Server Error",
+						"details": err.(error).Error(),
+					})
 				}
-				// Log the error
-				// log.Println().Err(err.(error)).Msg("Middleware panic")
-				// log.Println("panic err", err)
-				// Respond with an internal server error
-				// c.AbortWithStatusJSON(500, gin.H{
-				// 	"message": "Internal Server Error",
-				// })
+				logger.Error().
+					Str("code", "500").
+					Str("path", c.FullPath()).
+					Msg(err.(error).Error())
 			}
 		}()
 		// Call the next handler

@@ -1,0 +1,147 @@
+package sqldb
+
+import (
+	"context"
+	"database/sql"
+	"fmt"
+
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
+	"github.com/jackc/pgx/v5/pgxpool"
+)
+
+// QueryExecutor is common methods that is intended to be scoped to a DB transaction implemented by *sql.Tx.
+//
+// It is also a set of methods that is implemented by *sql.DB, so we can use this interface for both.
+type QueryExecutor interface {
+	Exec(ctx context.Context, sql string, arguments ...any) (pgconn.CommandTag, error)
+	Query(ctx context.Context, sql string, args ...any) (pgx.Rows, error)
+	QueryRow(ctx context.Context, sql string, args ...any) pgx.Row
+}
+
+// TxFunc is a func that is scoped to single DB transaction from WithinTx.
+type TxFunc func(QueryExecutor) error
+
+type txContextKey struct{}
+
+// WithTxContext create a copy of given context with given DB transaction interface.
+// Use case of this method is if we want execute single DB transaction for multiple SQL DB datastore/repository call.
+// Data store or repository should explicitly check whether context contains transaction Query.
+//
+// See WithinTxContextOrError or WithinTxContextOrDB as the helper function for this.
+func WithTxContext(ctx context.Context, tx QueryExecutor) context.Context {
+	return context.WithValue(ctx, txContextKey{}, tx)
+}
+
+// TxFromContext extract *sql.Tx that implements QueryExecutor and make sure it's not original *sql.DB.
+func TxFromContext(ctx context.Context) QueryExecutor {
+	val := ctx.Value(txContextKey{})
+	switch val.(type) {
+	case *pgxpool.Pool:
+		// *sql.DB also implement QueryExecutor, but we make sure to return it was a DB transaction.
+		// See WithinTxContextOrDB() to get executor with fallback.
+		return nil
+	case *sql.Tx, QueryExecutor:
+		return val.(QueryExecutor)
+	default:
+		return nil
+	}
+}
+
+// WithinTxContextOrDB is a helper function to get the SQL database executor with fallback using given sqlDB.
+//
+// If there is a database transaction found in given context by the upper application layer, use it,
+// it means that the method call is part of multiple data store or repository call in a single transaction,
+// otherwise return given *sql.DB as the executor as it is also implements QueryExecutor.
+func WithinTxContextOrDB(ctx context.Context, sqlDB *pgxpool.Pool) QueryExecutor {
+	if tx := TxFromContext(ctx); tx != nil {
+		return tx
+	}
+	return sqlDB
+}
+
+// WithinTxContextOrError is a helper function to execute given txFunc only within db transaction from given context,
+// if a Tx could NOT be fetched from given context, it will return error.
+//
+// This operation ideally called on data change: INSERT, UPDATE, DELETE.
+func WithinTxContextOrError(ctx context.Context, txFunc TxFunc) error {
+	if tx := TxFromContext(ctx); tx != nil {
+		return txFunc(tx)
+	}
+	return fmt.Errorf("sqldb: WithinTxContextOrError() could not fetch a *sql.Tx from given context")
+}
+
+type txOption struct {
+	txOpt *pgx.TxOptions
+}
+
+type TxOption func(*txOption)
+
+func TxIsolationLevelDefault() TxOption {
+	return func(opt *txOption) { opt.txOpt.IsoLevel = pgx.ReadCommitted }
+}
+func TxIsolationLevelReadUncommitted() TxOption {
+	return func(opt *txOption) { opt.txOpt.IsoLevel = pgx.ReadUncommitted }
+}
+func TxIsolationLevelReadCommitted() TxOption {
+	return func(opt *txOption) { opt.txOpt.IsoLevel = pgx.ReadCommitted }
+}
+func TxIsolationLevelRepeatableRead() TxOption {
+	return func(opt *txOption) { opt.txOpt.IsoLevel = pgx.RepeatableRead }
+}
+func TxIsolationLevelSerializable() TxOption {
+	return func(opt *txOption) { opt.txOpt.IsoLevel = pgx.Serializable }
+}
+
+// TxReadOnly pass read only flag for current transaction.
+func TxReadOnly() TxOption { return func(opt *txOption) { opt.txOpt.AccessMode = pgx.ReadOnly } }
+
+// WithinTx create a scoped func that wrap DB transaction begin, commit, and rollback mechanism.
+// Any error returned by txFunc will rollback a transaction.
+//
+// To execute a DB transaction in multiple data store, see WithTxContext().
+func WithinTx(ctx context.Context, db *pgxpool.Pool, txFunc TxFunc, txOpts ...TxOption) (err error) {
+	// var txOpt *pgx.TxOptions
+	txOpt := &pgx.TxOptions{}
+	if len(txOpts) > 0 {
+		opt := &txOption{txOpt: &pgx.TxOptions{}}
+		for _, o := range txOpts {
+			o(opt)
+		}
+
+		txOpt = opt.txOpt
+	}
+	sqlTx, err := db.BeginTx(ctx, *txOpt)
+
+	if err != nil {
+		return fmt.Errorf("sqldb: WithinTx begin SQL transaction failed: %w", err)
+	}
+	defer func() {
+		p := recover()
+		if p != nil {
+			// Rollback immediately, ignore error and continue original panicking.
+			_ = sqlTx.Rollback(ctx)
+			panic(p)
+		}
+		if err != nil {
+			rollErr := sqlTx.Rollback(ctx)
+			if rollErr != nil {
+				err = fmt.Errorf("sqldb: WithinTx rollback failed before commit: %w", rollErr)
+				return
+			}
+			err = fmt.Errorf("sqldb: WithinTx failed before commit: %w", err)
+			return
+		}
+		err = sqlTx.Commit(ctx)
+		if err != nil {
+			rollErr := sqlTx.Rollback(ctx)
+			if rollErr != nil {
+				err = fmt.Errorf("sqldb: WithinTx commit rollback error after commit failed: %w", rollErr)
+				return
+			}
+			err = fmt.Errorf("sqldb: WithinTx commit failed: %w", err)
+		}
+	}()
+	err = txFunc(sqlTx)
+	return err
+}

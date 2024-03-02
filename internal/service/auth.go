@@ -1,15 +1,10 @@
 package service
 
 import (
+	payload "api-iad-ams/internal/payload/http/auth"
 	"context"
 )
 
-type CreateUserRequest struct {
-	FirstName string `json:"first_name"`
-	LastName  string `json:"last_name"`
-	Email     string `json:"email"`
-	Password  string `json:"password"`
-}
 type AuthService interface {
-	CreateUser(ctx context.Context, payload *CreateUserRequest) error
+	CreateUser(ctx context.Context, req *payload.ReqCreateAccount) error
 }

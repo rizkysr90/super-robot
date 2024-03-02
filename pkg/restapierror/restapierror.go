@@ -36,3 +36,27 @@ func NewBadRequest(ctx context.Context,
 	}
 	return err
 }
+func NewInternalServer(ctx context.Context,
+	opts ...RestAPIErrorOption) *RestAPIError {
+
+	err := &RestAPIError{
+		Code:    500,
+		Message: "Internal Server Error",
+		Details: "",
+	}
+	for _, opt := range opts {
+		opt(err)
+	}
+	return err
+}
+func NewMultipleFieldsValidation(ctx context.Context, errors []RestAPIError, opts ...RestAPIErrorOption) *RestAPIError {
+	err := &RestAPIError{
+		Code:    400,
+		Message: "Bad Request - Error Multiple Fields Validaition",
+		Details: errors,
+	}
+	for _, opt := range opts {
+		opt(err)
+	}
+	return err
+}
