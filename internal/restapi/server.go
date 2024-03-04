@@ -1,21 +1,22 @@
 package restapi
 
 import (
-	"api-iad-ams/internal/config"
-	authHandler "api-iad-ams/internal/restapi/handler/auth"
-	auth "api-iad-ams/internal/service/auth"
-	"api-iad-ams/internal/store/pg"
+	"database/sql"
 
-	"api-iad-ams/internal/restapi/middleware"
+	"github.com/rizkysr90/go-boilerplate/internal/config"
+	authHandler "github.com/rizkysr90/go-boilerplate/internal/restapi/handler/auth"
+	auth "github.com/rizkysr90/go-boilerplate/internal/service/auth"
+	"github.com/rizkysr90/go-boilerplate/internal/store/pg"
+
+	"github.com/rizkysr90/go-boilerplate/internal/restapi/middleware"
 
 	"github.com/gin-gonic/gin"
-	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/rs/zerolog"
 )
 
 func New(
 	cfg config.Config,
-	sqlDB *pgxpool.Pool,
+	sqlDB *sql.DB,
 	logger zerolog.Logger,
 ) (*gin.Engine, error) {
 	// Setup rest api server and its provided services.

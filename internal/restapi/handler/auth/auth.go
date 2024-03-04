@@ -1,15 +1,16 @@
 package auth
 
 import (
-	"api-iad-ams/internal/config"
-	payload "api-iad-ams/internal/payload/http/auth"
-	commonvalidator "api-iad-ams/internal/restapi/validator"
-	"api-iad-ams/internal/service"
-	"api-iad-ams/pkg/restapierror"
 	"context"
 	"fmt"
 	"html"
 	"strings"
+
+	"github.com/rizkysr90/go-boilerplate/internal/config"
+	payload "github.com/rizkysr90/go-boilerplate/internal/payload/http/auth"
+	commonvalidator "github.com/rizkysr90/go-boilerplate/internal/restapi/validator"
+	"github.com/rizkysr90/go-boilerplate/internal/service"
+	"github.com/rizkysr90/go-boilerplate/pkg/restapierror"
 
 	"github.com/gin-gonic/gin"
 )

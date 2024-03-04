@@ -5,7 +5,7 @@ import "context"
 type RestAPIError struct {
 	Code    int         `json:"code"`
 	Message string      `json:"message"`
-	Details interface{} `json:"details"`
+	Details interface{} `json:"more_details"`
 }
 
 func (err *RestAPIError) Error() string {

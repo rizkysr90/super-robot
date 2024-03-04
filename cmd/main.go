@@ -1,12 +1,13 @@
 package main
 
 import (
-	"api-iad-ams/internal/config"
-	"api-iad-ams/internal/restapi"
-	pgx "api-iad-ams/pkg/pgx"
-	logger "api-iad-ams/pkg/zerolog"
 	"context"
 	"log"
+
+	"github.com/rizkysr90/go-boilerplate/internal/config"
+	"github.com/rizkysr90/go-boilerplate/internal/restapi"
+	pgx "github.com/rizkysr90/go-boilerplate/pkg/pgx"
+	logger "github.com/rizkysr90/go-boilerplate/pkg/zerolog"
 )
 
 func main() {

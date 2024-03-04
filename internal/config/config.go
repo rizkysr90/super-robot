@@ -1,7 +1,7 @@
 package config
 
 import (
-	pgx "api-iad-ams/pkg/pgx"
+	pgx "github.com/rizkysr90/go-boilerplate/pkg/pgx"
 
 	"github.com/caarlos0/env/v8"
 )

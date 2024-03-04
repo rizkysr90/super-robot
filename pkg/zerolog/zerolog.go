@@ -1,8 +1,9 @@
 package logger
 
 import (
-	"api-iad-ams/internal/config"
 	"os"
+
+	"github.com/rizkysr90/go-boilerplate/internal/config"
 
 	"github.com/rs/zerolog"
 )

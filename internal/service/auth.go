@@ -1,8 +1,9 @@
 package service
 
 import (
-	payload "api-iad-ams/internal/payload/http/auth"
 	"context"
+
+	payload "github.com/rizkysr90/go-boilerplate/internal/payload/http/auth"
 )
 
 type AuthService interface {

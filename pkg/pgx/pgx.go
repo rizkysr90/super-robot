@@ -2,10 +2,12 @@ package pgx
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/jackc/pgx/v5/stdlib"
 )
 
 type Config struct {
@@ -23,7 +25,7 @@ func (c Config) DSN() string {
 		c.Username, c.Password, c.Host, c.Port, c.Database,
 	)
 }
-func NewDB(cfg Config, ctx context.Context) (*pgxpool.Pool, error) {
+func NewDB(cfg Config, ctx context.Context) (*sql.DB, error) {
 	conCfg, err := pgxpool.ParseConfig(cfg.DSN())
 	if err != nil {
 		return nil, fmt.Errorf("pgx: parse DSN failed: %w", err)
@@ -32,12 +34,14 @@ func NewDB(cfg Config, ctx context.Context) (*pgxpool.Pool, error) {
 	maxLifetime := 5 * time.Minute
 	conCfg.MaxConnLifetime = maxLifetime
 	conCfg.MaxConns = 20
-	var db *pgxpool.Pool
-	db, err = pgxpool.NewWithConfig(ctx, conCfg)
+	var pool *pgxpool.Pool
+	pool, err = pgxpool.NewWithConfig(ctx, conCfg)
+
 	if err != nil {
 		return nil, fmt.Errorf("pgx: open db is failed: %w", err)
 	}
-	if err = db.Ping(ctx); err != nil {
+	db := stdlib.OpenDBFromPool(pool)
+	if err = db.Ping(); err != nil {
 		return nil, fmt.Errorf("pgx: DB ping failed: %w", err)
 	}
 	return db, nil

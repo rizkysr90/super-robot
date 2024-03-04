@@ -1,9 +1,10 @@
 package middleware
 
 import (
-	"api-iad-ams/pkg/restapierror"
 	"fmt"
 	"net/http"
+
+	"github.com/rizkysr90/go-boilerplate/pkg/restapierror"
 
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog"

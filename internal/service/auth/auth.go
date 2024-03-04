@@ -1,25 +1,26 @@
 package auth
 
 import (
-	payload "api-iad-ams/internal/payload/http/auth"
-	"api-iad-ams/internal/store"
-	"api-iad-ams/pkg/restapierror"
-	"api-iad-ams/pkg/sqldb"
 	"context"
+	"database/sql"
 	"errors"
 	"time"
 
+	payload "github.com/rizkysr90/go-boilerplate/internal/payload/http/auth"
+	"github.com/rizkysr90/go-boilerplate/internal/store"
+	"github.com/rizkysr90/go-boilerplate/pkg/restapierror"
+	"github.com/rizkysr90/go-boilerplate/pkg/sqldb"
+
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type AuthService struct {
-	db        *pgxpool.Pool
+	db        *sql.DB
 	userStore store.UserStore
 }
 
-func NewAuthService(db *pgxpool.Pool, userStore store.UserStore) *AuthService {
+func NewAuthService(db *sql.DB, userStore store.UserStore) *AuthService {
 	return &AuthService{
 		db:        db,
 		userStore: userStore,
@@ -31,10 +32,10 @@ func (a *AuthService) CreateUser(ctx context.Context, req *payload.ReqCreateAcco
 		return restapierror.NewBadRequest(ctx, restapierror.WithMessage("failed to confirm password"))
 	}
 	// check to db
-	filterBy := store.UserData{
+	filterBy := store.UserFilterBy{
 		Email: req.Email,
 	}
-	result, err := a.userStore.FindOne(ctx, &filterBy, "findbyemail")
+	result, err := a.userStore.FindOne(ctx, &filterBy, "findactiveuser")
 	if err != nil && !errors.Is(err, pgx.ErrNoRows) {
 		// internal server error after call db
 		return err
@@ -44,7 +45,7 @@ func (a *AuthService) CreateUser(ctx context.Context, req *payload.ReqCreateAcco
 		return restapierror.NewBadRequest(ctx, restapierror.WithMessage("email already registered"))
 	}
 	// Create user
-	createdData := store.UserData{
+	insertedData := store.InsertedData{
 		Id:        uuid.NewString(),
 		FirstName: req.FirstName,
 		LastName:  req.LastName,
@@ -54,7 +55,7 @@ func (a *AuthService) CreateUser(ctx context.Context, req *payload.ReqCreateAcco
 	}
 	if err = sqldb.WithinTx(ctx, a.db, func(tx sqldb.QueryExecutor) error {
 		txContext := sqldb.WithTxContext(ctx, tx)
-		return a.userStore.Create(txContext, &createdData)
+		return a.userStore.Create(txContext, &insertedData)
 	}); err != nil {
 		return err
 	}

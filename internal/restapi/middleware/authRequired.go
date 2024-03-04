@@ -1,11 +1,12 @@
 package middleware
 
 import (
-	"api-iad-ams/internal/config"
-	"api-iad-ams/internal/constant"
-	"api-iad-ams/internal/helper"
 	"errors"
 	"net/http"
+
+	"github.com/rizkysr90/go-boilerplate/internal/config"
+	"github.com/rizkysr90/go-boilerplate/internal/constant"
+	"github.com/rizkysr90/go-boilerplate/internal/helper"
 
 	"github.com/gin-gonic/gin"
 )

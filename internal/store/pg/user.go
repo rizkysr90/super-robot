@@ -1,25 +1,25 @@
 package pg
 
 import (
-	"api-iad-ams/internal/store"
-	"api-iad-ams/pkg/sqldb"
 	"context"
+	"database/sql"
 	"errors"
 
-	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/rizkysr90/go-boilerplate/internal/store"
+	"github.com/rizkysr90/go-boilerplate/pkg/sqldb"
 )
 
 type User struct {
-	db *pgxpool.Pool
+	db *sql.DB
 }
 
-func NewUserDB(db *pgxpool.Pool) *User {
+func NewUserDB(db *sql.DB) *User {
 	return &User{
 		db: db,
 	}
 }
 
-func (u *User) Create(ctx context.Context, payload *store.UserData) error {
+func (u *User) Create(ctx context.Context, data *store.InsertedData) error {
 	createFunc := func(tx sqldb.QueryExecutor) error {
 		query := `
 			INSERT INTO users 
@@ -29,13 +29,13 @@ func (u *User) Create(ctx context.Context, payload *store.UserData) error {
 			VALUES 
 			($1, $2, $3, $4, $5, $6)
 		`
-		_, err := tx.Exec(ctx, query,
-			payload.Id,
-			payload.FirstName,
-			payload.LastName,
-			payload.Password,
-			payload.Email,
-			payload.CreatedAt,
+		_, err := tx.ExecContext(ctx, query,
+			data.Id,
+			data.FirstName,
+			data.LastName,
+			data.Password,
+			data.Email,
+			data.CreatedAt,
 		)
 		if err != nil {
 			return err
@@ -45,16 +45,16 @@ func (u *User) Create(ctx context.Context, payload *store.UserData) error {
 	return sqldb.WithinTxContextOrError(ctx, createFunc)
 }
 func (u *User) FindOne(ctx context.Context,
-	filterBy *store.UserData, staging string) (
+	filterBy *store.UserFilterBy, staging string) (
 	*store.UserData, error) {
 	var result store.UserData
 	switch staging {
-	case "findbyemail":
+	case "findactiveuser":
 		// 1 is for filter by email
 		query := `SELECT email
-			 FROM users WHERE email = $1`
+			 FROM users WHERE email = $1 AND is_activated = true`
 		err := sqldb.WithinTxContextOrDB(ctx, u.db).
-			QueryRow(ctx, query, filterBy.Email).
+			QueryRowContext(ctx, query, filterBy.Email).
 			Scan(&result.Email)
 		if err != nil {
 			return nil, err

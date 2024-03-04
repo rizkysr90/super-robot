@@ -5,6 +5,7 @@ CREATE TABLE IF NOT EXISTS users (
     last_name VARCHAR(200),
     password TEXT NOT NULL,
     email TEXT NOT NULL,
+    is_activated BOOLEAN DEFAULT false,
     created_at TIMESTAMPTZ NOT NULL,
     updated_at TIMESTAMPTZ,
     deleted_at TIMESTAMPTZ

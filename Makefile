@@ -21,3 +21,8 @@ CGO_ENABLED ?= 0
 .PHONY: build/restapi
 build/restapi:
 	CGO_ENABLED=$(CGO_ENABLED) GOOS=$(GOOS) GOARCH=$(GOARCH) go build -o build/restapi cmd/main.go
+
+.PHONY: test
+test:
+	go test ./... -coverprofile=coverage.out
+	go tool cover -html=coverage.out -o coverage.html

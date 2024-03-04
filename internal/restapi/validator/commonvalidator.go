@@ -1,12 +1,13 @@
 package commonvalidator
 
 import (
-	"api-iad-ams/internal/constant"
-	"api-iad-ams/pkg/restapierror"
 	"fmt"
 	"reflect"
 	"regexp"
 	"strings"
+
+	"github.com/rizkysr90/go-boilerplate/internal/constant"
+	"github.com/rizkysr90/go-boilerplate/pkg/restapierror"
 )
 
 func ValidateRequired(value interface{}, field string) *restapierror.RestAPIError {

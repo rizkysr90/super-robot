@@ -1,1 +1,1 @@
-This is a repository for internal BFI-FINANCE(FINANCE DIVISION) REST API
+Base template repository to make REST API with Golang and Gin Web Framework
