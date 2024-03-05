@@ -55,7 +55,7 @@ func ValidateEmail(email string, field string) *restapierror.RestAPIError {
 	if !emailRegex.MatchString(email) {
 		return &restapierror.RestAPIError{
 			Code:    400,
-			Message: constant.ERR_INVALID_FIELD_FORMAT,
+			Message: constant.ErrInvalidFormat,
 			Details: fmt.Sprintf("%s is required", field),
 		}
 	}

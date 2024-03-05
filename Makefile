@@ -1,4 +1,6 @@
-
+.PHONY: vendor
+vendor: 
+	go mod tidy && go mod vendor
 .PHONY: server/start
 server/start:
 	docker-compose -f docker-compose.yml up -d  --remove-orphans
@@ -26,3 +28,14 @@ build/restapi:
 test:
 	go test ./... -coverprofile=coverage.out
 	go tool cover -html=coverage.out -o coverage.html
+
+GOLANGCI_VERSION=1.55.2
+GOLANGCI_CHECK := $(shell golangci-lint -v 2> /dev/null)
+
+.PHONY: lint
+lint:
+# if golangci-lint failed on MacOS Ventura, try: brew install diffutils
+ifndef GOLANGCI_CHECK
+	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v$(GOLANGCI_VERSION)
+endif
+	golangci-lint run -c .golangci.yml ./...

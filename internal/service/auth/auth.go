@@ -15,47 +15,47 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-type AuthService struct {
+type Service struct {
 	db        *sql.DB
 	userStore store.UserStore
 }
 
-func NewAuthService(db *sql.DB, userStore store.UserStore) *AuthService {
-	return &AuthService{
+func NewAuthService(db *sql.DB, userStore store.UserStore) *Service {
+	return &Service{
 		db:        db,
 		userStore: userStore,
 	}
 }
 
-func (a *AuthService) CreateUser(ctx context.Context, req *payload.ReqCreateAccount) error {
+func (s *Service) CreateUser(ctx context.Context, req *payload.ReqCreateAccount) error {
 	if req.Password != req.ConfirmPassword {
-		return restapierror.NewBadRequest(ctx, restapierror.WithMessage("failed to confirm password"))
+		return restapierror.NewBadRequest(restapierror.WithMessage("failed to confirm password"))
 	}
 	// check to db
 	filterBy := store.UserFilterBy{
 		Email: req.Email,
 	}
-	result, err := a.userStore.FindOne(ctx, &filterBy, "findactiveuser")
+	result, err := s.userStore.FindOne(ctx, &filterBy, "findactiveuser")
 	if err != nil && !errors.Is(err, pgx.ErrNoRows) {
 		// internal server error after call db
 		return err
 	}
 	// check duplicate email
 	if result != nil {
-		return restapierror.NewBadRequest(ctx, restapierror.WithMessage("email already registered"))
+		return restapierror.NewBadRequest(restapierror.WithMessage("email already registered"))
 	}
 	// Create user
 	insertedData := store.InsertedData{
-		Id:        uuid.NewString(),
+		ID:        uuid.NewString(),
 		FirstName: req.FirstName,
 		LastName:  req.LastName,
 		Email:     req.Email,
 		Password:  req.Password,
 		CreatedAt: time.Now().UTC(),
 	}
-	if err = sqldb.WithinTx(ctx, a.db, func(tx sqldb.QueryExecutor) error {
+	if err = sqldb.WithinTx(ctx, s.db, func(tx sqldb.QueryExecutor) error {
 		txContext := sqldb.WithTxContext(ctx, tx)
-		return a.userStore.Create(txContext, &insertedData)
+		return s.userStore.Create(txContext, &insertedData)
 	}); err != nil {
 		return err
 	}

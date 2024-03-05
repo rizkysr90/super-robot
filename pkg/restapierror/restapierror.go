@@ -1,6 +1,6 @@
 package restapierror
 
-import "context"
+import "github.com/rizkysr90/go-boilerplate/internal/constant"
 
 type RestAPIError struct {
 	Code    int         `json:"code"`
@@ -12,20 +12,20 @@ func (err *RestAPIError) Error() string {
 	return err.Message
 }
 
-type RestAPIErrorOption func(*RestAPIError)
+type Option func(*RestAPIError)
 
-func WithMessage(message string) RestAPIErrorOption {
+func WithMessage(message string) Option {
 	return func(err *RestAPIError) {
 		err.Message = message
 	}
 }
-func WithDetails(details interface{}) RestAPIErrorOption {
+func WithDetails(details interface{}) Option {
 	return func(err *RestAPIError) {
 		err.Details = details
 	}
 }
-func NewBadRequest(ctx context.Context,
-	opts ...RestAPIErrorOption) *RestAPIError {
+func NewBadRequest(
+	opts ...Option) *RestAPIError {
 	err := &RestAPIError{
 		Code:    400,
 		Message: "",
@@ -36,9 +36,8 @@ func NewBadRequest(ctx context.Context,
 	}
 	return err
 }
-func NewInternalServer(ctx context.Context,
-	opts ...RestAPIErrorOption) *RestAPIError {
-
+func NewInternalServer(
+	opts ...Option) *RestAPIError {
 	err := &RestAPIError{
 		Code:    500,
 		Message: "Internal Server Error",
@@ -49,11 +48,22 @@ func NewInternalServer(ctx context.Context,
 	}
 	return err
 }
-func NewMultipleFieldsValidation(ctx context.Context, errors []RestAPIError, opts ...RestAPIErrorOption) *RestAPIError {
+func NewMultipleFieldsValidation(errors []RestAPIError, opts ...Option) *RestAPIError {
 	err := &RestAPIError{
 		Code:    400,
 		Message: "Bad Request - Error Multiple Fields Validaition",
 		Details: errors,
+	}
+	for _, opt := range opts {
+		opt(err)
+	}
+	return err
+}
+func NewUnauthorized(opts ...Option) *RestAPIError {
+	err := &RestAPIError{
+		Code:    401,
+		Message: constant.ErrInvalidAPIKey,
+		Details: "",
 	}
 	for _, opt := range opts {
 		opt(err)

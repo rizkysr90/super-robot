@@ -1,8 +1,9 @@
 package middleware
 
 import (
-	"fmt"
+	"errors"
 	"net/http"
+	"strconv"
 
 	"github.com/rizkysr90/go-boilerplate/pkg/restapierror"
 
@@ -12,20 +13,20 @@ import (
 
 func logRestAPIErr(c *gin.Context, logger zerolog.Logger, restAPIErr *restapierror.RestAPIError) {
 	logger.Error().
-		Str("code", fmt.Sprintf("%d", restAPIErr.Code)).
+		Str("code", strconv.Itoa(restAPIErr.Code)).
 		Str("path", c.FullPath()).
 		Any("details", restAPIErr.Details).
 		Msg(restAPIErr.Message)
 }
 func ErrorHandler(logger zerolog.Logger) gin.HandlerFunc {
-
 	return func(c *gin.Context) {
 		c.Next()
 		// Check if there are errors
 		hasErrors := len(c.Errors) > 0
 		if hasErrors {
 			ginErr := c.Errors[0]
-			if restAPIErr, ok := ginErr.Err.(*restapierror.RestAPIError); ok {
+			var restAPIErr *restapierror.RestAPIError
+			if errors.As(ginErr.Err, &restAPIErr) {
 				c.AbortWithStatusJSON(restAPIErr.Code, restAPIErr)
 				logRestAPIErr(c, logger, restAPIErr)
 				return
@@ -45,6 +46,5 @@ func ErrorHandler(logger zerolog.Logger) gin.HandlerFunc {
 				Str("path", c.FullPath()).
 				Msg("Request processed")
 		}
-
 	}
 }

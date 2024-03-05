@@ -28,17 +28,20 @@ func main() {
 	// // INFRASTRUCTURE OBJECTS
 	// // -----------------------------------------------------------------------------------------------------------------
 	// PgSQL
-	sqlDB, sqlDBErr := pgx.NewDB(cfg.PgSQL, ctx)
+	sqlDB, sqlDBErr := pgx.NewDB(ctx, cfg.PgSQL)
 	// sqlDB.tx
 	if sqlDBErr != nil {
-		log.Fatalf("pgSql: main failed to construct pgSql %s", sqlDBErr)
+		logger.Error().Err(sqlDBErr).Msgf("pgSql: main failed to construct pgSql %s", sqlDBErr)
 		return
 	}
 	defer func() { sqlDB.Close() }()
 
 	restAPIserver, err := restapi.New(cfg, sqlDB, logger)
 	if err != nil {
-		log.Fatalf("restapi: main failed to construct server: %s", err)
+		logger.Error().Err(sqlDBErr).Msgf("restapi: main failed to construct server: %s", err)
 	}
-	restAPIserver.Run(cfg.RestAPIPort) // listen and serve on 0.0.0.0:8080
+	err = restAPIserver.Run(cfg.RestAPIPort) // listen and serve on 0.0.0.0:8080
+	if err != nil {
+		logger.Error().Err(sqlDBErr).Msgf("restapi: main failed to run server: %s", err)
+	}
 }

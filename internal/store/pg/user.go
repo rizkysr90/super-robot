@@ -30,7 +30,7 @@ func (u *User) Create(ctx context.Context, data *store.InsertedData) error {
 			($1, $2, $3, $4, $5, $6)
 		`
 		_, err := tx.ExecContext(ctx, query,
-			data.Id,
+			data.ID,
 			data.FirstName,
 			data.LastName,
 			data.Password,

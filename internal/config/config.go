@@ -11,24 +11,24 @@ type flatEnv struct {
 	AppEnv            string `env:"APP_ENV"` // local|dev|uat|sit|prod
 	RestAPIPort       string `env:"REST_API_PORT"`
 	DBHost            string `env:"DB_HOST"`
-	DBPort            int    `env:"DB_PORT"`
 	DBDatabase        string `env:"DB_DATABASE"`
 	DBUsername        string `env:"DB_USERNAME"`
 	DBPassword        string `env:"DB_PASSWORD,unset"` // sensitive, unset from environment after parse!
+	APIKey            string `env:"API_KEY,unset"`
+	APIVersionBaseURL string `env:"API_VERSION_BASE_URL"`
+	LogLevel          string `env:"LOG_LEVEL"`
+	DBPort            int    `env:"DB_PORT"`
 	DBConnMaxOpen     int    `env:"DB_CONN_MAX_OPEN"`
 	DBConnMaxIdle     int    `env:"DB_CONN_MAX_IDLE"`
-	ApiKey            string `env:"API_KEY,unset"`
-	ApiVersionBaseURL string `env:"API_VERSION_BASE_URL"`
-	LogLevel          string `env:"LOG_LEVEL"`
 }
 type Config struct {
 	AppName           string
 	AppEnv            string
 	RestAPIPort       string
-	PgSQL             pgx.Config
 	APIKey            string
-	ApiVersionBaseURL string
+	APIVersionBaseURL string
 	LogLevel          string
+	PgSQL             pgx.Config
 }
 
 func LoadFromEnv() (Config, error) {
@@ -51,8 +51,8 @@ func newConfig(envCfg flatEnv) Config {
 			Host:     envCfg.DBHost,
 			Port:     envCfg.DBPort,
 		},
-		APIKey:            envCfg.ApiKey,
-		ApiVersionBaseURL: envCfg.ApiVersionBaseURL,
+		APIKey:            envCfg.APIKey,
+		APIVersionBaseURL: envCfg.APIVersionBaseURL,
 		LogLevel:          envCfg.LogLevel,
 	}
 }

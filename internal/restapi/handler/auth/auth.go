@@ -1,7 +1,6 @@
 package auth
 
 import (
-	"context"
 	"fmt"
 	"html"
 	"strings"
@@ -31,7 +30,7 @@ func NewAuthHandler(
 	}
 }
 func (a *AuthHandler) AddRoutes(ginEngine *gin.Engine) {
-	createUserPath := fmt.Sprintf("%s/auth/users", a.config.ApiVersionBaseURL)
+	createUserPath := fmt.Sprintf("%s/auth/users", a.config.APIVersionBaseURL)
 	ginEngine.POST(createUserPath, func(ctx *gin.Context) {
 		a.CreateUser(ctx)
 	})
@@ -51,7 +50,7 @@ func (req *reqCreateUser) sanitize() {
 	req.Password = html.EscapeString(strings.TrimSpace(req.Password))
 	req.ConfirmPassword = html.EscapeString(strings.TrimSpace(req.ConfirmPassword))
 }
-func (req *reqCreateUser) validate(ctx context.Context) error {
+func (req *reqCreateUser) validate() error {
 	validationErrors := []restapierror.RestAPIError{}
 	if err := commonvalidator.ValidateRequired(req.FirstName, "first_name"); err != nil {
 		validationErrors = append(validationErrors, *err)
@@ -72,7 +71,7 @@ func (req *reqCreateUser) validate(ctx context.Context) error {
 		validationErrors = append(validationErrors, *err)
 	}
 	if len(validationErrors) > 0 {
-		return restapierror.NewMultipleFieldsValidation(ctx, validationErrors)
+		return restapierror.NewMultipleFieldsValidation(validationErrors)
 	}
 
 	return nil
@@ -86,7 +85,7 @@ func (a *AuthHandler) CreateUser(ctx *gin.Context) {
 	}
 	input := reqCreateUser{payload}
 	input.sanitize()
-	if err := input.validate(ctx); err != nil {
+	if err := input.validate(); err != nil {
 		ctx.Error(err)
 		return
 	}

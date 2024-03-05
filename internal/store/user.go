@@ -7,7 +7,7 @@ import (
 )
 
 type UserData struct {
-	Id        string
+	ID        string
 	FirstName string
 	LastName  string
 	Email     string
@@ -17,12 +17,12 @@ type UserData struct {
 	DeletedAt sql.NullTime
 }
 type InsertedData struct {
-	Id        string
+	CreatedAt time.Time
+	ID        string
 	FirstName string
 	LastName  string
 	Email     string
 	Password  string
-	CreatedAt time.Time
 }
 type UserFilterBy struct {
 	Email string

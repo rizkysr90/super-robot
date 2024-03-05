@@ -25,7 +25,8 @@ func (c Config) DSN() string {
 		c.Username, c.Password, c.Host, c.Port, c.Database,
 	)
 }
-func NewDB(cfg Config, ctx context.Context) (*sql.DB, error) {
+func NewDB(ctx context.Context, cfg Config) (*sql.DB, error) {
+
 	conCfg, err := pgxpool.ParseConfig(cfg.DSN())
 	if err != nil {
 		return nil, fmt.Errorf("pgx: parse DSN failed: %w", err)

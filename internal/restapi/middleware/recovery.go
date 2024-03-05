@@ -11,9 +11,11 @@ import (
 	"github.com/rs/zerolog"
 )
 
+//nolint:gocognit
 func Recovery(logger zerolog.Logger) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		defer func() {
+			//nolint:nestif
 			if err := recover(); err != nil {
 				// Check for a broken connection, as it is not really a
 				// condition that warrants a panic stack trace.
@@ -29,17 +31,23 @@ func Recovery(logger zerolog.Logger) gin.HandlerFunc {
 					}
 				}
 				if !brokenPipe {
-					c.Error(err.(error))
-					c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
-						"code":    500,
-						"message": "Internal Server Error",
-						"details": err.(error).Error(),
-					})
+					if actualErr, ok := err.(error); ok {
+						if c.Error(actualErr) != nil {
+							// Handle the error-of-error handling situation.
+							c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+								"code":    500,
+								"message": "Internal Server Error",
+								"details": actualErr.Error(),
+							})
+						}
+					}
 				}
-				logger.Error().
-					Str("code", "500").
-					Str("path", c.FullPath()).
-					Msg(err.(error).Error())
+				if actualErr, ok := err.(error); ok {
+					logger.Error().
+						Str("code", "500").
+						Str("path", c.FullPath()).
+						Msg(actualErr.Error())
+				}
 			}
 		}()
 		// Call the next handler
