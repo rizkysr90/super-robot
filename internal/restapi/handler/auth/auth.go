@@ -1,7 +1,6 @@
 package auth
 
 import (
-	"fmt"
 	"html"
 	"net/http"
 	"strings"
@@ -30,20 +29,7 @@ func NewAuthHandler(
 		config:      config,
 	}
 }
-func (a *AuthHandler) AddRoutes(ginEngine *gin.Engine) {
-	createUserPath := fmt.Sprintf("%s/auth/users", a.config.APIVersionBaseURL)
-	ginEngine.POST(createUserPath, func(ctx *gin.Context) {
-		a.CreateUser(ctx)
-	})
-	loginUserPath := fmt.Sprintf("%s/auth/users/login", a.config.APIVersionBaseURL)
-	ginEngine.POST(loginUserPath, func(ctx *gin.Context) {
-		a.LoginUser(ctx)
-	})
-}
 
-//	type testError struct {
-//		TestArray string `json:"test_array"`
-//	}
 type reqCreateUser struct {
 	*payload.ReqCreateAccount
 }

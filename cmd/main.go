@@ -6,6 +6,7 @@ import (
 
 	"github.com/rizkysr90/go-boilerplate/internal/config"
 	"github.com/rizkysr90/go-boilerplate/internal/restapi"
+	jwttoken "github.com/rizkysr90/go-boilerplate/pkg/jwt"
 	pgx "github.com/rizkysr90/go-boilerplate/pkg/pgx"
 	logger "github.com/rizkysr90/go-boilerplate/pkg/zerolog"
 )
@@ -35,8 +36,9 @@ func main() {
 		return
 	}
 	defer func() { sqlDB.Close() }()
-
-	restAPIserver, err := restapi.New(cfg, sqlDB, logger)
+	// JWT TOKEN
+	jwtToken := jwttoken.New(cfg)
+	restAPIserver, err := restapi.New(cfg, sqlDB, logger, jwtToken)
 	if err != nil {
 		logger.Error().Err(sqlDBErr).Msgf("restapi: main failed to construct server: %s", err)
 	}

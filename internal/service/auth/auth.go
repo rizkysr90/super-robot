@@ -8,6 +8,7 @@ import (
 
 	payload "github.com/rizkysr90/go-boilerplate/internal/payload/http/auth"
 	"github.com/rizkysr90/go-boilerplate/internal/store"
+	jwttoken "github.com/rizkysr90/go-boilerplate/pkg/jwt"
 	"github.com/rizkysr90/go-boilerplate/pkg/restapierror"
 	"github.com/rizkysr90/go-boilerplate/pkg/sqldb"
 
@@ -19,12 +20,14 @@ import (
 type Service struct {
 	db        *sql.DB
 	userStore store.UserStore
+	jwtToken  jwttoken.JWT
 }
 
-func NewAuthService(db *sql.DB, userStore store.UserStore) *Service {
+func NewAuthService(db *sql.DB, userStore store.UserStore, jwttoken jwttoken.JWT) *Service {
 	return &Service{
 		db:        db,
 		userStore: userStore,
+		jwtToken:  jwttoken,
 	}
 }
 
@@ -84,5 +87,15 @@ func (s *Service) LoginUser(ctx context.Context,
 		return nil, restapierror.NewBadRequest(restapierror.WithMessage(err.Error()))
 	}
 	// gen token
-	return nil, nil
+	var genToken string
+	genToken, err = s.jwtToken.Generate(&jwttoken.JWTClaims{
+		UserID: result.ID,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return &payload.ResLoginUser{
+		Token: genToken,
+	}, nil
 }

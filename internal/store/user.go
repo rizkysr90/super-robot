@@ -7,15 +7,15 @@ import (
 )
 
 type UserData struct {
+	CreatedAt   time.Time
+	UpdatedAt   sql.NullTime
+	DeletedAt   sql.NullTime
 	ID          string
 	FirstName   string
 	LastName    string
 	Email       string
 	Password    string
 	IsActivated bool
-	CreatedAt   time.Time
-	UpdatedAt   sql.NullTime
-	DeletedAt   sql.NullTime
 }
 type InsertedData struct {
 	CreatedAt   time.Time

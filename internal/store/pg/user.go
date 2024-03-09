@@ -52,11 +52,11 @@ func (u *User) FindOne(ctx context.Context,
 	switch staging {
 	case "findactiveuser":
 		// 1 is for filter by email
-		query := `SELECT email,password
+		query := `SELECT id, email,password
 			 FROM users WHERE email = $1 AND is_activated = true`
 		err := sqldb.WithinTxContextOrDB(ctx, u.db).
 			QueryRowContext(ctx, query, filterBy.Email).
-			Scan(&result.Email, &result.Password)
+			Scan(&result.ID, &result.Email, &result.Password)
 		if err != nil {
 			return nil, err
 		}

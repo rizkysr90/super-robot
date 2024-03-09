@@ -2,3 +2,5 @@ vendor/
 .env
 build/
 coverage.*
+private_key_jwt.pem
+public_key_jwt.pem

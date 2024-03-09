@@ -20,6 +20,8 @@ type flatEnv struct {
 	DBPort            int    `env:"DB_PORT"`
 	DBConnMaxOpen     int    `env:"DB_CONN_MAX_OPEN"`
 	DBConnMaxIdle     int    `env:"DB_CONN_MAX_IDLE"`
+	PrivateKeyJWT     string `env:"PRIVATE_KEY_JWT,unset"`
+	PublicKeyJWT      string `env:"PUBLIC_KEY_JWT,unset"`
 }
 type Config struct {
 	AppName           string
@@ -29,6 +31,8 @@ type Config struct {
 	APIVersionBaseURL string
 	LogLevel          string
 	PgSQL             pgx.Config
+	PrivateKeyJWT     string
+	PublicKeyJWT      string
 }
 
 func LoadFromEnv() (Config, error) {
@@ -54,5 +58,7 @@ func newConfig(envCfg flatEnv) Config {
 		APIKey:            envCfg.APIKey,
 		APIVersionBaseURL: envCfg.APIVersionBaseURL,
 		LogLevel:          envCfg.LogLevel,
+		PrivateKeyJWT:     envCfg.PrivateKeyJWT,
+		PublicKeyJWT:      envCfg.PublicKeyJWT,
 	}
 }
