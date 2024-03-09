@@ -3,6 +3,7 @@ package auth
 import (
 	"fmt"
 	"html"
+	"net/http"
 	"strings"
 
 	"github.com/rizkysr90/go-boilerplate/internal/config"
@@ -34,6 +35,10 @@ func (a *AuthHandler) AddRoutes(ginEngine *gin.Engine) {
 	ginEngine.POST(createUserPath, func(ctx *gin.Context) {
 		a.CreateUser(ctx)
 	})
+	loginUserPath := fmt.Sprintf("%s/auth/users/login", a.config.APIVersionBaseURL)
+	ginEngine.POST(loginUserPath, func(ctx *gin.Context) {
+		a.LoginUser(ctx)
+	})
 }
 
 //	type testError struct {
@@ -61,13 +66,13 @@ func (req *reqCreateUser) validate() error {
 	if err := commonvalidator.ValidateRequired(req.Email, "email"); err != nil {
 		validationErrors = append(validationErrors, *err)
 	}
-	if err := commonvalidator.ValidateRequired(req.Password, "password"); err != nil {
-		validationErrors = append(validationErrors, *err)
-	}
 	if err := commonvalidator.ValidateRequired(req.ConfirmPassword, "confirm_password"); err != nil {
 		validationErrors = append(validationErrors, *err)
 	}
 	if err := commonvalidator.ValidateEmail(req.Email, "email"); err != nil {
+		validationErrors = append(validationErrors, *err)
+	}
+	if err := commonvalidator.ValidatePassword(req.Password); err != nil {
 		validationErrors = append(validationErrors, *err)
 	}
 	if len(validationErrors) > 0 {
@@ -78,7 +83,6 @@ func (req *reqCreateUser) validate() error {
 }
 func (a *AuthHandler) CreateUser(ctx *gin.Context) {
 	payload := &payload.ReqCreateAccount{}
-
 	if err := ctx.Bind(payload); err != nil {
 		ctx.Error(err)
 		return
@@ -93,5 +97,50 @@ func (a *AuthHandler) CreateUser(ctx *gin.Context) {
 		ctx.Error(err)
 		return
 	}
-	ctx.JSON(200, gin.H{})
+	ctx.JSON(http.StatusCreated, gin.H{})
+}
+
+type reqLoginUser struct {
+	*payload.ReqLoginUser
+}
+
+func (req *reqLoginUser) sanitize() {
+	req.Email = html.EscapeString(strings.TrimSpace(req.Email))
+	req.Password = html.EscapeString(strings.TrimSpace(req.Password))
+}
+func (req *reqLoginUser) validate() error {
+	validationErrors := []restapierror.RestAPIError{}
+	if err := commonvalidator.ValidateRequired(req.Email, "email"); err != nil {
+		validationErrors = append(validationErrors, *err)
+	}
+	if err := commonvalidator.ValidateRequired(req.Password, "password"); err != nil {
+		validationErrors = append(validationErrors, *err)
+	}
+	if err := commonvalidator.ValidateEmail(req.Email, "email"); err != nil {
+		validationErrors = append(validationErrors, *err)
+	}
+	if len(validationErrors) > 0 {
+		return restapierror.NewMultipleFieldsValidation(validationErrors)
+	}
+	return nil
+}
+func (a *AuthHandler) LoginUser(ctx *gin.Context) {
+	payload := &payload.ReqLoginUser{}
+	if err := ctx.ShouldBindJSON(payload); err != nil {
+		ctx.Error(err)
+		return
+	}
+	input := reqLoginUser{payload}
+	input.sanitize()
+	if err := input.validate(); err != nil {
+		ctx.Error(err)
+		return
+	}
+	data, err := a.authService.LoginUser(ctx, payload)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+	ctx.JSON(http.StatusOK, data)
+
 }

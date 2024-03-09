@@ -8,4 +8,6 @@ import (
 
 type AuthService interface {
 	CreateUser(ctx context.Context, req *payload.ReqCreateAccount) error
+	LoginUser(ctx context.Context,
+		req *payload.ReqLoginUser) (*payload.ResLoginUser, error)
 }

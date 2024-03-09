@@ -5,6 +5,7 @@ import (
 	"reflect"
 	"regexp"
 	"strings"
+	"unicode"
 
 	"github.com/rizkysr90/go-boilerplate/internal/constant"
 	"github.com/rizkysr90/go-boilerplate/pkg/restapierror"
@@ -60,4 +61,70 @@ func ValidateEmail(email string, field string) *restapierror.RestAPIError {
 		}
 	}
 	return nil
+}
+
+func ValidatePassword(password string) *restapierror.RestAPIError {
+	/*
+	 that checks the length, presence of uppercase and lowercase letters,
+	 digits, and special characters in the given password.
+	 The contains function is used to check if the password contains characters
+	 that satisfy a specific condition. Adjust the criteria as needed for your specific requirements.
+	*/
+	err := restapierror.RestAPIError{
+		Code:    400,
+		Message: "invalid password",
+		//nolint:lll
+		Details: "Password must be presence of uppercase and lowercase letters, digits, and special characters, min 8 char and max 64 char",
+	}
+	// Check length
+	if len(password) < 8 {
+		return &err
+	}
+	if len(password) > 64 {
+		return &err
+	}
+	// Check for uppercase letter
+	if !contains(password, isUpperCase) {
+		return &err
+	}
+
+	// Check for lowercase letter
+	if !contains(password, isLowerCase) {
+		return &err
+	}
+
+	// Check for digit
+	if !contains(password, isDigit) {
+		return &err
+	}
+
+	// Check for special character
+	if !contains(password, isSpecialChar) {
+		return &err
+	}
+
+	return nil
+}
+func isUpperCase(r rune) bool {
+	return unicode.IsUpper(r)
+}
+
+func isLowerCase(r rune) bool {
+	return unicode.IsLower(r)
+}
+
+func isDigit(r rune) bool {
+	return unicode.IsDigit(r)
+}
+
+func isSpecialChar(r rune) bool {
+	return regexp.MustCompile(`[[:punct:]]`).MatchString(string(r))
+}
+func contains(s string, condition func(rune) bool) bool {
+	for _, r := range s {
+		if condition(r) {
+			return true
+		}
+	}
+	return false
 }

@@ -24,10 +24,10 @@ func (u *User) Create(ctx context.Context, data *store.InsertedData) error {
 		query := `
 			INSERT INTO users 
 			(id, first_name, last_name,
-			 password, email, created_at
+			 password, email, created_at, is_activated
 			)
 			VALUES 
-			($1, $2, $3, $4, $5, $6)
+			($1, $2, $3, $4, $5, $6, $7)
 		`
 		_, err := tx.ExecContext(ctx, query,
 			data.ID,
@@ -36,6 +36,7 @@ func (u *User) Create(ctx context.Context, data *store.InsertedData) error {
 			data.Password,
 			data.Email,
 			data.CreatedAt,
+			data.IsActivated,
 		)
 		if err != nil {
 			return err
@@ -51,11 +52,11 @@ func (u *User) FindOne(ctx context.Context,
 	switch staging {
 	case "findactiveuser":
 		// 1 is for filter by email
-		query := `SELECT email
+		query := `SELECT email,password
 			 FROM users WHERE email = $1 AND is_activated = true`
 		err := sqldb.WithinTxContextOrDB(ctx, u.db).
 			QueryRowContext(ctx, query, filterBy.Email).
-			Scan(&result.Email)
+			Scan(&result.Email, &result.Password)
 		if err != nil {
 			return nil, err
 		}

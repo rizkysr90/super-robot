@@ -70,3 +70,14 @@ func NewUnauthorized(opts ...Option) *RestAPIError {
 	}
 	return err
 }
+func NewNotFound(opts ...Option) *RestAPIError {
+	err := &RestAPIError{
+		Code:    404,
+		Message: constant.ErrNotFound,
+		Details: "",
+	}
+	for _, opt := range opts {
+		opt(err)
+	}
+	return err
+}
