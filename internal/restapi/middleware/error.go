@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/rizkysr90/go-boilerplate/pkg/restapierror"
+	"github.com/rizkysr90/rizkysr90-go-pkg/restapierror"
 
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog"

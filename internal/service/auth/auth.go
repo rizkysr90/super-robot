@@ -9,8 +9,8 @@ import (
 	payload "github.com/rizkysr90/go-boilerplate/internal/payload/http/auth"
 	"github.com/rizkysr90/go-boilerplate/internal/store"
 	jwttoken "github.com/rizkysr90/go-boilerplate/pkg/jwt"
-	"github.com/rizkysr90/go-boilerplate/pkg/restapierror"
-	"github.com/rizkysr90/go-boilerplate/pkg/sqldb"
+	"github.com/rizkysr90/rizkysr90-go-pkg/restapierror"
+	"github.com/rizkysr90/rizkysr90-go-pkg/sqldb"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"

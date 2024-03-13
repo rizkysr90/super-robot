@@ -8,7 +8,7 @@ import (
 	"unicode"
 
 	"github.com/rizkysr90/go-boilerplate/internal/constant"
-	"github.com/rizkysr90/go-boilerplate/pkg/restapierror"
+	"github.com/rizkysr90/rizkysr90-go-pkg/restapierror"
 )
 
 func ValidateRequired(value interface{}, field string) *restapierror.RestAPIError {

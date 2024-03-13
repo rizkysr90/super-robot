@@ -1,7 +1,7 @@
 package config
 
 import (
-	pgx "github.com/rizkysr90/go-boilerplate/pkg/pgx"
+	pgx "github.com/rizkysr90/rizkysr90-go-pkg/pgx"
 
 	"github.com/caarlos0/env/v8"
 )

@@ -7,17 +7,13 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/rizkysr90/go-boilerplate/internal/config"
 )
 
 type JWT struct {
-	config config.Config
 }
 
-func New(cfg config.Config) JWT {
-	return JWT{
-		config: cfg,
-	}
+func New() JWT {
+	return JWT{}
 }
 
 type JWTClaims struct {

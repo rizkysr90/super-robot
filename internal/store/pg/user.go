@@ -6,7 +6,7 @@ import (
 	"errors"
 
 	"github.com/rizkysr90/go-boilerplate/internal/store"
-	"github.com/rizkysr90/go-boilerplate/pkg/sqldb"
+	"github.com/rizkysr90/rizkysr90-go-pkg/sqldb"
 )
 
 type User struct {

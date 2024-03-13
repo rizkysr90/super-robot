@@ -7,8 +7,8 @@ import (
 	"github.com/rizkysr90/go-boilerplate/internal/config"
 	"github.com/rizkysr90/go-boilerplate/internal/restapi"
 	jwttoken "github.com/rizkysr90/go-boilerplate/pkg/jwt"
-	pgx "github.com/rizkysr90/go-boilerplate/pkg/pgx"
-	logger "github.com/rizkysr90/go-boilerplate/pkg/zerolog"
+	pgx "github.com/rizkysr90/rizkysr90-go-pkg/pgx"
+	logger "github.com/rizkysr90/rizkysr90-go-pkg/zerolog"
 )
 
 func main() {
@@ -21,7 +21,7 @@ func main() {
 		log.Fatalf("restApi: main failed to load and parse config: %s", err)
 		return
 	}
-	logger := logger.New(cfg).With().
+	logger := logger.New().With().
 		Str("app", cfg.AppName).
 		Str("env", cfg.AppEnv).
 		Logger()
@@ -37,7 +37,7 @@ func main() {
 	}
 	defer func() { sqlDB.Close() }()
 	// JWT TOKEN
-	jwtToken := jwttoken.New(cfg)
+	jwtToken := jwttoken.New()
 	restAPIserver, err := restapi.New(cfg, sqlDB, logger, jwtToken)
 	if err != nil {
 		logger.Error().Err(sqlDBErr).Msgf("restapi: main failed to construct server: %s", err)

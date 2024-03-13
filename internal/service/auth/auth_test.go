@@ -6,7 +6,6 @@ import (
 	"os"
 	"testing"
 
-	"github.com/rizkysr90/go-boilerplate/internal/config"
 	payload "github.com/rizkysr90/go-boilerplate/internal/payload/http/auth"
 	"github.com/rizkysr90/go-boilerplate/internal/store"
 	jwttoken "github.com/rizkysr90/go-boilerplate/pkg/jwt"
@@ -59,11 +58,7 @@ func TestCreateUser(t *testing.T) {
 	// set expectation when user.FindOne is called
 	mockStore.On("FindOne", queryFilter, "findactiveuser").Return(nil, nil)
 	mockStore.On("Create", mock.Anything).Return(nil)
-	cfg := config.Config{
-		PublicKeyJWT:  publicKeyTest,
-		PrivateKeyJWT: privateKeyTest,
-	}
-	jwtTest := jwttoken.New(cfg)
+	jwtTest := jwttoken.New()
 	authService := NewAuthService(db, mockStore, jwtTest)
 	res := authService.CreateUser(ctx, requestPayload)
 	mockStore.AssertExpectations(t)
@@ -91,11 +86,7 @@ func TestCreateUserDuplicate(t *testing.T) {
 	}
 	// set expectation when user.FindOne is called
 	mockStore.On("FindOne", queryFilter, "findactiveuser").Return(&store.UserData{}, nil)
-	cfg := config.Config{
-		PublicKeyJWT:  publicKeyTest,
-		PrivateKeyJWT: privateKeyTest,
-	}
-	jwtTest := jwttoken.New(cfg)
+	jwtTest := jwttoken.New()
 	authService := NewAuthService(db, mockStore, jwtTest)
 	res := authService.CreateUser(ctx, requestPayload)
 	mockStore.AssertExpectations(t)
@@ -118,11 +109,7 @@ func TestCreateUserInvalidPassword(t *testing.T) {
 		Password:        "verysecretpassword",
 		ConfirmPassword: "thedifferent",
 	}
-	cfg := config.Config{
-		PublicKeyJWT:  publicKeyTest,
-		PrivateKeyJWT: privateKeyTest,
-	}
-	jwtTest := jwttoken.New(cfg)
+	jwtTest := jwttoken.New()
 	authService := NewAuthService(db, mockStore, jwtTest)
 	res := authService.CreateUser(ctx, requestPayload)
 	mockStore.AssertExpectations(t)

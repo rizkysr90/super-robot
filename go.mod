@@ -1,6 +1,6 @@
 module github.com/rizkysr90/go-boilerplate
 
-go 1.19
+go 1.21.3
 
 require (
 	github.com/DATA-DOG/go-sqlmock v1.5.2
@@ -8,7 +8,8 @@ require (
 	github.com/gin-gonic/gin v1.9.1
 	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/google/uuid v1.6.0
-	github.com/jackc/pgx/v5 v5.5.3
+	github.com/jackc/pgx/v5 v5.5.5
+	github.com/rizkysr90/rizkysr90-go-pkg v0.0.0-20240313144016-24fa886f5f95
 	github.com/rs/zerolog v1.32.0
 	github.com/stretchr/testify v1.9.0
 	golang.org/x/crypto v0.21.0

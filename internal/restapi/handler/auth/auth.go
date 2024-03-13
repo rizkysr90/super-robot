@@ -9,7 +9,7 @@ import (
 	payload "github.com/rizkysr90/go-boilerplate/internal/payload/http/auth"
 	commonvalidator "github.com/rizkysr90/go-boilerplate/internal/restapi/validator"
 	"github.com/rizkysr90/go-boilerplate/internal/service"
-	"github.com/rizkysr90/go-boilerplate/pkg/restapierror"
+	"github.com/rizkysr90/rizkysr90-go-pkg/restapierror"
 
 	"github.com/gin-gonic/gin"
 )

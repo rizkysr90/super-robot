@@ -5,7 +5,7 @@ import (
 
 	"github.com/rizkysr90/go-boilerplate/internal/config"
 	jwttoken "github.com/rizkysr90/go-boilerplate/pkg/jwt"
-	"github.com/rizkysr90/go-boilerplate/pkg/restapierror"
+	"github.com/rizkysr90/rizkysr90-go-pkg/restapierror"
 
 	"github.com/gin-gonic/gin"
 )
