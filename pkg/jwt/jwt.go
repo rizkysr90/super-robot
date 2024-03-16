@@ -12,12 +12,15 @@ import (
 type JWT struct {
 }
 
-func New() JWT {
-	return JWT{}
+func New() *JWT {
+	return &JWT{}
 }
 
 type JWTClaims struct {
 	UserID string
+}
+type MyCustomClaims struct {
+	jwt.RegisteredClaims
 }
 
 func (j *JWT) Generate(jwtClaims *JWTClaims) (string, error) {
@@ -44,10 +47,6 @@ func (j *JWT) Generate(jwtClaims *JWTClaims) (string, error) {
 		return "", err
 	}
 	return signedToken, nil
-}
-
-type MyCustomClaims struct {
-	jwt.RegisteredClaims
 }
 
 func (j *JWT) Authorize(tokenString string) error {

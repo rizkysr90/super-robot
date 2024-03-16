@@ -31,8 +31,6 @@ type Config struct {
 	APIVersionBaseURL string
 	LogLevel          string
 	PgSQL             pgx.Config
-	PrivateKeyJWT     string
-	PublicKeyJWT      string
 }
 
 func LoadFromEnv() (Config, error) {
@@ -58,7 +56,5 @@ func newConfig(envCfg flatEnv) Config {
 		APIKey:            envCfg.APIKey,
 		APIVersionBaseURL: envCfg.APIVersionBaseURL,
 		LogLevel:          envCfg.LogLevel,
-		PrivateKeyJWT:     envCfg.PrivateKeyJWT,
-		PublicKeyJWT:      envCfg.PublicKeyJWT,
 	}
 }

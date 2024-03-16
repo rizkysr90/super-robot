@@ -20,10 +20,10 @@ import (
 type Service struct {
 	db        *sql.DB
 	userStore store.UserStore
-	jwtToken  jwttoken.JWT
+	jwtToken  jwttoken.JWTInterface
 }
 
-func NewAuthService(db *sql.DB, userStore store.UserStore, jwttoken jwttoken.JWT) *Service {
+func NewAuthService(db *sql.DB, userStore store.UserStore, jwttoken jwttoken.JWTInterface) *Service {
 	return &Service{
 		db:        db,
 		userStore: userStore,

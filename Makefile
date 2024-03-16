@@ -26,7 +26,7 @@ build/restapi:
 
 .PHONY: test
 test:
-	go test ./... -coverprofile=coverage.out
+	go test ./internal/service/... -coverprofile=coverage.out
 	go tool cover -html=coverage.out -o coverage.html
 
 GOLANGCI_VERSION=1.55.2

@@ -3,14 +3,14 @@ package restapi
 import (
 	"database/sql"
 
+	"github.com/gin-gonic/gin"
 	"github.com/rizkysr90/go-boilerplate/internal/config"
 	authHandler "github.com/rizkysr90/go-boilerplate/internal/restapi/handler/auth"
 	"github.com/rizkysr90/go-boilerplate/internal/restapi/middleware"
 	auth "github.com/rizkysr90/go-boilerplate/internal/service/auth"
 	"github.com/rizkysr90/go-boilerplate/internal/store/pg"
 	jwttoken "github.com/rizkysr90/go-boilerplate/pkg/jwt"
-
-	"github.com/gin-gonic/gin"
+	restapimiddleware "github.com/rizkysr90/rizkysr90-go-pkg/restapi/middleware"
 	"github.com/rs/zerolog"
 )
 
@@ -18,12 +18,12 @@ func New(
 	cfg config.Config,
 	sqlDB *sql.DB,
 	logger zerolog.Logger,
-	jwtToken jwttoken.JWT,
+	jwtToken *jwttoken.JWT,
 ) (*gin.Engine, error) {
 	// Setup rest api server and its provided services.
 	server := gin.New()
-	server.Use(middleware.Recovery(logger))
-	server.Use(middleware.ErrorHandler(logger))
+	server.Use(restapimiddleware.Recovery(logger))
+	server.Use(restapimiddleware.ErrorHandler(logger))
 	// Auth service
 	userStore := pg.NewUserDB(sqlDB)
 	authService := auth.NewAuthService(sqlDB, userStore, jwtToken)
@@ -35,7 +35,7 @@ func New(
 		authHandler.LoginUser(ctx)
 	})
 
-	server.Use(middleware.AuthRequired(cfg, &jwtToken))
+	server.Use(middleware.AuthRequired(cfg, jwtToken))
 	server.GET("api/v1/privateroutes")
 	return server, nil
 }
