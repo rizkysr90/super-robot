@@ -1,0 +1,102 @@
+openapi: 3.1.0
+info:
+  title: Auth Service rizkysr90pos - OpenAPI 3.0
+  description: |-
+    This is microservice for auth service
+  contact:
+    email: rizkysr90@gmail.com
+  version: 1.0.0
+tags:
+  - name: Auth Microservices
+    description: Everything about your auth service
+paths:
+  /api/v1/auth/users:
+    post:
+      tags:
+        - Users
+      summary: Create new users
+      description: Create new users that with unique email
+      operationId: users.create
+      requestBody:
+        content:
+          application/json:
+            schema:
+              required:
+                - first_name
+                - last_name
+                - email
+                - password
+                - confirm_password
+              type: object
+              properties:
+                first_name:
+                  type: string
+                  description: first name of new user
+                last_name:
+                  type: string
+                  description: last name of new user
+                email:
+                  type: string
+                  description: email of new user
+                password:
+                  type: string
+                  description: password of new user
+                confirm_password:
+                  type: string
+                  description: to validate inputted password
+        required: true
+      responses:
+        '201':
+          description: Successful to create new user
+          content:
+            application/json:
+              schema:
+                type: object       
+        '400':
+          description: Provided data doesn't meet the validation
+  /api/v1/auth/users/login:
+    post:
+      tags:
+        - Users
+      summary: Login users
+      description: Login registered users
+      operationId: users.login
+      requestBody:
+        content:
+          application/json:
+            schema:
+              required:
+                - email
+                - password
+              type: object
+              properties:
+                email:
+                  type: string
+                  description: email of the user
+                password:
+                  type: string
+                  description: password of the user
+        required: true
+      responses:
+        '201':
+          description: Successful to create new user
+          content:
+            application/json:
+              schema:
+                type: object       
+        '400':
+          description: Provided data doesn't meet the validation
+ 
+  # securitySchemes:
+  #   petstore_auth:
+  #     type: oauth2
+  #     flows:
+  #       implicit:
+  #         authorizationUrl: https://petstore3.swagger.io/oauth/authorize
+  #         scopes:
+  #           write:pets: modify pets in your account
+  #           read:pets: read your pets
+  #   api_key:
+  #     type: apiKey
+  #     name: api_key
+  #     in: header
