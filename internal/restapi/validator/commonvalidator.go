@@ -7,7 +7,8 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/rizkysr90/go-boilerplate/internal/constant"
+	"auth-service-rizkysr90-pos/internal/constant"
+
 	"github.com/rizkysr90/rizkysr90-go-pkg/restapierror"
 )
 

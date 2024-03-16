@@ -3,7 +3,7 @@ package service
 import (
 	"context"
 
-	payload "github.com/rizkysr90/go-boilerplate/internal/payload/http/auth"
+	payload "auth-service-rizkysr90-pos/internal/payload/http/auth"
 )
 
 type AuthService interface {

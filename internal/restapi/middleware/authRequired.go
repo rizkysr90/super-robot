@@ -3,8 +3,9 @@ package middleware
 import (
 	"strings"
 
-	"github.com/rizkysr90/go-boilerplate/internal/config"
-	jwttoken "github.com/rizkysr90/go-boilerplate/pkg/jwt"
+	"auth-service-rizkysr90-pos/internal/config"
+	jwttoken "auth-service-rizkysr90-pos/pkg/jwt"
+
 	"github.com/rizkysr90/rizkysr90-go-pkg/restapierror"
 
 	"github.com/gin-gonic/gin"

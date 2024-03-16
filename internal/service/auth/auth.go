@@ -6,9 +6,10 @@ import (
 	"strings"
 	"time"
 
-	payload "github.com/rizkysr90/go-boilerplate/internal/payload/http/auth"
-	"github.com/rizkysr90/go-boilerplate/internal/store"
-	jwttoken "github.com/rizkysr90/go-boilerplate/pkg/jwt"
+	payload "auth-service-rizkysr90-pos/internal/payload/http/auth"
+	"auth-service-rizkysr90-pos/internal/store"
+	jwttoken "auth-service-rizkysr90-pos/pkg/jwt"
+
 	"github.com/rizkysr90/rizkysr90-go-pkg/restapierror"
 	"github.com/rizkysr90/rizkysr90-go-pkg/sqldb"
 

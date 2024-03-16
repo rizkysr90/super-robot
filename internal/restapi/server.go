@@ -3,13 +3,14 @@ package restapi
 import (
 	"database/sql"
 
+	"auth-service-rizkysr90-pos/internal/config"
+	authHandler "auth-service-rizkysr90-pos/internal/restapi/handler/auth"
+	"auth-service-rizkysr90-pos/internal/restapi/middleware"
+	auth "auth-service-rizkysr90-pos/internal/service/auth"
+	"auth-service-rizkysr90-pos/internal/store/pg"
+	jwttoken "auth-service-rizkysr90-pos/pkg/jwt"
+
 	"github.com/gin-gonic/gin"
-	"github.com/rizkysr90/go-boilerplate/internal/config"
-	authHandler "github.com/rizkysr90/go-boilerplate/internal/restapi/handler/auth"
-	"github.com/rizkysr90/go-boilerplate/internal/restapi/middleware"
-	auth "github.com/rizkysr90/go-boilerplate/internal/service/auth"
-	"github.com/rizkysr90/go-boilerplate/internal/store/pg"
-	jwttoken "github.com/rizkysr90/go-boilerplate/pkg/jwt"
 	restapimiddleware "github.com/rizkysr90/rizkysr90-go-pkg/restapi/middleware"
 	"github.com/rs/zerolog"
 )

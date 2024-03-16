@@ -4,9 +4,10 @@ import (
 	"context"
 	"log"
 
-	"github.com/rizkysr90/go-boilerplate/internal/config"
-	"github.com/rizkysr90/go-boilerplate/internal/restapi"
-	jwttoken "github.com/rizkysr90/go-boilerplate/pkg/jwt"
+	"auth-service-rizkysr90-pos/internal/config"
+	"auth-service-rizkysr90-pos/internal/restapi"
+	jwttoken "auth-service-rizkysr90-pos/pkg/jwt"
+
 	pgx "github.com/rizkysr90/rizkysr90-go-pkg/pgx"
 	logger "github.com/rizkysr90/rizkysr90-go-pkg/zerolog"
 )

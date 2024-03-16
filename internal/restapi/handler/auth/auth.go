@@ -5,10 +5,11 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/rizkysr90/go-boilerplate/internal/config"
-	payload "github.com/rizkysr90/go-boilerplate/internal/payload/http/auth"
-	commonvalidator "github.com/rizkysr90/go-boilerplate/internal/restapi/validator"
-	"github.com/rizkysr90/go-boilerplate/internal/service"
+	"auth-service-rizkysr90-pos/internal/config"
+	payload "auth-service-rizkysr90-pos/internal/payload/http/auth"
+	commonvalidator "auth-service-rizkysr90-pos/internal/restapi/validator"
+	"auth-service-rizkysr90-pos/internal/service"
+
 	"github.com/rizkysr90/rizkysr90-go-pkg/restapierror"
 
 	"github.com/gin-gonic/gin"

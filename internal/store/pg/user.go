@@ -5,7 +5,8 @@ import (
 	"database/sql"
 	"errors"
 
-	"github.com/rizkysr90/go-boilerplate/internal/store"
+	"auth-service-rizkysr90-pos/internal/store"
+
 	"github.com/rizkysr90/rizkysr90-go-pkg/sqldb"
 )
 

@@ -1,4 +1,4 @@
-module github.com/rizkysr90/go-boilerplate
+module auth-service-rizkysr90-pos
 
 go 1.21.3
 
