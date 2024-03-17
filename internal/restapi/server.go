@@ -38,7 +38,7 @@ func New(
 		authHandler.LoginUser(ctx)
 	})
 
-	server.Use(middleware.AuthRequired(cfg, jwtToken))
+	server.Use(middleware.AuthRequiredCookies(jwtToken))
 	server.GET("api/v1/privateroutes")
 	return server, nil
 }

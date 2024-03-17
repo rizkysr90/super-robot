@@ -54,3 +54,11 @@ func (u *UserStoreMock) FindOne(ctx context.Context,
 	}
 	return &UserData{}, nil
 }
+func (u *UserStoreMock) Update(ctx context.Context,
+	updatedData *UserData,
+	filter *UserFilterBy,
+	staging string) error {
+	u.Called()
+
+	return nil
+}

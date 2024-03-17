@@ -127,7 +127,12 @@ func (a *AuthHandler) LoginUser(ctx *gin.Context) {
 	if err != nil {
 		ctx.Error(err)
 		return
+
 	}
-	ctx.JSON(http.StatusOK, data)
+	ctx.SetSameSite(http.SameSiteLaxMode)
+	ctx.SetCookie("access_token", data.Token, 0, "", "", true, true)
+	ctx.JSON(http.StatusOK, gin.H{
+		"refresh_token": data.RefreshToken,
+	})
 
 }

@@ -129,10 +129,12 @@ func TestCreateUserInvalidPassword(t *testing.T) {
 
 func TestLoginUser(t *testing.T) {
 	ctx := context.Background()
-	db, _, err := sqlmock.New()
+	db, mockDB, err := sqlmock.New()
 	if err != nil {
 		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
 	}
+	mockDB.ExpectBegin()
+	mockDB.ExpectCommit()
 	defer db.Close()
 	mockStore := store.UserStoreMock{}
 	reqPayload := &payload.ReqLoginUser{
@@ -148,14 +150,20 @@ func TestLoginUser(t *testing.T) {
 		Password: "$2a$10$h2rEwjxtJPi2ePYAmvOQr.eDMbcNZxaRrEwLiir9lfFBH9yIBdK3u",
 	}
 	mockStore.On("FindOne", queryFilter, "findactiveuser").Return(expectedResQuery, nil)
+	mockStore.On("Update", mock.Anything)
 	mockJWT := new(jwttoken.MockJWTToken)
 	authService := NewAuthService(db, &mockStore, mockJWT)
 	// var res *payload.ResLoginUser
 	mockJWT.On("Generate", &jwttoken.JWTClaims{UserID: expectedResQuery.ID}).Return(
 		"jwttoken", nil,
 	)
-	_, err = authService.LoginUser(ctx, reqPayload)
+	mockJWT.On("GenerateRefreshToken", &jwttoken.JWTClaims{UserID: expectedResQuery.ID}).Return(
+		"jwttoken", nil,
+	)
+	var res *payload.ResLoginUser
+	res, err = authService.LoginUser(ctx, reqPayload)
 	assert.Nil(t, err)
+	assert.NotEmpty(t, res.RefreshToken)
 	mockStore.AssertExpectations(t)
 }
 func TestLoginUserInvalidPassword(t *testing.T) {
@@ -180,6 +188,7 @@ func TestLoginUserInvalidPassword(t *testing.T) {
 	var res *payload.ResLoginUser
 	res, err = svc.LoginUser(ctx, reqPayload)
 	assert.Error(t, err)
+	assert.Equal(t, "invalid username or password", err.Error())
 	assert.Nil(t, res)
 	mockStore.AssertExpectations(t)
 }

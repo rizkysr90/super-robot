@@ -7,15 +7,16 @@ import (
 )
 
 type UserData struct {
-	CreatedAt   time.Time
-	UpdatedAt   sql.NullTime
-	DeletedAt   sql.NullTime
-	ID          string
-	FirstName   string
-	LastName    string
-	Email       string
-	Password    string
-	IsActivated bool
+	CreatedAt    time.Time
+	UpdatedAt    sql.NullTime
+	DeletedAt    sql.NullTime
+	ID           string
+	FirstName    string
+	LastName     string
+	Email        string
+	Password     string
+	RefreshToken string
+	IsActivated  bool
 }
 type InsertedData struct {
 	CreatedAt   time.Time
@@ -32,4 +33,8 @@ type UserFilterBy struct {
 type UserStore interface {
 	Create(ctx context.Context, data *InsertedData) error
 	FindOne(ctx context.Context, filterBy *UserFilterBy, staging string) (*UserData, error)
+	Update(ctx context.Context,
+		updatedData *UserData,
+		filter *UserFilterBy,
+		staging string) error
 }

@@ -12,5 +12,6 @@ type ReqLoginUser struct {
 	Password string `json:"password"`
 }
 type ResLoginUser struct {
-	Token string `json:"token"`
+	Token        string `json:"token"`
+	RefreshToken string `json:"refresh_token"`
 }

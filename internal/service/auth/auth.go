@@ -85,6 +85,9 @@ func (s *Service) LoginUser(ctx context.Context,
 		}
 	}
 	if err = bcrypt.CompareHashAndPassword([]byte(result.Password), []byte(req.Password)); err != nil {
+		if err.Error() == bcrypt.ErrMismatchedHashAndPassword.Error() {
+			return nil, restapierror.NewBadRequest(restapierror.WithMessage("invalid username or password"))
+		}
 		return nil, restapierror.NewBadRequest(restapierror.WithMessage(err.Error()))
 	}
 	// gen token
@@ -95,8 +98,26 @@ func (s *Service) LoginUser(ctx context.Context,
 	if err != nil {
 		return nil, err
 	}
+	// gen refresh token
+	var refreshToken string
+	refreshToken, err = s.jwtToken.GenerateRefreshToken(&jwttoken.JWTClaims{
+		UserID: result.ID,
+	})
+	if err != nil {
+		return nil, err
+	}
+	err = sqldb.WithinTx(ctx, s.db, func(tx sqldb.QueryExecutor) error {
+		txContext := sqldb.WithTxContext(ctx, tx)
+		return s.userStore.Update(txContext, &store.UserData{
+			RefreshToken: refreshToken,
+		}, &store.UserFilterBy{Email: req.Email}, "updaterefreshtoken")
 
+	})
+	if err != nil {
+		return nil, err
+	}
 	return &payload.ResLoginUser{
-		Token: genToken,
+		Token:        genToken,
+		RefreshToken: refreshToken,
 	}, nil
 }

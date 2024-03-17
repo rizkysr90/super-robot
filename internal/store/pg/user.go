@@ -66,3 +66,35 @@ func (u *User) FindOne(ctx context.Context,
 		return nil, errors.New("staging db not found")
 	}
 }
+
+func updateRefreshtoken(ctx context.Context,
+	updatedData *store.UserData, f *store.UserFilterBy) func(tx sqldb.QueryExecutor) error {
+
+	result := func(tx sqldb.QueryExecutor) error {
+		query := `
+			UPDATE users SET refresh_token = $1
+			WHERE email = $2
+		`
+		_, err := tx.ExecContext(ctx, query, updatedData.RefreshToken, f.Email)
+		if err != nil {
+			return err
+		}
+		return nil
+	}
+	return result
+}
+func (u *User) Update(ctx context.Context,
+	updatedData *store.UserData,
+	filter *store.UserFilterBy,
+	staging string) error {
+
+	var updateFunc func(tx sqldb.QueryExecutor) error
+	switch staging {
+	case "updaterefreshtoken":
+		updateFunc = updateRefreshtoken(ctx, updatedData, filter)
+	default:
+		return errors.New("staging db not found")
+	}
+	return sqldb.WithinTxContextOrError(ctx, updateFunc)
+
+}
