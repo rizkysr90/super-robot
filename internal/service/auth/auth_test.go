@@ -9,42 +9,13 @@ import (
 	jwttoken "auth-service-rizkysr90-pos/pkg/jwt"
 
 	"github.com/jackc/pgx/v5"
+	"github.com/rizkysr90/rizkysr90-go-pkg/restapierror"
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
 
-// var privateKeyTest string
-// var publicKeyTest string
-
-//	func TestMain(m *testing.M) {
-//		var err error
-//		var privateKey []byte
-//		var publicKey []byte
-//		// Get the current working directory
-//		dir, err := os.Getwd()
-//		if err != nil {
-//			fmt.Println("Error:", err)
-//			return
-//		}
-//		// Construct the file path
-//		filePathPriv := filepath.Join(dir, "private_key_test.pem")
-//		filePathPub := filepath.Join(dir, "public_key_test.pem")
-//		privateKey, err = os.ReadFile(filePathPriv)
-//		if err != nil {
-//			fmt.Println("Error loading private key:", err)
-//		}
-//		log.Println(filePathPriv)
-//		log.Println(filePathPub)
-//		privateKeyTest = string(privateKey)
-//		publicKey, err = os.ReadFile(filePathPub)
-//		if err != nil {
-//			fmt.Println("Error loading public key:", err)
-//		}
-//		publicKeyTest = string(publicKey)
-//		m.Run()
-//	}
 func TestCreateUser(t *testing.T) {
 
 	ctx := context.Background()
@@ -215,4 +186,65 @@ func TestLoginUserNotFound(t *testing.T) {
 	assert.Nil(t, res)
 	assert.Error(t, err)
 	mockStore.AssertExpectations(t)
+}
+func TestRefreshTokenSucess(t *testing.T) {
+	ctx := context.Background()
+	const userID = "50c8d653-4a6a-45cf-92fa-406492b463d7"
+	db, _, err := sqlmock.New()
+	if err != nil {
+		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+	}
+	defer db.Close()
+	mockStore := store.UserStoreMock{}
+	mockStore.On("FindOne", mock.Anything, "findRefreshToken").Return(&store.UserData{
+		ID: userID,
+	}, nil)
+	reqPayload := &payload.ReqRefreshToken{
+		RefreshToken: "refreshtoken",
+	}
+	mockJWT := new(jwttoken.MockJWTToken)
+	mockJWT.On("AuthorizeRefreshToken", reqPayload.RefreshToken).Return(&jwttoken.JWTClaims{
+		UserID: userID,
+	}, nil)
+	mockJWT.On("Generate", &jwttoken.JWTClaims{
+		UserID: userID,
+	}).Return("access_token", nil)
+	svc := NewAuthService(db, &mockStore, mockJWT)
+	var res *payload.ResRefreshToken
+	res, err = svc.RefreshToken(ctx, reqPayload)
+	mockJWT.AssertExpectations(t)
+	mockStore.AssertExpectations(t)
+	assert.Nil(t, err)
+	assert.NotNil(t, res)
+	assert.NotEmpty(t, res.AccessToken)
+}
+
+func TestRefreshTokenInvalid(t *testing.T) {
+	ctx := context.Background()
+	const userID = "50c8d653-4a6a-45cf-92fa-406492b463d7"
+	db, _, err := sqlmock.New()
+	if err != nil {
+		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+	}
+	defer db.Close()
+	mockStore := store.UserStoreMock{}
+	mockStore.On("FindOne", mock.Anything, "findRefreshToken").Return(&store.UserData{
+		ID: userID,
+	}, nil)
+	reqPayload := &payload.ReqRefreshToken{
+		RefreshToken: "stolenToken",
+	}
+	mockJWT := new(jwttoken.MockJWTToken)
+	mockJWT.On("AuthorizeRefreshToken", reqPayload.RefreshToken).Return(&jwttoken.JWTClaims{
+		UserID: "50c8d653-4a6a-45cf-92fa-406492b463d8", // DIFF ID
+	}, nil)
+	svc := NewAuthService(db, &mockStore, mockJWT)
+	var res *payload.ResRefreshToken
+	res, err = svc.RefreshToken(ctx, reqPayload)
+	mockJWT.AssertExpectations(t)
+	mockStore.AssertExpectations(t)
+	assert.Nil(t, res)
+	assert.NotNil(t, err)
+	expectedError := restapierror.NewUnauthorized(restapierror.WithMessage("invalid token"))
+	assert.Equal(t, expectedError.Error(), err.Error())
 }

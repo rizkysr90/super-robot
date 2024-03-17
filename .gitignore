@@ -5,3 +5,4 @@ coverage.*
 private_key_jwt.pem
 public_key_jwt.pem
 private_key_refresh_jwt.pem
+public_key_refresh_jwt.pem

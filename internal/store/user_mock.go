@@ -52,6 +52,19 @@ func (u *UserStoreMock) FindOne(ctx context.Context,
 	if filterBy.Email == "usernotfound@gmail.com" {
 		return nil, args.Error(1)
 	}
+	if staging == "findRefreshToken" {
+		value := args.Get(0)
+		if _, ok := value.(*UserData); ok {
+			// Type assertion successful, userData is now of type *UserData
+			return &UserData{
+					ID: "50c8d653-4a6a-45cf-92fa-406492b463d7",
+				},
+				args.Error(1)
+		} else {
+			// Type assertion failed
+			return nil, fmt.Errorf("unexpected type, expected *UserData")
+		}
+	}
 	return &UserData{}, nil
 }
 func (u *UserStoreMock) Update(ctx context.Context,

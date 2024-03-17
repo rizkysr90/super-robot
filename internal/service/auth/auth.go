@@ -121,3 +121,34 @@ func (s *Service) LoginUser(ctx context.Context,
 		RefreshToken: refreshToken,
 	}, nil
 }
+
+func (s *Service) RefreshToken(ctx context.Context,
+	req *payload.ReqRefreshToken) (*payload.ResRefreshToken, error) {
+	claims, err := s.jwtToken.AuthorizeRefreshToken(req.RefreshToken)
+	if err != nil {
+		return nil, restapierror.NewUnauthorized(restapierror.WithMessage("invalid token"))
+	}
+	// find by token
+	var data *store.UserData
+	data, err = s.userStore.FindOne(ctx, &store.UserFilterBy{
+		RefreshToken: req.RefreshToken,
+	}, "findRefreshToken")
+	if err != nil {
+		if sql.ErrNoRows.Error() == err.Error() {
+			return nil, restapierror.NewUnauthorized(restapierror.WithMessage("invalid token"))
+		}
+		return nil, err
+	}
+	if data.ID != claims.Subject {
+		return nil, restapierror.NewUnauthorized(restapierror.WithMessage("invalid token"))
+	}
+	// gen access token
+	var accessToken string
+	accessToken, err = s.jwtToken.Generate(&jwttoken.JWTClaims{
+		UserID: data.ID,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return &payload.ResRefreshToken{AccessToken: accessToken}, nil
+}

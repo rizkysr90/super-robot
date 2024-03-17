@@ -28,7 +28,8 @@ type InsertedData struct {
 	IsActivated bool
 }
 type UserFilterBy struct {
-	Email string
+	Email        string
+	RefreshToken string
 }
 type UserStore interface {
 	Create(ctx context.Context, data *InsertedData) error

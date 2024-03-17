@@ -46,6 +46,21 @@ func (u *User) Create(ctx context.Context, data *store.InsertedData) error {
 	}
 	return sqldb.WithinTxContextOrError(ctx, createFunc)
 }
+func findRefreshToken(ctx context.Context,
+	db *sql.DB,
+	filterBy *store.UserFilterBy) (*store.UserData, error) {
+	var result store.UserData
+	// 1 is for filter by email
+	query := `SELECT id
+			 FROM users WHERE refresh_token = $1`
+	err := sqldb.WithinTxContextOrDB(ctx, db).
+		QueryRowContext(ctx, query, filterBy.RefreshToken).
+		Scan(&result.ID)
+	if err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
 func (u *User) FindOne(ctx context.Context,
 	filterBy *store.UserFilterBy, staging string) (
 	*store.UserData, error) {
@@ -62,6 +77,8 @@ func (u *User) FindOne(ctx context.Context,
 			return nil, err
 		}
 		return &result, nil
+	case "findRefreshToken":
+		return findRefreshToken(ctx, u.db, filterBy)
 	default:
 		return nil, errors.New("staging db not found")
 	}

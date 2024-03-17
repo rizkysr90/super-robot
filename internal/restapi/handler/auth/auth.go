@@ -127,7 +127,6 @@ func (a *AuthHandler) LoginUser(ctx *gin.Context) {
 	if err != nil {
 		ctx.Error(err)
 		return
-
 	}
 	ctx.SetSameSite(http.SameSiteLaxMode)
 	ctx.SetCookie("access_token", data.Token, 0, "", "", true, true)
@@ -135,4 +134,27 @@ func (a *AuthHandler) LoginUser(ctx *gin.Context) {
 		"refresh_token": data.RefreshToken,
 	})
 
+}
+func (a *AuthHandler) RefreshToken(ctx *gin.Context) {
+	payload := &payload.ReqRefreshToken{}
+	if err := ctx.ShouldBindJSON(payload); err != nil {
+		ctx.Error(err)
+		return
+	}
+	// sanitize
+	payload.RefreshToken = strings.TrimSpace(payload.RefreshToken)
+	// validate empty string
+	if len(payload.RefreshToken) == 0 {
+		ctx.Error(restapierror.NewBadRequest(
+			restapierror.WithMessage("refresh_token not found")),
+		)
+	}
+	data, err := a.authService.RefreshToken(ctx, payload)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+	ctx.SetSameSite(http.SameSiteLaxMode)
+	ctx.SetCookie("access_token", data.AccessToken, 0, "", "", true, true)
+	ctx.JSON(200, gin.H{})
 }

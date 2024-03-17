@@ -37,7 +37,9 @@ func New(
 	server.POST("api/v1/auth/users/login", func(ctx *gin.Context) {
 		authHandler.LoginUser(ctx)
 	})
-
+	server.POST("/api/v1/auth/users/refreshtoken", func(ctx *gin.Context) {
+		authHandler.RefreshToken(ctx)
+	})
 	server.Use(middleware.AuthRequiredCookies(jwtToken))
 	server.GET("api/v1/privateroutes")
 	return server, nil
