@@ -2,7 +2,7 @@
 CREATE TABLE IF NOT EXISTS users (
     id UUID PRIMARY KEY NOT NULL,
     first_name VARCHAR(200) NOT NULL,
-    last_name VARCHAR(200),
+    last_name VARCHAR(200) NOT NULL,
     password TEXT NOT NULL,
     email TEXT NOT NULL,
     is_activated BOOLEAN DEFAULT false,

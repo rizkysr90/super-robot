@@ -10,6 +10,7 @@ import (
 	"auth-service-rizkysr90-pos/internal/store/pg"
 	jwttoken "auth-service-rizkysr90-pos/pkg/jwt"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	restapimiddleware "github.com/rizkysr90/rizkysr90-go-pkg/restapi/middleware"
 	"github.com/rs/zerolog"
@@ -25,6 +26,7 @@ func New(
 	server := gin.New()
 	server.Use(restapimiddleware.Recovery(logger))
 	server.Use(restapimiddleware.ErrorHandler(logger))
+	server.Use(cors.Default())
 	// Auth service
 	userStore := pg.NewUserDB(sqlDB)
 	authService := auth.NewAuthService(sqlDB, userStore, jwtToken)
