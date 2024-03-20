@@ -5,12 +5,12 @@ go 1.21.3
 require (
 	github.com/DATA-DOG/go-sqlmock v1.5.2
 	github.com/caarlos0/env/v8 v8.0.0
-	github.com/gin-contrib/cors v1.7.0
 	github.com/gin-gonic/gin v1.9.1
 	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/google/uuid v1.6.0
 	github.com/jackc/pgx/v5 v5.5.5
 	github.com/rizkysr90/rizkysr90-go-pkg v0.0.0-20240314213712-6d3e735486d1
+	github.com/rs/cors v1.10.1
 	github.com/rs/zerolog v1.32.0
 	github.com/stretchr/testify v1.9.0
 	golang.org/x/crypto v0.21.0

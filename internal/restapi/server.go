@@ -2,6 +2,7 @@ package restapi
 
 import (
 	"database/sql"
+	"net/http"
 
 	"auth-service-rizkysr90-pos/internal/config"
 	authHandler "auth-service-rizkysr90-pos/internal/restapi/handler/auth"
@@ -10,9 +11,9 @@ import (
 	"auth-service-rizkysr90-pos/internal/store/pg"
 	jwttoken "auth-service-rizkysr90-pos/pkg/jwt"
 
-	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	restapimiddleware "github.com/rizkysr90/rizkysr90-go-pkg/restapi/middleware"
+	"github.com/rs/cors"
 	"github.com/rs/zerolog"
 )
 
@@ -26,7 +27,18 @@ func New(
 	server := gin.New()
 	server.Use(restapimiddleware.Recovery(logger))
 	server.Use(restapimiddleware.ErrorHandler(logger))
-	server.Use(cors.Default())
+	// corsHandler := cors.AllowAll()
+	corsHandler := cors.New(cors.Options{
+		AllowedOrigins:   []string{"http://localhost:3000"}, // Allow all origins
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"*"}, // Allow all headers
+		AllowCredentials: true,
+	})
+	// Use the CORS middleware with the Gin router
+	server.Use(func(c *gin.Context) {
+		corsHandler.HandlerFunc(c.Writer, c.Request)
+		c.Next()
+	})
 	// Auth service
 	userStore := pg.NewUserDB(sqlDB)
 	authService := auth.NewAuthService(sqlDB, userStore, jwtToken)
@@ -40,7 +52,11 @@ func New(
 	server.POST("/api/v1/auth/users/refreshtoken", func(ctx *gin.Context) {
 		authHandler.RefreshToken(ctx)
 	})
-	server.Use(middleware.AuthRequiredCookies(jwtToken))
-	server.GET("api/v1/privateroutes")
+	authGroup := server.Group("")
+	authGroup.Use(middleware.AuthRequiredCookies(jwtToken))
+	authGroup.GET("api/v1/privateroutes")
+	server.NoRoute(func(c *gin.Context) {
+		c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"error": "Not Foaund"})
+	})
 	return server, nil
 }
