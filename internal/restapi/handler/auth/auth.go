@@ -129,17 +129,20 @@ func (a *AuthHandler) LoginUser(ctx *gin.Context) {
 		return
 	}
 	ctx.SetSameSite(http.SameSiteLaxMode)
+	ctx.SetCookie("refresh_token", data.RefreshToken, 0, "", "", true, true)
+	ctx.SetSameSite(http.SameSiteLaxMode)
 	ctx.SetCookie("access_token", data.Token, 0, "", "", true, true)
-	ctx.JSON(http.StatusOK, gin.H{
-		"refresh_token": data.RefreshToken,
-	})
+	ctx.JSON(http.StatusOK, gin.H{})
 
 }
 func (a *AuthHandler) RefreshToken(ctx *gin.Context) {
-	payload := &payload.ReqRefreshToken{}
-	if err := ctx.ShouldBindJSON(payload); err != nil {
+	refresh_token, err := ctx.Request.Cookie("refresh_token")
+	if err != nil {
 		ctx.Error(err)
 		return
+	}
+	payload := &payload.ReqRefreshToken{
+		RefreshToken: refresh_token.Value,
 	}
 	// sanitize
 	payload.RefreshToken = strings.TrimSpace(payload.RefreshToken)

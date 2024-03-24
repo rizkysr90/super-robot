@@ -78,12 +78,14 @@ github.com/pelletier/go-toml/v2 v2.1.1/go.mod h1:tJU2Z3ZkXwnxa4DPO899bsyIoywizdU
 github.com/pkg/errors v0.9.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
-github.com/rizkysr90/rizkysr90-go-pkg v0.0.0-20240314213712-6d3e735486d1 h1:loR/oiBOxav4TImA2+Q24fANnmfaRh0rbxN6raAfULA=
-github.com/rizkysr90/rizkysr90-go-pkg v0.0.0-20240314213712-6d3e735486d1/go.mod h1:4Z4aWMrlzbAwlgIrEyczsVGDaU7hxJuU3H/lHwPmX44=
+github.com/rizkysr90/rizkysr90-go-pkg v0.0.0-20240323052015-0c2ca6be39d6 h1:IJQXgLCYp6sLsu0wBot+NU44ir+dsZDj4PWFZMFn2bY=
+github.com/rizkysr90/rizkysr90-go-pkg v0.0.0-20240323052015-0c2ca6be39d6/go.mod h1:4Z4aWMrlzbAwlgIrEyczsVGDaU7hxJuU3H/lHwPmX44=
 github.com/rogpeppe/go-internal v1.12.0 h1:exVL4IDcn6na9z1rAb56Vxr+CgyK3nn3O+epU5NdKM8=
 github.com/rogpeppe/go-internal v1.12.0/go.mod h1:E+RYuTGaKKdloAfM02xzb0FW3Paa99yedzYV+kq4uf4=
 github.com/rs/cors v1.10.1 h1:L0uuZVXIKlI1SShY2nhFfo44TYvDPQ1w4oFkUJNfhyo=
 github.com/rs/cors v1.10.1/go.mod h1:XyqrcTp5zjWr1wsJ8PIRZssZ8b/WMcMf71DJnit4EMU=
+github.com/rs/cors/wrapper/gin v0.0.0-20240228164225-8d33ca4794ea h1:zDqxp+k0Xtoh+2gTtG2eODpGSrNbnqQ0WRO1ycox22g=
+github.com/rs/cors/wrapper/gin v0.0.0-20240228164225-8d33ca4794ea/go.mod h1:gmu40DuK3SLdKUzGOUofS3UDZwyeOUy6ZjPPuaALatw=
 github.com/rs/xid v1.5.0/go.mod h1:trrq9SKmegXys3aeAKXMUTdJsYXVwGY3RLcfgqegfbg=
 github.com/rs/zerolog v1.32.0 h1:keLypqrlIjaFsbmJOBdB/qvyF8KEtCWHwobLp5l/mQ0=
 github.com/rs/zerolog v1.32.0/go.mod h1:/7mN4D5sKwJLZQ2b/znpjC3/GQWY/xaDXUM0kKWRHss=

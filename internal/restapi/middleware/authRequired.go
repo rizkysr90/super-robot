@@ -45,20 +45,21 @@ func AuthRequiredCookies(jwt *jwttoken.JWT) gin.HandlerFunc {
 			}
 			// Authorization successful, proceed with the request
 			ctx.Next()
+		} else {
+			// Token not found in cookies or failed to authorize, check for token in headers
+			token := ctx.GetHeader("Authorization")
+			if token == "" {
+				err := restapierror.NewUnauthorized(restapierror.WithMessage("access token not provided"))
+				ctx.Error(err)
+				return
+			}
+			// Remove "Bearer " prefix if present
+			token = strings.TrimPrefix(token, "Bearer ")
+			if err := jwt.Authorize(token); err != nil {
+				ctx.Error(restapierror.NewUnauthorized(restapierror.WithMessage(err.Error())))
+				return
+			}
+			ctx.Next()
 		}
-		// Token not found in cookies or failed to authorize, check for token in headers
-		token := ctx.GetHeader("Authorization")
-		if token == "" {
-			err := restapierror.NewUnauthorized(restapierror.WithMessage("access token not provided"))
-			ctx.Error(err)
-			return
-		}
-		// Remove "Bearer " prefix if present
-		token = strings.TrimPrefix(token, "Bearer ")
-		if err := jwt.Authorize(token); err != nil {
-			ctx.Error(restapierror.NewUnauthorized(restapierror.WithMessage(err.Error())))
-			return
-		}
-		ctx.Next()
 	}
 }

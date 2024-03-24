@@ -124,7 +124,6 @@ func TestLoginUser(t *testing.T) {
 	mockStore.On("Update", mock.Anything)
 	mockJWT := new(jwttoken.MockJWTToken)
 	authService := NewAuthService(db, &mockStore, mockJWT)
-	// var res *payload.ResLoginUser
 	mockJWT.On("Generate", &jwttoken.JWTClaims{UserID: expectedResQuery.ID}).Return(
 		"jwttoken", nil,
 	)

@@ -3,6 +3,7 @@ package restapi
 import (
 	"database/sql"
 	"net/http"
+	"time"
 
 	"auth-service-rizkysr90-pos/internal/config"
 	authHandler "auth-service-rizkysr90-pos/internal/restapi/handler/auth"
@@ -13,7 +14,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	restapimiddleware "github.com/rizkysr90/rizkysr90-go-pkg/restapi/middleware"
-	"github.com/rs/cors"
+	cors "github.com/rs/cors/wrapper/gin"
 	"github.com/rs/zerolog"
 )
 
@@ -25,20 +26,40 @@ func New(
 ) (*gin.Engine, error) {
 	// Setup rest api server and its provided services.
 	server := gin.New()
+	server.Use(func(ctx *gin.Context) {
+		startTime := time.Now()
+		ctx.Next()
+		// Log request duration and response status
+		if ctx.Writer.Status() >= http.StatusBadRequest {
+			logger.Error().
+				Str("method", ctx.Request.Method).
+				Str("url", ctx.Request.URL.String()).
+				Str("client_ip", ctx.ClientIP()).
+				Str("user_agent", ctx.GetHeader("User-Agent")).
+				Dur("duration", time.Since(startTime)).
+				Int("status", ctx.Writer.Status()).
+				Msg(ctx.Errors[0].Err.Error())
+		} else {
+			logger.Info().
+				Str("method", ctx.Request.Method).
+				Str("url", ctx.Request.URL.String()).
+				Str("client_ip", ctx.ClientIP()).
+				Str("user_agent", ctx.GetHeader("User-Agent")).
+				Dur("duration", time.Since(startTime)).
+				Int("status", ctx.Writer.Status()).
+				Msg("Request processed")
+		}
+	})
 	server.Use(restapimiddleware.Recovery(logger))
-	server.Use(restapimiddleware.ErrorHandler(logger))
+	server.Use(restapimiddleware.ErrorHandler())
 	// corsHandler := cors.AllowAll()
-	corsHandler := cors.New(cors.Options{
-		AllowedOrigins:   []string{"http://localhost:3000"}, // Allow all origins
+	server.Use(cors.New(cors.Options{
+		AllowedOrigins:   []string{"http://localhost:3000"},
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"*"}, // Allow all headers
 		AllowCredentials: true,
-	})
-	// Use the CORS middleware with the Gin router
-	server.Use(func(c *gin.Context) {
-		corsHandler.HandlerFunc(c.Writer, c.Request)
-		c.Next()
-	})
+	}))
+
 	// Auth service
 	userStore := pg.NewUserDB(sqlDB)
 	authService := auth.NewAuthService(sqlDB, userStore, jwtToken)
@@ -56,7 +77,13 @@ func New(
 	authGroup.Use(middleware.AuthRequiredCookies(jwtToken))
 	authGroup.GET("api/v1/privateroutes")
 	server.NoRoute(func(c *gin.Context) {
-		c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"error": "Not Foaund"})
+		c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"error": "Not Found"})
 	})
+	// server.Use(func(ctx *gin.Context) {
+	// 	log.Println(ctx)
+	// 	logger.Info().
+	// 		Str("path", ctx.FullPath()).
+	// 		Msg("incoming process")
+	// })
 	return server, nil
 }

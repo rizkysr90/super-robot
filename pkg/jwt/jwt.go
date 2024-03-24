@@ -34,7 +34,9 @@ func (j *JWT) GenerateRefreshToken(jwtClaims *JWTClaims) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodRS256, jwt.MapClaims{
 		"iss": "rizkysr90-pos",
 		"sub": jwtClaims.UserID,
-		"exp": time.Now().Add((time.Hour * 24) * 7).Unix(), // 1 weeks expiry
+		// "exp": time.Now().Add((time.Hour * 24) * 7).Unix(), // 1 weeks expiry
+		"exp": time.Now().Add(time.Minute * 2).Unix(), // 2 minute expiry
+
 	})
 	var signedToken string
 	var privateKey *rsa.PrivateKey
@@ -59,7 +61,9 @@ func (j *JWT) Generate(jwtClaims *JWTClaims) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodRS256, jwt.MapClaims{
 		"iss": "rizkysr90-pos",
 		"sub": jwtClaims.UserID,
-		"exp": time.Now().Add(time.Minute * 5).Unix(), // 5 minutes expiry
+		// "exp": time.Now().Add(time.Minute * 5).Unix(), // 5 minutes expiry
+		"exp": time.Now().Add(time.Second * 2).Unix(), // 2 minute second
+
 	})
 	var signedToken string
 	var privateKey *rsa.PrivateKey
