@@ -20,7 +20,7 @@ func AuthRequired(jwt *jwttoken.JWT) gin.HandlerFunc {
 			return
 		}
 		getToken := splitAuthHeader[1]
-		if err := jwt.Authorize(getToken); err != nil {
+		if _, err := jwt.Authorize(getToken); err != nil {
 			ctx.Error(err)
 			return
 		}
@@ -36,13 +36,15 @@ func AuthRequiredCookies(jwt *jwttoken.JWT) gin.HandlerFunc {
 		}
 		if access_token.Value != "" {
 			// Token found in cookies, authorize using it
-			err = jwt.Authorize(access_token.Value)
+			claims, err := jwt.Authorize(access_token.Value)
 			if err != nil {
 				// authorization error
 				err = restapierror.NewUnauthorized(restapierror.WithMessage(err.Error()))
 				ctx.Error(err)
 				return
 			}
+			ctx.Set("user_id", claims.Subject)
+
 			// Authorization successful, proceed with the request
 			ctx.Next()
 		} else {
@@ -55,7 +57,7 @@ func AuthRequiredCookies(jwt *jwttoken.JWT) gin.HandlerFunc {
 			}
 			// Remove "Bearer " prefix if present
 			token = strings.TrimPrefix(token, "Bearer ")
-			if err := jwt.Authorize(token); err != nil {
+			if _, err := jwt.Authorize(token); err != nil {
 				ctx.Error(restapierror.NewUnauthorized(restapierror.WithMessage(err.Error())))
 				return
 			}

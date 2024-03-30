@@ -17,9 +17,9 @@ func (m *MockJWTToken) GenerateRefreshToken(jwtClaims *JWTClaims) (string, error
 	args := m.Called(jwtClaims)
 	return args.String(0), args.Error(1)
 }
-func (m *MockJWTToken) Authorize(tokenString string) error {
+func (m *MockJWTToken) Authorize(tokenString string) (*MyCustomClaims, error) {
 	args := m.Called(tokenString)
-	return args.Error(0)
+	return nil, args.Error(0)
 }
 func (m *MockJWTToken) AuthorizeRefreshToken(tokenString string) (*MyCustomClaims, error) {
 	args := m.Called(tokenString)

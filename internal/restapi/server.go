@@ -7,8 +7,12 @@ import (
 
 	"auth-service-rizkysr90-pos/internal/config"
 	authHandler "auth-service-rizkysr90-pos/internal/restapi/handler/auth"
+	storeHandler "auth-service-rizkysr90-pos/internal/restapi/handler/store"
+
 	"auth-service-rizkysr90-pos/internal/restapi/middleware"
 	auth "auth-service-rizkysr90-pos/internal/service/auth"
+	storeService "auth-service-rizkysr90-pos/internal/service/store"
+
 	"auth-service-rizkysr90-pos/internal/store/pg"
 	jwttoken "auth-service-rizkysr90-pos/pkg/jwt"
 
@@ -73,17 +77,21 @@ func New(
 	server.POST("/api/v1/auth/users/refreshtoken", func(ctx *gin.Context) {
 		authHandler.RefreshToken(ctx)
 	})
+	// Store service
+	storeStore := pg.NewStoreDB(sqlDB)
+	storeService := storeService.NewStoreService(sqlDB, storeStore)
+	storeHander := storeHandler.NewAuthHandler(storeService)
+
+	// PRIVATE ROUTES
 	authGroup := server.Group("")
 	authGroup.Use(middleware.AuthRequiredCookies(jwtToken))
+
 	authGroup.GET("api/v1/privateroutes")
+	authGroup.POST("/api/v1/stores", func(ctx *gin.Context) {
+		storeHander.CreateStore(ctx)
+	})
 	server.NoRoute(func(c *gin.Context) {
 		c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"error": "Not Found"})
 	})
-	// server.Use(func(ctx *gin.Context) {
-	// 	log.Println(ctx)
-	// 	logger.Info().
-	// 		Str("path", ctx.FullPath()).
-	// 		Msg("incoming process")
-	// })
 	return server, nil
 }

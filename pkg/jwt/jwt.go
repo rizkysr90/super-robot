@@ -34,8 +34,8 @@ func (j *JWT) GenerateRefreshToken(jwtClaims *JWTClaims) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodRS256, jwt.MapClaims{
 		"iss": "rizkysr90-pos",
 		"sub": jwtClaims.UserID,
-		// "exp": time.Now().Add((time.Hour * 24) * 7).Unix(), // 1 weeks expiry
-		"exp": time.Now().Add(time.Minute * 2).Unix(), // 2 minute expiry
+		"exp": time.Now().Add((time.Hour * 24) * 7).Unix(), // 1 weeks expiry
+		// "exp": time.Now().Add(time.Minute * 2).Unix(), // 2 minute expiry
 
 	})
 	var signedToken string
@@ -61,8 +61,8 @@ func (j *JWT) Generate(jwtClaims *JWTClaims) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodRS256, jwt.MapClaims{
 		"iss": "rizkysr90-pos",
 		"sub": jwtClaims.UserID,
-		// "exp": time.Now().Add(time.Minute * 5).Unix(), // 5 minutes expiry
-		"exp": time.Now().Add(time.Second * 2).Unix(), // 2 minute second
+		"exp": time.Now().Add(time.Minute * 5).Unix(), // 5 minutes expiry
+		// "exp": time.Now().Add(time.Second * 2).Unix(), // 2 second
 
 	})
 	var signedToken string
@@ -77,19 +77,19 @@ func (j *JWT) Generate(jwtClaims *JWTClaims) (string, error) {
 	}
 	return signedToken, nil
 }
-func (j *JWT) Authorize(tokenString string) error {
+func (j *JWT) Authorize(tokenString string) (*MyCustomClaims, error) {
 	var err error
 	var publicKeyBytes []byte
 	var publicKey *rsa.PublicKey
 	var jwtToken *jwt.Token
 	publicKeyBytes, err = os.ReadFile("public_key_jwt.pem")
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	publicKey, err = jwt.ParseRSAPublicKeyFromPEM(publicKeyBytes)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	jwtToken, err = jwt.ParseWithClaims(tokenString, &MyCustomClaims{}, func(t *jwt.Token) (interface{}, error) {
 		// Don't forget to validate the alg is what you expect:
@@ -100,11 +100,11 @@ func (j *JWT) Authorize(tokenString string) error {
 	})
 
 	if err != nil {
-		return restapierror.NewUnauthorized(restapierror.WithMessage(err.Error()))
-	} else if _, ok := jwtToken.Claims.(*MyCustomClaims); ok {
-		return nil
+		return nil, restapierror.NewUnauthorized(restapierror.WithMessage(err.Error()))
+	} else if claims, ok := jwtToken.Claims.(*MyCustomClaims); ok {
+		return claims, nil
 	} else {
-		return err
+		return nil, err
 	}
 }
 func (j *JWT) AuthorizeRefreshToken(tokenString string) (*MyCustomClaims, error) {
