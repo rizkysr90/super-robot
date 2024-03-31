@@ -43,3 +43,38 @@ func (s *Store) Insert(ctx context.Context, data *store.StoreData) error {
 	}
 	return sqldb.WithinTxContextOrError(ctx, createFunc)
 }
+
+func (s *Store) Finder(ctx context.Context,
+	filter *store.StoreFilter, operationID string) ([]store.StoreData, error) {
+	const query = `
+		WITH total_count AS (
+			SELECT COUNT(id) AS total_elements FROM stores WHERE user_id = $1
+		)
+		SELECT 
+		id, name, address, contact, created_at,
+		(SELECT total_elements FROM total_count) AS total_elements
+		FROM stores WHERE user_id = $1
+		LIMIT $2
+		OFFSET $3
+	`
+	var resultArr []store.StoreData
+	rows, err := sqldb.WithinTxContextOrDB(ctx, s.db).QueryContext(ctx, query,
+		filter.UserID, filter.Pagination.PageSize, filter.Pagination.PageNumber)
+	if err != nil {
+		return nil, err
+	}
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var result store.StoreData
+		err = rows.Scan(&result.ID, &result.Name, &result.Address,
+			&result.Contact, &result.CreatedAt, &filter.Pagination.TotalElements)
+		if err != nil {
+			return nil, err
+		}
+		resultArr = append(resultArr, result)
+	}
+	return resultArr, nil
+}

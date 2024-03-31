@@ -7,4 +7,5 @@ import (
 
 type StoreService interface {
 	CreateStore(ctx context.Context, req *payload.ReqCreateStore) error
+	GetAllStore(ctx context.Context, req *payload.ReqGetAllStore) (*payload.ResGetAllStore, error)
 }

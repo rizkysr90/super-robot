@@ -19,9 +19,11 @@ func New() *JWT {
 
 type JWTClaims struct {
 	UserID string
+	Role   int
 }
 type MyCustomClaims struct {
 	jwt.RegisteredClaims
+	JWTClaims
 }
 
 func (j *JWT) GenerateRefreshToken(jwtClaims *JWTClaims) (string, error) {
@@ -32,9 +34,10 @@ func (j *JWT) GenerateRefreshToken(jwtClaims *JWTClaims) (string, error) {
 		return "", err
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodRS256, jwt.MapClaims{
-		"iss": "rizkysr90-pos",
-		"sub": jwtClaims.UserID,
-		"exp": time.Now().Add((time.Hour * 24) * 7).Unix(), // 1 weeks expiry
+		"iss":  "rizkysr90-pos",
+		"sub":  jwtClaims.UserID,
+		"exp":  time.Now().Add((time.Hour * 24) * 7).Unix(), // 1 weeks expiry
+		"role": jwtClaims.Role,
 		// "exp": time.Now().Add(time.Minute * 2).Unix(), // 2 minute expiry
 
 	})
@@ -59,9 +62,10 @@ func (j *JWT) Generate(jwtClaims *JWTClaims) (string, error) {
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodRS256, jwt.MapClaims{
-		"iss": "rizkysr90-pos",
-		"sub": jwtClaims.UserID,
-		"exp": time.Now().Add(time.Minute * 5).Unix(), // 5 minutes expiry
+		"iss":  "rizkysr90-pos",
+		"sub":  jwtClaims.UserID,
+		"exp":  time.Now().Add(time.Minute * 5).Unix(), // 5 minutes expiry
+		"role": jwtClaims.Role,
 		// "exp": time.Now().Add(time.Second * 2).Unix(), // 2 second
 
 	})

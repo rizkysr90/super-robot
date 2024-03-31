@@ -9,6 +9,8 @@ info:
 tags:
   - name: Auth Microservices
     description: Everything about your auth service
+  - name: Stores
+    description: Everything about store service
 paths:
   /api/v1/auth/users:
     post:
@@ -46,13 +48,13 @@ paths:
                   description: to validate inputted password
         required: true
       responses:
-        '201':
+        "201":
           description: Successful to create new user
           content:
             application/json:
               schema:
-                type: object       
-        '400':
+                type: object
+        "400":
           description: Provided data doesn't meet the validation
   /api/v1/auth/users/login:
     post:
@@ -78,15 +80,93 @@ paths:
                   description: password of the user
         required: true
       responses:
-        '201':
+        "200":
+          description: Success login
+          headers:
+            Set-Cookie:
+              description: Cookie returned in the response
+              schema:
+                type: array
+                items:
+                  type: string
+                examples:
+                  - "access_token=cookie1_value;"
+                  - "refresh_token=cookie2_value;"
+
+        "400":
+          description: Provided data doesn't meet the validation
+  /api/v1/auth/users/refreshtoken:
+    post:
+      tags:
+        - Users
+      summary: To refresh the access token
+      description: using refresh token to get new access token
+      operationId: users.refreshtoken
+      parameters:
+        - in: cookie
+          name: refresh_token
+          required: true
+          schema:
+            type: string
+          description: refresh_token value
+      responses:
+        "200":
+          description: Success to get a new refresh token
+          headers:
+            Set-Cookie:
+              description: Cookie returned in the response
+              schema:
+                type: array
+                items:
+                  type: string
+                examples:
+                  - "access_token=cookie1_value;"
+
+        "400":
+          description: Provided data doesn't meet the validation
+
+  /api/v1/stores:
+    post:
+      tags:
+        - Stores
+      summary: To create store
+      operationId: stores.create
+      parameters:
+        - in: cookie
+          name: access_token
+          required: true
+          schema:
+            type: string
+          description: access_token value
+      requestBody:
+        content:
+          application/json:
+            schema:
+              required:
+                - name
+                - address
+                - contact
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: name of the store
+                address:
+                  type: string
+                  description: address of the store
+                contact:
+                  type: string
+                  description: contact of the store
+        required: true
+      responses:
+        "201":
           description: Successful to create new user
           content:
             application/json:
               schema:
-                type: object       
-        '400':
+                type: object
+        "400":
           description: Provided data doesn't meet the validation
- 
   # securitySchemes:
   #   petstore_auth:
   #     type: oauth2

@@ -130,7 +130,7 @@ func (a *AuthHandler) LoginUser(ctx *gin.Context) {
 	}
 	ctx.SetSameSite(http.SameSiteLaxMode)
 	ctx.SetCookie("refresh_token", data.RefreshToken, 0, "", "", true, true)
-	ctx.SetSameSite(http.SameSiteLaxMode)
+	ctx.SetCookie("user_role", "1", 0, "", "", true, false)
 	ctx.SetCookie("access_token", data.Token, 0, "", "", true, true)
 	ctx.JSON(http.StatusOK, gin.H{})
 

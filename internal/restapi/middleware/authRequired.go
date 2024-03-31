@@ -31,7 +31,7 @@ func AuthRequiredCookies(jwt *jwttoken.JWT) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		access_token, err := ctx.Request.Cookie("access_token")
 		if err != nil {
-			ctx.Error(err)
+			ctx.Error(restapierror.NewUnauthorized(restapierror.WithMessage(err.Error())))
 			return
 		}
 		if access_token.Value != "" {
@@ -44,7 +44,7 @@ func AuthRequiredCookies(jwt *jwttoken.JWT) gin.HandlerFunc {
 				return
 			}
 			ctx.Set("user_id", claims.Subject)
-
+			ctx.Set("userRoles", claims.Role)
 			// Authorization successful, proceed with the request
 			ctx.Next()
 		} else {

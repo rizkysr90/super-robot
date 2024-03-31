@@ -94,6 +94,7 @@ func (s *Service) LoginUser(ctx context.Context,
 	var genToken string
 	genToken, err = s.jwtToken.Generate(&jwttoken.JWTClaims{
 		UserID: result.ID,
+		Role:   1,
 	})
 	if err != nil {
 		return nil, err
@@ -102,6 +103,7 @@ func (s *Service) LoginUser(ctx context.Context,
 	var refreshToken string
 	refreshToken, err = s.jwtToken.GenerateRefreshToken(&jwttoken.JWTClaims{
 		UserID: result.ID,
+		Role:   1,
 	})
 	if err != nil {
 		return nil, err
@@ -146,6 +148,7 @@ func (s *Service) RefreshToken(ctx context.Context,
 	var accessToken string
 	accessToken, err = s.jwtToken.Generate(&jwttoken.JWTClaims{
 		UserID: data.ID,
+		Role:   1,
 	})
 	if err != nil {
 		return nil, err

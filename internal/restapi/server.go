@@ -6,11 +6,14 @@ import (
 	"time"
 
 	"auth-service-rizkysr90-pos/internal/config"
+	"auth-service-rizkysr90-pos/internal/constant"
 	authHandler "auth-service-rizkysr90-pos/internal/restapi/handler/auth"
+	employeeHandler "auth-service-rizkysr90-pos/internal/restapi/handler/employee"
 	storeHandler "auth-service-rizkysr90-pos/internal/restapi/handler/store"
 
 	"auth-service-rizkysr90-pos/internal/restapi/middleware"
 	auth "auth-service-rizkysr90-pos/internal/service/auth"
+	"auth-service-rizkysr90-pos/internal/service/employee"
 	storeService "auth-service-rizkysr90-pos/internal/service/store"
 
 	"auth-service-rizkysr90-pos/internal/store/pg"
@@ -18,6 +21,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	restapimiddleware "github.com/rizkysr90/rizkysr90-go-pkg/restapi/middleware"
+	"github.com/rizkysr90/rizkysr90-go-pkg/restapierror"
 	cors "github.com/rs/cors/wrapper/gin"
 	"github.com/rs/zerolog"
 )
@@ -55,6 +59,7 @@ func New(
 		}
 	})
 	server.Use(restapimiddleware.Recovery(logger))
+	// server.Use(gin.RecoveryWithWriter(logger))
 	server.Use(restapimiddleware.ErrorHandler())
 	// corsHandler := cors.AllowAll()
 	server.Use(cors.New(cors.Options{
@@ -68,6 +73,10 @@ func New(
 	userStore := pg.NewUserDB(sqlDB)
 	authService := auth.NewAuthService(sqlDB, userStore, jwtToken)
 	authHandler := authHandler.NewAuthHandler(authService, cfg)
+	// Employee Service
+	employeeStore := pg.NewEmployeeDB(sqlDB)
+	employeeService := employee.NewEmployeeService(sqlDB, employeeStore, jwtToken)
+	employeeHandler := employeeHandler.NewEmployeeHandler(employeeService)
 	server.POST("api/v1/auth/users", func(ctx *gin.Context) {
 		authHandler.CreateUser(ctx)
 	})
@@ -77,6 +86,10 @@ func New(
 	server.POST("/api/v1/auth/users/refreshtoken", func(ctx *gin.Context) {
 		authHandler.RefreshToken(ctx)
 	})
+	server.POST("/api/v1/auth/employees/login", func(ctx *gin.Context) {
+		employeeHandler.LoginUser(ctx)
+	})
+
 	// Store service
 	storeStore := pg.NewStoreDB(sqlDB)
 	storeService := storeService.NewStoreService(sqlDB, storeStore)
@@ -85,13 +98,21 @@ func New(
 	// PRIVATE ROUTES
 	authGroup := server.Group("")
 	authGroup.Use(middleware.AuthRequiredCookies(jwtToken))
-
 	authGroup.GET("api/v1/privateroutes")
-	authGroup.POST("/api/v1/stores", func(ctx *gin.Context) {
-		storeHander.CreateStore(ctx)
+
+	// EMPLOYEE ENDPOINT
+	authGroup.POST("/api/v1/employees", middleware.RBACMiddleware(constant.RBAC_LEVEL_SUPERVISOR), func(ctx *gin.Context) {
+		employeeHandler.CreateStore(ctx)
+	})
+	authGroup.POST("/api/v1/stores", middleware.RBACMiddleware(constant.RBAC_LEVEL_OWNER),
+		func(ctx *gin.Context) {
+			storeHander.CreateStore(ctx)
+		})
+	authGroup.GET("/api/v1/stores", func(ctx *gin.Context) {
+		storeHander.GetAllStore(ctx)
 	})
 	server.NoRoute(func(c *gin.Context) {
-		c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"error": "Not Found"})
+		c.Error(restapierror.NewNotFound(restapierror.WithMessage("route not found")))
 	})
 	return server, nil
 }

@@ -3,6 +3,7 @@ package store
 import (
 	"html"
 	"net/http"
+	"strconv"
 	"strings"
 
 	payload "auth-service-rizkysr90-pos/internal/payload/http/store"
@@ -56,11 +57,11 @@ func (req *reqCreateStore) validate() error {
 }
 func (a *StoreHandler) CreateStore(ctx *gin.Context) {
 	payload := &payload.ReqCreateStore{}
-	payload.UserID = ctx.GetString("user_id")
 	if err := ctx.Bind(payload); err != nil {
 		ctx.Error(err)
 		return
 	}
+	payload.UserID = ctx.GetString("user_id")
 	input := reqCreateStore{payload}
 	input.sanitize()
 	if err := input.validate(); err != nil {
@@ -72,4 +73,27 @@ func (a *StoreHandler) CreateStore(ctx *gin.Context) {
 		return
 	}
 	ctx.JSON(http.StatusCreated, gin.H{})
+}
+func (a *StoreHandler) GetAllStore(ctx *gin.Context) {
+	var err error
+	req := &payload.ReqGetAllStore{
+		UserID: ctx.GetString("user_id"),
+	}
+	req.PageNumber, err = strconv.Atoi(ctx.Query("page_number"))
+	if err != nil {
+		req.PageNumber = 0
+	}
+	req.PageSize, err = strconv.Atoi(ctx.Query("page_size"))
+	if err != nil {
+		req.PageSize = 0
+	}
+	var responseData *payload.ResGetAllStore
+	if responseData, err = a.storeService.GetAllStore(ctx, req); err != nil {
+		ctx.Error(err)
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{
+		"pagination": responseData.Pagination,
+		"data":       responseData.Data,
+	})
 }
