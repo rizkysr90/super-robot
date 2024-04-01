@@ -18,3 +18,11 @@ type ResLoginEmployee struct {
 	RefreshToken string `json:"refresh_token"`
 	Role         int    `json:"role"`
 }
+type ReqRefreshToken struct {
+	RefreshToken string `json:"refresh_token"`
+}
+type ResRefreshToken struct {
+	// it will attach to the cookies, so response body remain empty
+	AccessToken string
+	Role        int
+}

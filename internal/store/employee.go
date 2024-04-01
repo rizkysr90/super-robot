@@ -15,6 +15,7 @@ type EmployeeData struct {
 	StoreID      string
 	RefreshToken string
 	Role         int
+	UserID       string
 	CreatedAt    time.Time
 	DeletedAt    sql.NullTime
 }
@@ -30,6 +31,7 @@ type SetResponsGetEmployees struct {
 }
 
 type EmployeeFilter struct {
+	ID       string
 	Username string
 	StoreID  string
 }

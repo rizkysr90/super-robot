@@ -48,12 +48,16 @@ func (s *Store) Finder(ctx context.Context,
 	filter *store.StoreFilter, operationID string) ([]store.StoreData, error) {
 	const query = `
 		WITH total_count AS (
-			SELECT COUNT(id) AS total_elements FROM stores WHERE user_id = $1
+			SELECT 
+				COUNT(s.id) as total_elements
+			FROM stores s JOIN employees e ON s.id = e.store_id 
+			WHERE e.id = $1
 		)
 		SELECT 
-		id, name, address, contact, created_at,
+			s.id, s.name, s.address, s.contact, s.created_at,
 		(SELECT total_elements FROM total_count) AS total_elements
-		FROM stores WHERE user_id = $1
+		FROM stores s JOIN employees e ON s.id = e.store_id 
+		WHERE e.id = $1
 		LIMIT $2
 		OFFSET $3
 	`

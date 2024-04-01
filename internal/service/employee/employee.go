@@ -103,6 +103,37 @@ func (s *Service) Login(ctx context.Context,
 		Role:         result.Role,
 	}, nil
 }
+func (s *Service) RefreshToken(ctx context.Context,
+	req *payload.ReqRefreshToken) (*payload.ResRefreshToken, error) {
+	claims, err := s.jwtToken.AuthorizeRefreshToken(req.RefreshToken)
+	if err != nil {
+		return nil, restapierror.NewUnauthorized(restapierror.WithMessage("invalid token"))
+	}
+	// find by token
+	var data *store.EmployeeData
+	data, err = s.employeeStore.FindOne(ctx, &store.EmployeeFilter{
+		ID: claims.Subject,
+	}, "findByID")
+	if err != nil {
+		if sql.ErrNoRows.Error() == err.Error() {
+			return nil, restapierror.NewUnauthorized(restapierror.WithMessage("invalid token"))
+		}
+		return nil, err
+	}
+	if data.RefreshToken != req.RefreshToken {
+		return nil, restapierror.NewUnauthorized(restapierror.WithMessage("invalid token"))
+	}
+	// gen access token
+	var accessToken string
+	accessToken, err = s.jwtToken.Generate(&jwttoken.JWTClaims{
+		UserID: data.ID,
+		Role:   data.Role,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return &payload.ResRefreshToken{AccessToken: accessToken, Role: data.Role}, nil
+}
 
 // func (s *Service) GetAllStore(ctx context.Context, req *payload.ReqGetAllStore) (*payload.ResGetAllStore, error) {
 // 	if req.PageSize == 0 {

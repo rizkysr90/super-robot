@@ -68,15 +68,19 @@ func New(
 		AllowedHeaders:   []string{"*"}, // Allow all headers
 		AllowCredentials: true,
 	}))
-
-	// Auth service
-	userStore := pg.NewUserDB(sqlDB)
-	authService := auth.NewAuthService(sqlDB, userStore, jwtToken)
-	authHandler := authHandler.NewAuthHandler(authService, cfg)
+	// Store service
+	storeStore := pg.NewStoreDB(sqlDB)
+	storeService := storeService.NewStoreService(sqlDB, storeStore)
+	storeHander := storeHandler.NewAuthHandler(storeService)
 	// Employee Service
 	employeeStore := pg.NewEmployeeDB(sqlDB)
 	employeeService := employee.NewEmployeeService(sqlDB, employeeStore, jwtToken)
 	employeeHandler := employeeHandler.NewEmployeeHandler(employeeService)
+	// Auth service
+	userStore := pg.NewUserDB(sqlDB)
+	authService := auth.NewAuthService(sqlDB, userStore, employeeStore, storeStore, jwtToken)
+	authHandler := authHandler.NewAuthHandler(authService, cfg)
+
 	server.POST("api/v1/auth/users", func(ctx *gin.Context) {
 		authHandler.CreateUser(ctx)
 	})
@@ -89,11 +93,9 @@ func New(
 	server.POST("/api/v1/auth/employees/login", func(ctx *gin.Context) {
 		employeeHandler.LoginUser(ctx)
 	})
-
-	// Store service
-	storeStore := pg.NewStoreDB(sqlDB)
-	storeService := storeService.NewStoreService(sqlDB, storeStore)
-	storeHander := storeHandler.NewAuthHandler(storeService)
+	server.POST("api/v1/auth/employees/refreshtoken", func(ctx *gin.Context) {
+		employeeHandler.RefreshToken(ctx)
+	})
 
 	// PRIVATE ROUTES
 	authGroup := server.Group("")

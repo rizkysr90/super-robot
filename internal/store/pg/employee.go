@@ -21,7 +21,30 @@ func NewEmployeeDB(db *sql.DB) *Employee {
 
 func (e *Employee) Insert(ctx context.Context, data *store.EmployeeData) error {
 	createFunc := func(tx sqldb.QueryExecutor) error {
-		query := `
+		var err error
+		if data.UserID != "" {
+			query := `
+			INSERT INTO employees 
+			(id, name, contact,
+			 username, password, store_id, 
+			 role, created_at, user_id
+			)
+			VALUES 
+			($1, $2, $3, $4, $5, $6, $7, $8, $9)
+			`
+			_, err = tx.ExecContext(ctx, query,
+				data.ID,
+				data.Name,
+				data.Contact,
+				data.Username,
+				data.Password,
+				data.StoreID,
+				data.Role,
+				data.CreatedAt,
+				data.UserID,
+			)
+		} else {
+			query := `
 			INSERT INTO employees 
 			(id, name, contact,
 			 username, password, store_id, 
@@ -30,16 +53,17 @@ func (e *Employee) Insert(ctx context.Context, data *store.EmployeeData) error {
 			VALUES 
 			($1, $2, $3, $4, $5, $6, $7, $8)
 		`
-		_, err := tx.ExecContext(ctx, query,
-			data.ID,
-			data.Name,
-			data.Contact,
-			data.Username,
-			data.Password,
-			data.StoreID,
-			data.Role,
-			data.CreatedAt,
-		)
+			_, err = tx.ExecContext(ctx, query,
+				data.ID,
+				data.Name,
+				data.Contact,
+				data.Username,
+				data.Password,
+				data.StoreID,
+				data.Role,
+				data.CreatedAt,
+			)
+		}
 		if err != nil {
 			return err
 		}
@@ -94,6 +118,16 @@ func (e *Employee) FindOne(ctx context.Context,
 		err := sqldb.WithinTxContextOrDB(ctx, e.db).
 			QueryRowContext(ctx, query, filterBy.Username).
 			Scan(&result.ID, &result.Password, &result.Role)
+		if err != nil {
+			return nil, err
+		}
+		return &result, nil
+	case "findByID":
+		query := `SELECT id, password, role, refresh_token
+				 FROM employees WHERE id = $1`
+		err := sqldb.WithinTxContextOrDB(ctx, e.db).
+			QueryRowContext(ctx, query, filterBy.ID).
+			Scan(&result.ID, &result.Password, &result.Role, &result.RefreshToken)
 		if err != nil {
 			return nil, err
 		}

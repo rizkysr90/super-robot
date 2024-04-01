@@ -132,6 +132,35 @@ func (e *EmployeeHandler) LoginUser(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{})
 
 }
+func (e *EmployeeHandler) RefreshToken(ctx *gin.Context) {
+	refresh_token, err := ctx.Request.Cookie("refresh_token")
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+	payload := &payload.ReqRefreshToken{
+		RefreshToken: refresh_token.Value,
+	}
+	// sanitize
+	payload.RefreshToken = strings.TrimSpace(payload.RefreshToken)
+	// validate empty string
+	if len(payload.RefreshToken) == 0 {
+		ctx.Error(restapierror.NewBadRequest(
+			restapierror.WithMessage("refresh_token not found")),
+		)
+	}
+	data, err := e.employeeService.RefreshToken(ctx, payload)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+	ctx.SetSameSite(http.SameSiteLaxMode)
+	ctx.SetCookie("access_token", data.AccessToken, 0, "", "", true, true)
+	getRole := strconv.Itoa(data.Role)
+	ctx.SetCookie("user_role", getRole, 0, "", "", true, false)
+
+	ctx.JSON(200, gin.H{})
+}
 
 // func (a *StoreHandler) GetAllStore(ctx *gin.Context) {
 // 	var err error

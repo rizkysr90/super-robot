@@ -3,9 +3,11 @@ package auth
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"strings"
 	"time"
 
+	"auth-service-rizkysr90-pos/internal/constant"
 	payload "auth-service-rizkysr90-pos/internal/payload/http/auth"
 	"auth-service-rizkysr90-pos/internal/store"
 	jwttoken "auth-service-rizkysr90-pos/pkg/jwt"
@@ -19,16 +21,23 @@ import (
 )
 
 type Service struct {
-	db        *sql.DB
-	userStore store.UserStore
-	jwtToken  jwttoken.JWTInterface
+	db            *sql.DB
+	userStore     store.UserStore
+	employeeStore store.EmployeeStore
+	storeStore    store.StoreStore
+	jwtToken      jwttoken.JWTInterface
 }
 
-func NewAuthService(db *sql.DB, userStore store.UserStore, jwttoken jwttoken.JWTInterface) *Service {
+func NewAuthService(db *sql.DB, userStore store.UserStore,
+	employeeStore store.EmployeeStore,
+	storeStore store.StoreStore,
+	jwttoken jwttoken.JWTInterface) *Service {
 	return &Service{
-		db:        db,
-		userStore: userStore,
-		jwtToken:  jwttoken,
+		db:            db,
+		userStore:     userStore,
+		employeeStore: employeeStore,
+		storeStore:    storeStore,
+		jwtToken:      jwttoken,
 	}
 }
 
@@ -65,9 +74,42 @@ func (s *Service) CreateUser(ctx context.Context, req *payload.ReqCreateAccount)
 		CreatedAt:   time.Now().UTC(),
 		IsActivated: true,
 	}
+	// Create Store
+	insertedStore := store.StoreData{
+		ID:        uuid.NewString(),
+		Name:      fmt.Sprintf("%s-%s-store", insertedData.FirstName, insertedData.LastName),
+		Address:   "",
+		Contact:   "",
+		UserID:    insertedData.ID,
+		CreatedAt: time.Now().UTC(),
+	}
+	// CreateEmployee
+	insertedDataEmployee := store.EmployeeData{
+		ID:        uuid.NewString(),
+		Name:      insertedData.FirstName + " " + insertedData.LastName,
+		Contact:   req.Email,
+		Username:  req.Email,
+		Password:  string(bytesPassword),
+		StoreID:   insertedStore.ID,
+		Role:      constant.RBAC_LEVEL_OWNER,
+		UserID:    insertedData.ID,
+		CreatedAt: time.Now().UTC(),
+	}
 	if err = sqldb.WithinTx(ctx, s.db, func(tx sqldb.QueryExecutor) error {
 		txContext := sqldb.WithTxContext(ctx, tx)
-		return s.userStore.Create(txContext, &insertedData)
+		err = s.userStore.Create(txContext, &insertedData)
+		if err != nil {
+			return restapierror.NewInternalServer(restapierror.WithMessage(err.Error()))
+		}
+		err = s.storeStore.Insert(txContext, &insertedStore)
+		if err != nil {
+			return restapierror.NewInternalServer(restapierror.WithMessage(err.Error()))
+		}
+		err = s.employeeStore.Insert(txContext, &insertedDataEmployee)
+		if err != nil {
+			return restapierror.NewInternalServer(restapierror.WithMessage(err.Error()))
+		}
+		return nil
 	}); err != nil {
 		return err
 	}

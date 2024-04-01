@@ -41,7 +41,7 @@ func TestCreateUser(t *testing.T) {
 	mockStore.On("FindOne", queryFilter, "findactiveuser").Return(nil, nil)
 	mockStore.On("Create", mock.Anything).Return(nil)
 	jwtTest := jwttoken.New()
-	authService := NewAuthService(db, mockStore, jwtTest)
+	authService := NewAuthService(db, mockStore, nil, nil, jwtTest)
 	res := authService.CreateUser(ctx, requestPayload)
 	mockStore.AssertExpectations(t)
 	assert.Nil(t, res)
@@ -69,7 +69,7 @@ func TestCreateUserDuplicate(t *testing.T) {
 	// set expectation when user.FindOne is called
 	mockStore.On("FindOne", queryFilter, "findactiveuser").Return(&store.UserData{}, nil)
 	jwtTest := jwttoken.New()
-	authService := NewAuthService(db, mockStore, jwtTest)
+	authService := NewAuthService(db, mockStore, nil, nil, jwtTest)
 	res := authService.CreateUser(ctx, requestPayload)
 	mockStore.AssertExpectations(t)
 	assert.Error(t, res)
@@ -92,7 +92,7 @@ func TestCreateUserInvalidPassword(t *testing.T) {
 		ConfirmPassword: "thedifferent",
 	}
 	jwtTest := jwttoken.New()
-	authService := NewAuthService(db, mockStore, jwtTest)
+	authService := NewAuthService(db, mockStore, nil, nil, jwtTest)
 	res := authService.CreateUser(ctx, requestPayload)
 	mockStore.AssertExpectations(t)
 	assert.Error(t, res)
@@ -123,7 +123,7 @@ func TestLoginUser(t *testing.T) {
 	mockStore.On("FindOne", queryFilter, "findactiveuser").Return(expectedResQuery, nil)
 	mockStore.On("Update", mock.Anything)
 	mockJWT := new(jwttoken.MockJWTToken)
-	authService := NewAuthService(db, &mockStore, mockJWT)
+	authService := NewAuthService(db, &mockStore, nil, nil, mockJWT)
 	mockJWT.On("Generate", &jwttoken.JWTClaims{UserID: expectedResQuery.ID}).Return(
 		"jwttoken", nil,
 	)
@@ -149,7 +149,7 @@ func TestLoginUserInvalidPassword(t *testing.T) {
 		Password: "mysecretpassword",
 	}
 	mockJWT := new(jwttoken.MockJWTToken)
-	svc := NewAuthService(db, &mockStore, mockJWT)
+	svc := NewAuthService(db, &mockStore, nil, nil, mockJWT)
 	mockStore.On("FindOne", &store.UserFilterBy{
 		Email: reqPayload.Email,
 	}, "findactiveuser").Return(&store.UserData{
@@ -175,7 +175,7 @@ func TestLoginUserNotFound(t *testing.T) {
 		Password: "mysecretpassword",
 	}
 	mockJWT := new(jwttoken.MockJWTToken)
-	svc := NewAuthService(db, &mockStore, mockJWT)
+	svc := NewAuthService(db, &mockStore, nil, nil, mockJWT)
 	mockStore.On("FindOne", &store.UserFilterBy{
 		Email: reqPayload.Email,
 	}, "findactiveuser").Return(nil, pgx.ErrNoRows)
@@ -208,7 +208,7 @@ func TestRefreshTokenSucess(t *testing.T) {
 	mockJWT.On("Generate", &jwttoken.JWTClaims{
 		UserID: userID,
 	}).Return("access_token", nil)
-	svc := NewAuthService(db, &mockStore, mockJWT)
+	svc := NewAuthService(db, &mockStore, nil, nil, mockJWT)
 	var res *payload.ResRefreshToken
 	res, err = svc.RefreshToken(ctx, reqPayload)
 	mockJWT.AssertExpectations(t)
@@ -237,7 +237,7 @@ func TestRefreshTokenInvalid(t *testing.T) {
 	mockJWT.On("AuthorizeRefreshToken", reqPayload.RefreshToken).Return(&jwttoken.JWTClaims{
 		UserID: "50c8d653-4a6a-45cf-92fa-406492b463d8", // DIFF ID
 	}, nil)
-	svc := NewAuthService(db, &mockStore, mockJWT)
+	svc := NewAuthService(db, &mockStore, nil, nil, mockJWT)
 	var res *payload.ResRefreshToken
 	res, err = svc.RefreshToken(ctx, reqPayload)
 	mockJWT.AssertExpectations(t)
