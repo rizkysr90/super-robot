@@ -3,6 +3,7 @@ package store
 import (
 	"context"
 	"database/sql"
+	"html"
 	"time"
 )
 
@@ -24,16 +25,18 @@ type SetResponse struct {
 	DeletedAt time.Time `json:"deleted_at"`
 }
 type StoreFilter struct {
-	UserID     string
+	StoreID    string
+	EmployeeID string
+	Name       string
 	Pagination Pagination
 }
 
 func (s *StoreData) ToPayloadResponse(data *StoreData) *SetResponse {
 	return &SetResponse{
 		ID:        s.ID,
-		Name:      s.Name,
-		Address:   s.Address,
-		Contact:   s.Contact,
+		Name:      html.UnescapeString(s.Name),
+		Address:   html.UnescapeString(s.Address),
+		Contact:   html.UnescapeString(s.Contact),
 		CreatedAt: s.CreatedAt,
 		DeletedAt: s.DeletedAt.Time,
 	}
@@ -41,5 +44,7 @@ func (s *StoreData) ToPayloadResponse(data *StoreData) *SetResponse {
 
 type StoreStore interface {
 	Insert(ctx context.Context, data *StoreData) error
-	Finder(ctx context.Context, filter *StoreFilter, operationID string) ([]StoreData, error)
+	Finder(ctx context.Context, filter *StoreFilter, operationID string) (interface{}, error)
+	Delete(ctx context.Context, filter *StoreFilter) error
+	Update(ctx context.Context, updatedData *StoreData, filter *StoreFilter, operationID string) (int64, error)
 }

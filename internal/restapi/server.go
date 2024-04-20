@@ -104,14 +104,20 @@ func New(
 
 	// EMPLOYEE ENDPOINT
 	authGroup.POST("/api/v1/employees", middleware.RBACMiddleware(constant.RBAC_LEVEL_SUPERVISOR), func(ctx *gin.Context) {
-		employeeHandler.CreateStore(ctx)
+		employeeHandler.CreateEmployee(ctx)
 	})
 	authGroup.POST("/api/v1/stores", middleware.RBACMiddleware(constant.RBAC_LEVEL_OWNER),
 		func(ctx *gin.Context) {
 			storeHander.CreateStore(ctx)
 		})
-	authGroup.GET("/api/v1/stores", func(ctx *gin.Context) {
+	authGroup.GET("/api/v1/stores", middleware.RBACMiddleware(constant.RBAC_LEVEL_OWNER), func(ctx *gin.Context) {
 		storeHander.GetAllStore(ctx)
+	})
+	authGroup.DELETE("/api/v1/stores", middleware.RBACMiddleware(constant.RBAC_LEVEL_OWNER), func(ctx *gin.Context) {
+		storeHander.DeleteStore(ctx)
+	})
+	authGroup.PUT("/api/v1/stores/:store_id", middleware.RBACMiddleware(constant.RBAC_LEVEL_OWNER), func(ctx *gin.Context) {
+		storeHander.UpdateStore(ctx)
 	})
 	server.NoRoute(func(c *gin.Context) {
 		c.Error(restapierror.NewNotFound(restapierror.WithMessage("route not found")))

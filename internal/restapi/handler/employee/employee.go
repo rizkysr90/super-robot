@@ -2,6 +2,7 @@ package employee
 
 import (
 	"html"
+	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -67,12 +68,10 @@ func (req *reqCreateEmployee) validate() error {
 	}
 	return nil
 }
-func (e *EmployeeHandler) CreateStore(ctx *gin.Context) {
+func (e *EmployeeHandler) CreateEmployee(ctx *gin.Context) {
 	payload := &payload.ReqCreateEmployee{}
-	if err := ctx.Bind(payload); err != nil {
-		ctx.Error(err)
-		return
-	}
+	ctx.Bind(payload)
+	log.Println("HEREEES2")
 	input := reqCreateEmployee{payload}
 	input.sanitize()
 	if err := input.validate(); err != nil {
@@ -135,7 +134,7 @@ func (e *EmployeeHandler) LoginUser(ctx *gin.Context) {
 func (e *EmployeeHandler) RefreshToken(ctx *gin.Context) {
 	refresh_token, err := ctx.Request.Cookie("refresh_token")
 	if err != nil {
-		ctx.Error(err)
+		ctx.Error(restapierror.NewUnauthorized(restapierror.WithMessage(err.Error())))
 		return
 	}
 	payload := &payload.ReqRefreshToken{

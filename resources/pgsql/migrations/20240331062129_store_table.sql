@@ -4,12 +4,12 @@ CREATE TABLE IF NOT EXISTS stores (
     name TEXT NOT NULL,
     address TEXT NOT NULL,
     contact VARCHAR(50) NOT NULL,
-    user_id UUID NOT NULL,
+    employee_id UUID NOT NULL,
     created_at TIMESTAMPTZ NOT NULL,
-    deleted_at TIMESTAMPTZ NULL,
+    deleted_at TIMESTAMPTZ NULL
 
-    CONSTRAINT fk_user_store FOREIGN KEY (user_id) 
-    REFERENCES users(id)
+    -- CONSTRAINT fk_employee_store FOREIGN KEY (employee_id) 
+    -- REFERENCES employees(id)
 );
 
 -- migrate:down

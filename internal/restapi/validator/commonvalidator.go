@@ -58,7 +58,7 @@ func ValidateEmail(email string, field string) *restapierror.RestAPIError {
 		return &restapierror.RestAPIError{
 			Code:    400,
 			Message: constant.ErrInvalidFormat,
-			Details: fmt.Sprintf("%s is required", field),
+			Details: fmt.Sprintf("%s is invalid", field),
 		}
 	}
 	return nil
@@ -128,4 +128,17 @@ func contains(s string, condition func(rune) bool) bool {
 		}
 	}
 	return false
+}
+
+func ValidateOnlyNumber(s, field string) *restapierror.RestAPIError {
+	// Regular expression pattern to match only numbers
+	numberPattern := regexp.MustCompile("^[0-9]+$")
+	if !numberPattern.MatchString(s) {
+		return &restapierror.RestAPIError{
+			Code:    400,
+			Message: constant.ErrInvalidFormat,
+			Details: fmt.Sprintf("%s does not contain only numbers", field),
+		}
+	}
+	return nil
 }

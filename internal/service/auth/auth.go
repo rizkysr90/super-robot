@@ -64,6 +64,7 @@ func (s *Service) CreateUser(ctx context.Context, req *payload.ReqCreateAccount)
 	if err != nil {
 		return err
 	}
+	employeeID := uuid.NewString()
 	// Create user
 	insertedData := store.InsertedData{
 		ID:          uuid.NewString(),
@@ -80,12 +81,12 @@ func (s *Service) CreateUser(ctx context.Context, req *payload.ReqCreateAccount)
 		Name:      fmt.Sprintf("%s-%s-store", insertedData.FirstName, insertedData.LastName),
 		Address:   "",
 		Contact:   "",
-		UserID:    insertedData.ID,
+		UserID:    employeeID,
 		CreatedAt: time.Now().UTC(),
 	}
 	// CreateEmployee
 	insertedDataEmployee := store.EmployeeData{
-		ID:        uuid.NewString(),
+		ID:        employeeID,
 		Name:      insertedData.FirstName + " " + insertedData.LastName,
 		Contact:   req.Email,
 		Username:  req.Email,
