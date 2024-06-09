@@ -2,25 +2,18 @@ package restapi
 
 import (
 	"database/sql"
-	"net/http"
-	"time"
 
 	"auth-service-rizkysr90-pos/internal/config"
-	"auth-service-rizkysr90-pos/internal/constant"
-	authHandler "auth-service-rizkysr90-pos/internal/restapi/handler/auth"
-	employeeHandler "auth-service-rizkysr90-pos/internal/restapi/handler/employee"
-	storeHandler "auth-service-rizkysr90-pos/internal/restapi/handler/store"
-
-	"auth-service-rizkysr90-pos/internal/restapi/middleware"
-	auth "auth-service-rizkysr90-pos/internal/service/auth"
-	"auth-service-rizkysr90-pos/internal/service/employee"
-	storeService "auth-service-rizkysr90-pos/internal/service/store"
+	usersHandler "auth-service-rizkysr90-pos/internal/restapi/handler/users"
+	"auth-service-rizkysr90-pos/internal/service/users"
 
 	"auth-service-rizkysr90-pos/internal/store/pg"
+
+	"auth-service-rizkysr90-pos/internal/restapi/middleware"
+
 	jwttoken "auth-service-rizkysr90-pos/pkg/jwt"
 
 	"github.com/gin-gonic/gin"
-	restapimiddleware "github.com/rizkysr90/rizkysr90-go-pkg/restapi/middleware"
 	"github.com/rizkysr90/rizkysr90-go-pkg/restapierror"
 	cors "github.com/rs/cors/wrapper/gin"
 	"github.com/rs/zerolog"
@@ -34,33 +27,36 @@ func New(
 ) (*gin.Engine, error) {
 	// Setup rest api server and its provided services.
 	server := gin.New()
-	server.Use(func(ctx *gin.Context) {
-		startTime := time.Now()
-		ctx.Next()
-		// Log request duration and response status
-		if ctx.Writer.Status() >= http.StatusBadRequest {
-			logger.Error().
-				Str("method", ctx.Request.Method).
-				Str("url", ctx.Request.URL.String()).
-				Str("client_ip", ctx.ClientIP()).
-				Str("user_agent", ctx.GetHeader("User-Agent")).
-				Dur("duration", time.Since(startTime)).
-				Int("status", ctx.Writer.Status()).
-				Msg(ctx.Errors[0].Err.Error())
-		} else {
-			logger.Info().
-				Str("method", ctx.Request.Method).
-				Str("url", ctx.Request.URL.String()).
-				Str("client_ip", ctx.ClientIP()).
-				Str("user_agent", ctx.GetHeader("User-Agent")).
-				Dur("duration", time.Since(startTime)).
-				Int("status", ctx.Writer.Status()).
-				Msg("Request processed")
-		}
-	})
-	server.Use(restapimiddleware.Recovery(logger))
-	// server.Use(gin.RecoveryWithWriter(logger))
-	server.Use(restapimiddleware.ErrorHandler())
+	// server.Use(func(ctx *gin.Context) {
+	// 	startTime := time.Now()
+	// 	ctx.Next()
+	// 	// Log request duration and response status
+	// 	if ctx.Writer.Status() >= http.StatusBadRequest {
+	// 		logger.Error().
+	// 			Str("method", ctx.Request.Method).
+	// 			Str("url", ctx.Request.URL.String()).
+	// 			Str("client_ip", ctx.ClientIP()).
+	// 			Str("user_agent", ctx.GetHeader("User-Agent")).
+	// 			Dur("duration", time.Since(startTime)).
+	// 			Int("status", ctx.Writer.Status()).
+	// 			Msg(ctx.Errors[0].Err.Error())
+	// 	} else {
+	// 		logger.Info().
+	// 			Str("method", ctx.Request.Method).
+	// 			Str("url", ctx.Request.URL.String()).
+	// 			Str("client_ip", ctx.ClientIP()).
+	// 			Str("user_agent", ctx.GetHeader("User-Agent")).
+	// 			Dur("duration", time.Since(startTime)).
+	// 			Int("status", ctx.Writer.Status()).
+	// 			Msg("Request processed")
+	// 	}
+	// })
+	// server.Use(restapimiddleware.Recovery(logger))
+	server.Use(middleware.RequestBodyMiddleware())
+	server.Use(middleware.ResponseBody())
+	server.Use(middleware.Recovery(logger))
+	// Log middleware
+	server.Use(middleware.ErrorHandler(logger))
 	// corsHandler := cors.AllowAll()
 	server.Use(cors.New(cors.Options{
 		AllowedOrigins:   []string{"http://localhost:3000"},
@@ -68,57 +64,27 @@ func New(
 		AllowedHeaders:   []string{"*"}, // Allow all headers
 		AllowCredentials: true,
 	}))
-	// Store service
-	storeStore := pg.NewStoreDB(sqlDB)
-	storeService := storeService.NewStoreService(sqlDB, storeStore)
-	storeHander := storeHandler.NewAuthHandler(storeService)
-	// Employee Service
-	employeeStore := pg.NewEmployeeDB(sqlDB)
-	employeeService := employee.NewEmployeeService(sqlDB, employeeStore, jwtToken)
-	employeeHandler := employeeHandler.NewEmployeeHandler(employeeService)
-	// Auth service
-	userStore := pg.NewUserDB(sqlDB)
-	authService := auth.NewAuthService(sqlDB, userStore, employeeStore, storeStore, jwtToken)
-	authHandler := authHandler.NewAuthHandler(authService, cfg)
 
-	server.POST("api/v1/auth/users", func(ctx *gin.Context) {
-		authHandler.CreateUser(ctx)
+	// Users service
+	usersStore := pg.NewUserDB(sqlDB)
+	usersService := users.NewUsersService(sqlDB, usersStore, jwtToken)
+	user := usersHandler.NewAuthHandler(usersService, cfg)
+
+	server.POST("api/v1/users", func(ctx *gin.Context) {
+		user.CreateUser(ctx)
 	})
-	server.POST("api/v1/auth/users/login", func(ctx *gin.Context) {
-		authHandler.LoginUser(ctx)
-	})
-	server.POST("/api/v1/auth/users/refreshtoken", func(ctx *gin.Context) {
-		authHandler.RefreshToken(ctx)
-	})
-	server.POST("/api/v1/auth/employees/login", func(ctx *gin.Context) {
-		employeeHandler.LoginUser(ctx)
-	})
-	server.POST("api/v1/auth/employees/refreshtoken", func(ctx *gin.Context) {
-		employeeHandler.RefreshToken(ctx)
-	})
+	// server.POST("api/v1/auth/users/login", func(ctx *gin.Context) {
+	// 	authHandler.LoginUser(ctx)
+	// })
+	// server.POST("/api/v1/auth/users/refreshtoken", func(ctx *gin.Context) {
+	// 	authHandler.RefreshToken(ctx)
+	// })
 
 	// PRIVATE ROUTES
 	authGroup := server.Group("")
 	authGroup.Use(middleware.AuthRequiredCookies(jwtToken))
 	authGroup.GET("api/v1/privateroutes")
 
-	// EMPLOYEE ENDPOINT
-	authGroup.POST("/api/v1/employees", middleware.RBACMiddleware(constant.RBAC_LEVEL_SUPERVISOR), func(ctx *gin.Context) {
-		employeeHandler.CreateEmployee(ctx)
-	})
-	authGroup.POST("/api/v1/stores", middleware.RBACMiddleware(constant.RBAC_LEVEL_OWNER),
-		func(ctx *gin.Context) {
-			storeHander.CreateStore(ctx)
-		})
-	authGroup.GET("/api/v1/stores", middleware.RBACMiddleware(constant.RBAC_LEVEL_OWNER), func(ctx *gin.Context) {
-		storeHander.GetAllStore(ctx)
-	})
-	authGroup.DELETE("/api/v1/stores", middleware.RBACMiddleware(constant.RBAC_LEVEL_OWNER), func(ctx *gin.Context) {
-		storeHander.DeleteStore(ctx)
-	})
-	authGroup.PUT("/api/v1/stores/:store_id", middleware.RBACMiddleware(constant.RBAC_LEVEL_OWNER), func(ctx *gin.Context) {
-		storeHander.UpdateStore(ctx)
-	})
 	server.NoRoute(func(c *gin.Context) {
 		c.Error(restapierror.NewNotFound(restapierror.WithMessage("route not found")))
 	})

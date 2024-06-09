@@ -1,25 +1,22 @@
-package commonvalidator
+package validator
 
 import (
-	"fmt"
+	"auth-service-rizkysr90-pos/internal/constant"
 	"reflect"
 	"regexp"
 	"strings"
 	"unicode"
-
-	"auth-service-rizkysr90-pos/internal/constant"
-
-	"github.com/rizkysr90/rizkysr90-go-pkg/restapierror"
 )
 
-func ValidateRequired(value interface{}, field string) *restapierror.RestAPIError {
-	err := restapierror.RestAPIError{
-		Code:    400,
-		Message: "REQUIRED DATA",
-		Details: fmt.Sprintf("%s is required", field),
-	}
+func ValidateName(name string) bool {
+	// Regular expression for validating names
+	// This regex allows alphabetic characters and optionally allows spaces, hyphens, and apostrophes
+	nameRegex := regexp.MustCompile(`^[a-zA-Z]+([' -][a-zA-Z]+)*$`)
+	return nameRegex.MatchString(name)
+}
+func ValidateRequired(value interface{}, field string) bool {
 	if value == nil {
-		return &err
+		return false
 	}
 	v := reflect.ValueOf(value)
 	kind := reflect.TypeOf(value).Kind()
@@ -33,78 +30,79 @@ func ValidateRequired(value interface{}, field string) *restapierror.RestAPIErro
 	switch kind {
 	case reflect.Array, reflect.Chan, reflect.Slice, reflect.Map:
 		if v.Len() == 0 || v.IsZero() {
-			return &err
+			return false
 		}
 	case reflect.String:
 		realValue := strings.TrimSpace(v.String())
 		if len(realValue) == 0 {
-			return &err
+			return false
 		}
 	default:
 		if v.IsZero() {
-			return &err
+			return false
 		}
 	}
-	return nil
+	return true
 }
-func ValidateEmail(email string, field string) *restapierror.RestAPIError {
+func ValidateEmail(email string) bool {
 	// Define a regular expression for basic email validation
 	// This regex allows letters, numbers, dots, and underscores in the username part,
 	// a single '@' symbol, and letters and dots in the domain part.
 	emailRegex := regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`)
 
 	// Use the MatchString method to check if the email matches the regex
-	if !emailRegex.MatchString(email) {
-		return &restapierror.RestAPIError{
-			Code:    400,
-			Message: constant.ErrInvalidFormat,
-			Details: fmt.Sprintf("%s is invalid", field),
+	return emailRegex.MatchString(email)
+}
+func ValidateOnlyNumber(input string) bool {
+	// Regular expression to match only digits (0-9)
+	regex := regexp.MustCompile(`^[0-9]+$`)
+	return regex.MatchString(input)
+}
+func ValidateRoles(role int) bool {
+	values := []int{constant.RBAC_ADMIN, constant.RBAC_OPERATIONAL}
+	for _, v := range values {
+		if role == v {
+			return true // Input value found in array, so it's valid
 		}
 	}
-	return nil
+	return false // Input value not found in array, so it's invalid
 }
-
-func ValidatePassword(password string) *restapierror.RestAPIError {
+func ValidatePassword(password string) bool {
 	/*
 	 that checks the length, presence of uppercase and lowercase letters,
 	 digits, and special characters in the given password.
 	 The contains function is used to check if the password contains characters
 	 that satisfy a specific condition. Adjust the criteria as needed for your specific requirements.
 	*/
-	err := restapierror.RestAPIError{
-		Code:    400,
-		Message: "invalid password",
-		//nolint:lll
-		Details: "Password must be presence of uppercase and lowercase letters, digits, and special characters, min 8 char and max 64 char",
-	}
+
 	// Check length
 	if len(password) < 8 {
-		return &err
+		return false
 	}
 	if len(password) > 64 {
-		return &err
+		return false
 	}
 	// Check for uppercase letter
 	if !contains(password, isUpperCase) {
-		return &err
+		return false
 	}
 
 	// Check for lowercase letter
 	if !contains(password, isLowerCase) {
-		return &err
+		return false
 	}
 
 	// Check for digit
 	if !contains(password, isDigit) {
-		return &err
+		return false
 	}
 
 	// Check for special character
 	if !contains(password, isSpecialChar) {
-		return &err
+		return false
 	}
 
-	return nil
+	return true
 }
 func isUpperCase(r rune) bool {
 	return unicode.IsUpper(r)
@@ -128,17 +126,4 @@ func contains(s string, condition func(rune) bool) bool {
 		}
 	}
 	return false
-}
-
-func ValidateOnlyNumber(s, field string) *restapierror.RestAPIError {
-	// Regular expression pattern to match only numbers
-	numberPattern := regexp.MustCompile("^[0-9]+$")
-	if !numberPattern.MatchString(s) {
-		return &restapierror.RestAPIError{
-			Code:    400,
-			Message: constant.ErrInvalidFormat,
-			Details: fmt.Sprintf("%s does not contain only numbers", field),
-		}
-	}
-	return nil
 }

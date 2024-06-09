@@ -3,12 +3,10 @@ module auth-service-rizkysr90-pos
 go 1.21.3
 
 require (
-	github.com/DATA-DOG/go-sqlmock v1.5.2
 	github.com/caarlos0/env/v8 v8.0.0
 	github.com/gin-gonic/gin v1.9.1
 	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/google/uuid v1.6.0
-	github.com/jackc/pgx/v5 v5.5.5
 	github.com/rizkysr90/rizkysr90-go-pkg v0.0.0-20240420154856-a4674c2bc1d6
 	github.com/rs/cors/wrapper/gin v0.0.0-20240228164225-8d33ca4794ea
 	github.com/rs/zerolog v1.32.0
@@ -29,6 +27,7 @@ require (
 	github.com/goccy/go-json v0.10.2 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20231201235250-de7065d80cb9 // indirect
+	github.com/jackc/pgx/v5 v5.5.5 // indirect
 	github.com/jackc/puddle/v2 v2.2.1 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.7 // indirect

@@ -1,22 +1,21 @@
-package payload
+package users
 
-type ReqCreateEmployee struct {
-	Name            string `json:"name"`
-	Contact         string `json:"contact"`
-	Username        string `json:"username"`
+type ReqCreateUsers struct {
+	FirstName       string `json:"first_name"`
+	LastName        string `json:"last_name"`
+	Email           string `json:"email"`
 	Password        string `json:"password"`
 	ConfirmPassword string `json:"confirm_password"`
-	StoreID         string `json:"store_id"`
+	Phone           string `json:"phone"`
 	Role            int    `json:"role"`
 }
-type ReqLoginEmployee struct {
-	Username string `json:"username"`
+type ReqLoginUser struct {
+	Email    string `json:"email"`
 	Password string `json:"password"`
 }
-type ResLoginEmployee struct {
+type ResLoginUser struct {
 	Token        string `json:"token"`
 	RefreshToken string `json:"refresh_token"`
-	Role         int    `json:"role"`
 }
 type ReqRefreshToken struct {
 	RefreshToken string `json:"refresh_token"`
@@ -24,5 +23,4 @@ type ReqRefreshToken struct {
 type ResRefreshToken struct {
 	// it will attach to the cookies, so response body remain empty
 	AccessToken string
-	Role        int
 }

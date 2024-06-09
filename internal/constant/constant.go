@@ -8,7 +8,6 @@ const (
 )
 
 const (
-	RBAC_LEVEL_OWNER      = 1
-	RBAC_LEVEL_SUPERVISOR = 2
-	RBAC_LEVEL_KASIR      = 3
+	RBAC_ADMIN       = 1
+	RBAC_OPERATIONAL = 2
 )

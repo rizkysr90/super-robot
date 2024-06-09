@@ -3,32 +3,32 @@ package pg
 import (
 	"context"
 	"database/sql"
-	"errors"
 
 	"auth-service-rizkysr90-pos/internal/store"
 
 	"github.com/rizkysr90/rizkysr90-go-pkg/sqldb"
 )
 
-type User struct {
+type Users struct {
 	db *sql.DB
 }
 
-func NewUserDB(db *sql.DB) *User {
-	return &User{
+func NewUserDB(db *sql.DB) *Users {
+	return &Users{
 		db: db,
 	}
 }
 
-func (u *User) Create(ctx context.Context, data *store.InsertedData) error {
+func (u *Users) Create(ctx context.Context, data *store.User) error {
 	createFunc := func(tx sqldb.QueryExecutor) error {
 		query := `
 			INSERT INTO users 
 			(id, first_name, last_name,
-			 password, email, created_at, is_activated
+			 password, email, phone, 
+			 is_activated, role, created_at
 			)
 			VALUES 
-			($1, $2, $3, $4, $5, $6, $7)
+			($1, $2, $3, $4, $5, $6, $7, $8, $9)
 		`
 		_, err := tx.ExecContext(ctx, query,
 			data.ID,
@@ -36,8 +36,10 @@ func (u *User) Create(ctx context.Context, data *store.InsertedData) error {
 			data.LastName,
 			data.Password,
 			data.Email,
-			data.CreatedAt,
+			data.Phone,
 			data.IsActivated,
+			data.Role,
+			data.CreatedAt,
 		)
 		if err != nil {
 			return err
@@ -46,72 +48,24 @@ func (u *User) Create(ctx context.Context, data *store.InsertedData) error {
 	}
 	return sqldb.WithinTxContextOrError(ctx, createFunc)
 }
-func findRefreshToken(ctx context.Context,
-	db *sql.DB,
-	filterBy *store.UserFilterBy) (*store.UserData, error) {
-	var result store.UserData
-	// 1 is for filter by email
-	query := `SELECT id
-			 FROM users WHERE refresh_token = $1`
-	err := sqldb.WithinTxContextOrDB(ctx, db).
-		QueryRowContext(ctx, query, filterBy.RefreshToken).
-		Scan(&result.ID)
-	if err != nil {
+
+const FindActiveUserByEmailSQL = `
+	SELECT id 
+	FROM users
+	WHERE 
+	is_activated = true AND
+	deleted_at IS NULL AND
+	email = $1
+`
+
+func (u *Users) FindActiveUserByEmail(ctx context.Context, filter *store.User) (*store.User, error) {
+	resultData := &store.User{}
+	row := sqldb.WithinTxContextOrDB(ctx, u.db).
+		QueryRowContext(ctx, FindActiveUserByEmailSQL, filter.Email)
+	if err := row.Err(); err != nil {
 		return nil, err
 	}
-	return &result, nil
-}
-func (u *User) FindOne(ctx context.Context,
-	filterBy *store.UserFilterBy, staging string) (
-	*store.UserData, error) {
-	var result store.UserData
-	switch staging {
-	case "findactiveuser":
-		// 1 is for filter by email
-		query := `SELECT id, email,password
-			 FROM users WHERE email = $1 AND is_activated = true`
-		err := sqldb.WithinTxContextOrDB(ctx, u.db).
-			QueryRowContext(ctx, query, filterBy.Email).
-			Scan(&result.ID, &result.Email, &result.Password)
-		if err != nil {
-			return nil, err
-		}
-		return &result, nil
-	case "findRefreshToken":
-		return findRefreshToken(ctx, u.db, filterBy)
-	default:
-		return nil, errors.New("staging db not found")
-	}
-}
+	row.Scan(&resultData.ID)
 
-func updateRefreshtoken(ctx context.Context,
-	updatedData *store.UserData, f *store.UserFilterBy) func(tx sqldb.QueryExecutor) error {
-
-	result := func(tx sqldb.QueryExecutor) error {
-		query := `
-			UPDATE users SET refresh_token = $1
-			WHERE email = $2
-		`
-		_, err := tx.ExecContext(ctx, query, updatedData.RefreshToken, f.Email)
-		if err != nil {
-			return err
-		}
-		return nil
-	}
-	return result
-}
-func (u *User) Update(ctx context.Context,
-	updatedData *store.UserData,
-	filter *store.UserFilterBy,
-	staging string) error {
-
-	var updateFunc func(tx sqldb.QueryExecutor) error
-	switch staging {
-	case "updaterefreshtoken":
-		updateFunc = updateRefreshtoken(ctx, updatedData, filter)
-	default:
-		return errors.New("staging db not found")
-	}
-	return sqldb.WithinTxContextOrError(ctx, updateFunc)
-
+	return resultData, nil
 }
