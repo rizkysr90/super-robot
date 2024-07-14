@@ -48,8 +48,6 @@ func loggerErrorFormat(ctx *gin.Context,
 			RawJSON("res_body", jsonResBody).
 			Msg(fmt.Sprintf("%s %s", ctx.Request.Method, ctx.Request.URL.String()))
 	}
-	// Mark request as processed successfully
-	ctx.Set("is_logged", true)
 
 }
 func ErrorHandler(logger zerolog.Logger) gin.HandlerFunc {
@@ -63,6 +61,8 @@ func ErrorHandler(logger zerolog.Logger) gin.HandlerFunc {
 			// Type assertion from gin.Error to errorHandler.HttpError
 			if restAPIErr, ok := ginErr.Err.(*errorHandler.HttpError); ok {
 				loggerErrorFormat(ctx, logger, restAPIErr, zerolog.WarnLevel)
+				// Mark request as processed successfully
+				ctx.Set("is_error_logged", bool(true))
 				ctx.AbortWithStatusJSON(restAPIErr.Code, restAPIErr)
 
 			} else {
@@ -72,6 +72,8 @@ func ErrorHandler(logger zerolog.Logger) gin.HandlerFunc {
 					Message: ginErr.Error(),
 				}
 				loggerErrorFormat(ctx, logger, &httpErr, zerolog.ErrorLevel)
+				// Mark request as processed successfully
+				ctx.Set("is_error_logged", bool(true))
 				ctx.AbortWithStatusJSON(http.StatusInternalServerError, httpErr)
 
 			}
@@ -79,3 +81,15 @@ func ErrorHandler(logger zerolog.Logger) gin.HandlerFunc {
 		}
 	}
 }
+
+// func GetIsErrorLogged(ctx *gin.Context) (bool, error) {
+// 	// Get the request body from the context
+// 	value := ctx.GetBool("is_error_logged")
+// 	if !ok {
+// 		// Request body not found in context
+// 		getRequestBodyErr := errorHandler.NewInternalServer(
+// 			errorHandler.WithInfo("is_error_logged not found in context"))
+// 		return nil, getRequestBodyErr
+// 	}
+// 	return requestBody.([]byte), nil
+// }

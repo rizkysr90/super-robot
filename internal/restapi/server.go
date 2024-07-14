@@ -52,11 +52,12 @@ func New(
 	// 	}
 	// })
 	// server.Use(restapimiddleware.Recovery(logger))
-	server.Use(middleware.RequestBodyMiddleware())
-	server.Use(middleware.ResponseBody())
 	server.Use(middleware.Recovery(logger))
 	// Log middleware
+	server.Use(middleware.LogMiddleware(logger))
+	server.Use(middleware.ResponseBody())
 	server.Use(middleware.ErrorHandler(logger))
+	server.Use(middleware.RequestBodyMiddleware())
 	// corsHandler := cors.AllowAll()
 	server.Use(cors.New(cors.Options{
 		AllowedOrigins:   []string{"http://localhost:3000"},
