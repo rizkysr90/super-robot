@@ -1,7 +1,7 @@
 # We need busybox for its sh and tee for entrypoint and stdout logs redirect
 FROM busybox:1.35.0-uclibc AS busybox
 # debian12 = bookworm
-FROM golang:1.21.5-bookworm AS builder
+FROM golang:1.22-bookworm AS builder
 WORKDIR /go/src/builder
 COPY . .
 RUN make build/grpc

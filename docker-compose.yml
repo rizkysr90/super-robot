@@ -1,11 +1,11 @@
 # for local development
-version: '3.9'
+version: "3.9"
 services:
   restapi:
-    image: "golang:1.21.5-bookworm"
+    image: "golang:1.22-bookworm"
     restart: on-failure
     ports:
-      -  "8080:8080/tcp"
+      - "8080:8080/tcp"
     volumes:
       - ./:/app
     working_dir: /app
@@ -39,7 +39,7 @@ services:
       - DBMATE_WAIT=true
       - DBMATE_WAIT_TIMEOUT=60s
     command: up
-   # ------------------------------------------ DB BROWSER WEB APP ------------------------------------------
+    # ------------------------------------------ DB BROWSER WEB APP ------------------------------------------
   adminer:
     container_name: adminer
     image: adminer:4-standalone
@@ -49,7 +49,7 @@ services:
         condition: service_started
     ports:
       - "8888:8080/tcp"
- # ------------------------------------------ INFRASTRUCTURES ------------------------------------------
+  # ------------------------------------------ INFRASTRUCTURES ------------------------------------------
   postgres:
     container_name: postgres
     image: postgres:15-alpine
