@@ -11,15 +11,15 @@ import (
 )
 
 type JWT struct {
+	secretKey string
 }
 
-func New() *JWT {
-	return &JWT{}
+func New(secretKey string) *JWT {
+	return &JWT{secretKey: secretKey}
 }
 
 type JWTClaims struct {
 	UserID string
-	Role   int
 }
 type MyCustomClaims struct {
 	jwt.RegisteredClaims
@@ -33,11 +33,10 @@ func (j *JWT) GenerateRefreshToken(jwtClaims *JWTClaims) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	token := jwt.NewWithClaims(jwt.SigningMethodRS256, jwt.MapClaims{
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"iss":  "rizkysr90-pos",
 		"sub":  jwtClaims.UserID,
 		"exp":  time.Now().Add((time.Hour * 24) * 7).Unix(), // 1 weeks expiry
-		"role": jwtClaims.Role,
 		// "exp": time.Now().Add(time.Minute * 2).Unix(), // 2 minute expiry
 
 	})
@@ -54,53 +53,28 @@ func (j *JWT) GenerateRefreshToken(jwtClaims *JWTClaims) (string, error) {
 	return signedToken, nil
 }
 func (j *JWT) Generate(jwtClaims *JWTClaims) (string, error) {
-	var privateKeyBytes []byte
-	var err error
-	privateKeyBytes, err = os.ReadFile("private_key_jwt.pem")
-	if err != nil {
-		return "", err
-	}
 
-	token := jwt.NewWithClaims(jwt.SigningMethodRS256, jwt.MapClaims{
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"iss":  "rizkysr90-pos",
 		"sub":  jwtClaims.UserID,
 		"exp":  time.Now().Add(time.Minute * 5).Unix(), // 5 minutes expiry
-		"role": jwtClaims.Role,
-		// "exp": time.Now().Add(time.Second * 2).Unix(), // 2 second
 
 	})
-	var signedToken string
-	var privateKey *rsa.PrivateKey
-	privateKey, err = jwt.ParseRSAPrivateKeyFromPEM(privateKeyBytes)
-	if err != nil {
-		return "", err
-	}
-	signedToken, err = token.SignedString(privateKey)
-	if err != nil {
-		return "", err
-	}
-	return signedToken, nil
+	// Sign the token with the secret key
+    signedToken, err := token.SignedString([]byte(j.secretKey))
+    if err != nil {
+        return "", err
+    }
+
+    return signedToken, nil
 }
 func (j *JWT) Authorize(tokenString string) (*MyCustomClaims, error) {
-	var err error
-	var publicKeyBytes []byte
-	var publicKey *rsa.PublicKey
-	var jwtToken *jwt.Token
-	publicKeyBytes, err = os.ReadFile("public_key_jwt.pem")
-	if err != nil {
-		return nil, err
-	}
-
-	publicKey, err = jwt.ParseRSAPublicKeyFromPEM(publicKeyBytes)
-	if err != nil {
-		return nil, err
-	}
-	jwtToken, err = jwt.ParseWithClaims(tokenString, &MyCustomClaims{}, func(t *jwt.Token) (interface{}, error) {
+	jwtToken, err := jwt.ParseWithClaims(tokenString, &MyCustomClaims{}, func(t *jwt.Token) (interface{}, error) {
 		// Don't forget to validate the alg is what you expect:
-		if _, ok := t.Method.(*jwt.SigningMethodRSA); !ok {
+		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", t.Header["alg"])
 		}
-		return publicKey, nil
+		return j.secretKey, nil
 	})
 
 	if err != nil {

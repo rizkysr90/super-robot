@@ -1,4 +1,4 @@
-package users
+package payload
 
 type ReqCreateUsers struct {
 	Username        string `json:"username"`
@@ -9,7 +9,10 @@ type ResCreateUsers struct {
 
 }
 
-type ResLoginUsers struct {
+type ReqLoginUsers struct {
 	Username        string `json:"username"`
 	Password        string `json:"password"`
+}
+type ResLoginUsers struct {
+	AccessToken string `json:"access_token"`
 }

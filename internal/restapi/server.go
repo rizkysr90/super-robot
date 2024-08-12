@@ -4,14 +4,16 @@ import (
 	"database/sql"
 
 	"auth-service-rizkysr90-pos/internal/config"
+	categoryHandler "auth-service-rizkysr90-pos/internal/restapi/handler/category"
 	usersHandler "auth-service-rizkysr90-pos/internal/restapi/handler/users"
-	"auth-service-rizkysr90-pos/internal/service/users"
+
+	categoryService "auth-service-rizkysr90-pos/internal/service/category"
+	usersService "auth-service-rizkysr90-pos/internal/service/user"
 
 	"auth-service-rizkysr90-pos/internal/store/pg"
+	jwttoken "auth-service-rizkysr90-pos/pkg/jwt"
 
 	"auth-service-rizkysr90-pos/internal/restapi/middleware"
-
-	jwttoken "auth-service-rizkysr90-pos/pkg/jwt"
 
 	"github.com/gin-gonic/gin"
 	"github.com/rizkysr90/rizkysr90-go-pkg/restapierror"
@@ -23,10 +25,10 @@ func New(
 	cfg config.Config,
 	sqlDB *sql.DB,
 	logger zerolog.Logger,
-	jwtToken *jwttoken.JWT,
 ) (*gin.Engine, error) {
 	// Setup rest api server and its provided services.
 	server := gin.New()
+	jwt := jwttoken.New(cfg.SecretKeyJWT)
 	// server.Use(func(ctx *gin.Context) {
 	// 	startTime := time.Now()
 	// 	ctx.Next()
@@ -68,11 +70,22 @@ func New(
 
 	// Users service
 	usersStore := pg.NewUserDB(sqlDB)
-	usersService := users.NewUsersService(sqlDB, usersStore, jwtToken)
-	user := usersHandler.NewAuthHandler(usersService, cfg)
+	usersService := usersService.NewUsersService(sqlDB, usersStore, jwt)
+	usersHandler := usersHandler.NewUsersHandler(usersService, cfg)
 
-	server.POST("api/v1/users", func(ctx *gin.Context) {
-		user.CreateUser(ctx)
+	// category service
+	categoryStore := pg.NewCategory(sqlDB)
+	categoryService := categoryService.NewCategoryService(sqlDB, categoryStore)
+	categoryHandler := categoryHandler.NewCategoryHandler(categoryService)
+
+	server.POST("api/v1/login/users", func(ctx *gin.Context) {
+		usersHandler.LoginUser(ctx)
+	})
+	server.POST("api/v1/signup/users", func(ctx *gin.Context) {
+		usersHandler.CreateUser(ctx)
+	})
+	server.POST("/api/v1/categories", func(ctx *gin.Context) {
+		categoryHandler.CreateCategory(ctx)
 	})
 	// server.POST("api/v1/auth/users/login", func(ctx *gin.Context) {
 	// 	authHandler.LoginUser(ctx)
@@ -83,7 +96,7 @@ func New(
 
 	// PRIVATE ROUTES
 	authGroup := server.Group("")
-	authGroup.Use(middleware.AuthRequiredCookies(jwtToken))
+	authGroup.Use(middleware.AuthRequiredCookies(jwt))
 	authGroup.GET("api/v1/privateroutes")
 
 	server.NoRoute(func(c *gin.Context) {

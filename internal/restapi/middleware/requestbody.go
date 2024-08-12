@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	"auth-service-rizkysr90-pos/internal/helper/errorHandler"
+	"auth-service-rizkysr90-pos/pkg/errorHandler"
 	"bytes"
 	"io"
 	"net/http"

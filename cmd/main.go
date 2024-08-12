@@ -6,7 +6,6 @@ import (
 
 	"auth-service-rizkysr90-pos/internal/config"
 	"auth-service-rizkysr90-pos/internal/restapi"
-	jwttoken "auth-service-rizkysr90-pos/pkg/jwt"
 
 	pgx "github.com/rizkysr90/rizkysr90-go-pkg/pgx"
 	logger "github.com/rizkysr90/rizkysr90-go-pkg/zerolog"
@@ -37,12 +36,12 @@ func main() {
 		return
 	}
 	defer func() { sqlDB.Close() }()
-	// JWT TOKEN
-	jwtToken := jwttoken.New()
-	restAPIserver, err := restapi.New(cfg, sqlDB, logger, jwtToken)
+	log.Println("HOREE : ",cfg.RestAPIPort)
+	restAPIserver, err := restapi.New(cfg, sqlDB, logger)
 	if err != nil {
 		logger.Error().Err(sqlDBErr).Msgf("restapi: main failed to construct server: %s", err)
 	}
+	log.Println("HOREE : ",cfg.RestAPIPort)
 	err = restAPIserver.Run(cfg.RestAPIPort) // listen and serve on 0.0.0.0:8080
 	if err != nil {
 		logger.Error().Err(sqlDBErr).Msgf("restapi: main failed to run server: %s", err)

@@ -22,6 +22,7 @@ type flatEnv struct {
 	DBConnMaxIdle     int    `env:"DB_CONN_MAX_IDLE"`
 	PrivateKeyJWT     string `env:"PRIVATE_KEY_JWT,unset"`
 	PublicKeyJWT      string `env:"PUBLIC_KEY_JWT,unset"`
+	SecretKeyJWT string 	`env:"SECRET_KEY_JWT,unset"`
 }
 type Config struct {
 	AppName           string
@@ -31,6 +32,7 @@ type Config struct {
 	APIVersionBaseURL string
 	LogLevel          string
 	PgSQL             pgx.Config
+	SecretKeyJWT 	  string
 }
 
 func LoadFromEnv() (Config, error) {
@@ -56,5 +58,6 @@ func newConfig(envCfg flatEnv) Config {
 		APIKey:            envCfg.APIKey,
 		APIVersionBaseURL: envCfg.APIVersionBaseURL,
 		LogLevel:          envCfg.LogLevel,
+		SecretKeyJWT: envCfg.SecretKeyJWT,
 	}
 }

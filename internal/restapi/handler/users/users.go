@@ -2,11 +2,10 @@ package users
 
 import (
 	"auth-service-rizkysr90-pos/internal/config"
-	"auth-service-rizkysr90-pos/internal/helper/errorHandler"
-	"auth-service-rizkysr90-pos/internal/service"
-	"net/http"
-
 	payload "auth-service-rizkysr90-pos/internal/payload/http/users"
+	"auth-service-rizkysr90-pos/internal/service"
+	"auth-service-rizkysr90-pos/pkg/errorHandler"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
@@ -17,7 +16,7 @@ type UsersHandler struct {
 	config       config.Config
 }
 
-func NewAuthHandler(
+func NewUsersHandler(
 	usersService service.UsersService,
 	config config.Config,
 ) *UsersHandler {
@@ -27,44 +26,24 @@ func NewAuthHandler(
 	}
 }
 
-// type reqCreateUser struct {
-// 	*payload.ReqCreateAccount
-// }
-
-// func (req *reqCreateUser) sanitize() {
-// 	req.FirstName = html.EscapeString(strings.TrimSpace(req.FirstName))
-// 	req.LastName = html.EscapeString(strings.TrimSpace(req.LastName))
-// 	req.Email = html.EscapeString(strings.TrimSpace(req.Email))
-// 	req.Password = html.EscapeString(strings.TrimSpace(req.Password))
-// 	req.ConfirmPassword = html.EscapeString(strings.TrimSpace(req.ConfirmPassword))
-// }
-// func (req *reqCreateUser) validate() error {
-// 	validationErrors := []restapierror.RestAPIError{}
-// 	if err := commonvalidator.ValidateRequired(req.FirstName, "first_name"); err != nil {
-// 		validationErrors = append(validationErrors, *err)
-// 	}
-// 	if err := commonvalidator.ValidateRequired(req.LastName, "last_name"); err != nil {
-// 		validationErrors = append(validationErrors, *err)
-// 	}
-// 	if err := commonvalidator.ValidateRequired(req.Email, "email"); err != nil {
-// 		validationErrors = append(validationErrors, *err)
-// 	}
-// 	if err := commonvalidator.ValidateRequired(req.ConfirmPassword, "confirm_password"); err != nil {
-// 		validationErrors = append(validationErrors, *err)
-// 	}
-// 	if err := commonvalidator.ValidateEmail(req.Email, "email"); err != nil {
-// 		validationErrors = append(validationErrors, *err)
-// 	}
-// 	if err := commonvalidator.ValidatePassword(req.Password); err != nil {
-// 		validationErrors = append(validationErrors, *err)
-// 	}
-// 	if len(validationErrors) > 0 {
-// 		return restapierror.NewMultipleFieldsValidation(validationErrors)
-// 	}
-
-//		return nil
-//	}
-func (a *UsersHandler) CreateUser(ctx *gin.Context) {
+func (u *UsersHandler) LoginUser(ctx *gin.Context) {
+	payload := &payload.ReqLoginUsers{}
+	if err := ctx.ShouldBind(payload); err != nil {
+		err := errorHandler.NewBadRequest(
+			errorHandler.WithInfo("invalid payload"),
+			errorHandler.WithMessage(err.Error()),
+		)
+		ctx.Error(err)
+		return
+	}
+	data, err := u.usersService.LoginUser(ctx, payload);
+	if  err != nil {
+		ctx.Error(err)
+		return
+	}
+	ctx.JSON(http.StatusOK, data)
+}
+func (u *UsersHandler) CreateUser(ctx *gin.Context) {
 	payload := &payload.ReqCreateUsers{}
 	if err := ctx.ShouldBind(payload); err != nil {
 		err := errorHandler.NewBadRequest(
@@ -74,84 +53,11 @@ func (a *UsersHandler) CreateUser(ctx *gin.Context) {
 		ctx.Error(err)
 		return
 	}
-	if err := a.usersService.CreateUser(ctx, payload); err != nil {
+	data, err := u.usersService.CreateUser(ctx, payload);
+	if  err != nil {
 		ctx.Error(err)
 		return
 	}
-	ctx.JSON(http.StatusCreated, gin.H{})
+	ctx.JSON(http.StatusOK, data)
 }
 
-// type reqLoginUser struct {
-// 	*payload.ReqLoginUser
-// }
-
-// func (req *reqLoginUser) sanitize() {
-// 	req.Email = html.EscapeString(strings.TrimSpace(req.Email))
-// 	req.Password = html.EscapeString(strings.TrimSpace(req.Password))
-// }
-// func (req *reqLoginUser) validate() error {
-// 	validationErrors := []restapierror.RestAPIError{}
-// 	if err := commonvalidator.ValidateRequired(req.Email, "email"); err != nil {
-// 		validationErrors = append(validationErrors, *err)
-// 	}
-// 	if err := commonvalidator.ValidateRequired(req.Password, "password"); err != nil {
-// 		validationErrors = append(validationErrors, *err)
-// 	}
-// 	if err := commonvalidator.ValidateEmail(req.Email, "email"); err != nil {
-// 		validationErrors = append(validationErrors, *err)
-// 	}
-// 	if len(validationErrors) > 0 {
-// 		return restapierror.NewMultipleFieldsValidation(validationErrors)
-// 	}
-// 	return nil
-// }
-// func (a *AuthHandler) LoginUser(ctx *gin.Context) {
-// 	payload := &payload.ReqLoginUser{}
-// 	if err := ctx.ShouldBindJSON(payload); err != nil {
-// 		ctx.Error(err)
-// 		return
-// 	}
-// 	input := reqLoginUser{payload}
-// 	input.sanitize()
-// 	if err := input.validate(); err != nil {
-// 		ctx.Error(err)
-// 		return
-// 	}
-// 	data, err := a.usersService.LoginUser(ctx, payload)
-// 	if err != nil {
-// 		ctx.Error(err)
-// 		return
-// 	}
-// 	ctx.SetSameSite(http.SameSiteLaxMode)
-// 	ctx.SetCookie("refresh_token", data.RefreshToken, 0, "", "", true, true)
-// 	ctx.SetCookie("user_role", "1", 0, "", "", true, false)
-// 	ctx.SetCookie("access_token", data.Token, 0, "", "", true, true)
-// 	ctx.JSON(http.StatusOK, gin.H{})
-
-// }
-// func (a *AuthHandler) RefreshToken(ctx *gin.Context) {
-// 	refresh_token, err := ctx.Request.Cookie("refresh_token")
-// 	if err != nil {
-// 		ctx.Error(err)
-// 		return
-// 	}
-// 	payload := &payload.ReqRefreshToken{
-// 		RefreshToken: refresh_token.Value,
-// 	}
-// 	// sanitize
-// 	payload.RefreshToken = strings.TrimSpace(payload.RefreshToken)
-// 	// validate empty string
-// 	if len(payload.RefreshToken) == 0 {
-// 		ctx.Error(restapierror.NewBadRequest(
-// 			restapierror.WithMessage("refresh_token not found")),
-// 		)
-// 	}
-// 	data, err := a.usersService.RefreshToken(ctx, payload)
-// 	if err != nil {
-// 		ctx.Error(err)
-// 		return
-// 	}
-// 	ctx.SetSameSite(http.SameSiteLaxMode)
-// 	ctx.SetCookie("access_token", data.AccessToken, 0, "", "", true, true)
-// 	ctx.JSON(200, gin.H{})
-// }

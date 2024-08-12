@@ -8,19 +8,16 @@ import (
 
 type User struct {
 	CreatedAt    time.Time
-	UpdatedAt    sql.NullTime
+	UpdatedAt    time.Time
 	DeletedAt    sql.NullTime
 	ID           string
-	FirstName    string
-	LastName     string
-	Phone        string
-	Email        string
+	Username string
 	Password     string
-	RefreshToken sql.NullString
-	Role         int
-	IsActivated  bool
+	AccessToken sql.NullString
 }
 type UserStore interface {
-	Create(ctx context.Context, createdUser *User) error
-	FindActiveUserByEmail(ctx context.Context, filter *User) (*User, error)
+	FindByUsername(ctx context.Context, username string) (*User, error)
+	Create(ctx context.Context, user *User) error
+	UpdateUserAccessToken(ctx context.Context, username, token string) error
+
 }

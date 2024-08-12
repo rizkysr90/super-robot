@@ -44,7 +44,6 @@ func AuthRequiredCookies(jwt *jwttoken.JWT) gin.HandlerFunc {
 				return
 			}
 			ctx.Set("user_id", claims.Subject)
-			ctx.Set("userRoles", claims.Role)
 			// Authorization successful, proceed with the request
 			ctx.Next()
 		} else {
