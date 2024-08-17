@@ -1,7 +1,7 @@
 package service
 
 import (
-	payload "auth-service-rizkysr90-pos/internal/payload/http/category"
+	"auth-service-rizkysr90-pos/internal/payload"
 	"context"
 )
 

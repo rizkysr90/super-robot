@@ -3,8 +3,9 @@ package middleware
 import (
 	"net/http"
 
+	"auth-service-rizkysr90-pos/pkg/errorHandler"
+
 	"github.com/gin-gonic/gin"
-	"github.com/rizkysr90/rizkysr90-go-pkg/restapierror"
 )
 
 // RBACMiddleware is a middleware function to enforce RBAC
@@ -13,7 +14,7 @@ func RBACMiddleware(userRoleLevel int) gin.HandlerFunc {
 		// Assuming user roles are stored in the context after authentication
 		userRoles := c.GetInt("userRoles")
 		if userRoles == 0 {
-			err := restapierror.NewUnauthorized(restapierror.WithMessage("User roles not found"))
+			err := errorHandler.NewUnauthorized(errorHandler.WithMessage("User roles not found"))
 			c.AbortWithError(http.StatusUnauthorized, err)
 			return
 		}
@@ -22,7 +23,7 @@ func RBACMiddleware(userRoleLevel int) gin.HandlerFunc {
 		if userRoles <= userRoleLevel {
 			c.Next()
 		} else {
-			err := restapierror.NewUnauthorized(restapierror.WithMessage("not allowed"))
+			err := errorHandler.NewUnauthorized(errorHandler.WithMessage("not allowed"))
 			c.AbortWithError(http.StatusUnauthorized, err)
 			return
 		}

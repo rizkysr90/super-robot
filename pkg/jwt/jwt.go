@@ -6,8 +6,9 @@ import (
 	"os"
 	"time"
 
+	"auth-service-rizkysr90-pos/pkg/errorHandler"
+
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/rizkysr90/rizkysr90-go-pkg/restapierror"
 )
 
 type JWT struct {
@@ -78,7 +79,7 @@ func (j *JWT) Authorize(tokenString string) (*MyCustomClaims, error) {
 	})
 
 	if err != nil {
-		return nil, restapierror.NewUnauthorized(restapierror.WithMessage(err.Error()))
+		return nil, errorHandler.NewUnauthorized(errorHandler.WithMessage(err.Error()))
 	} else if claims, ok := jwtToken.Claims.(*MyCustomClaims); ok {
 		return claims, nil
 	} else {
@@ -108,7 +109,7 @@ func (j *JWT) AuthorizeRefreshToken(tokenString string) (*MyCustomClaims, error)
 	})
 
 	if err != nil {
-		return nil, restapierror.NewUnauthorized(restapierror.WithMessage(err.Error()))
+		return nil, errorHandler.NewUnauthorized(errorHandler.WithMessage(err.Error()))
 	} else if claims, ok := jwtToken.Claims.(*MyCustomClaims); ok {
 		return claims, nil
 	} else {

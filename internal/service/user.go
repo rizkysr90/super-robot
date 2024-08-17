@@ -3,7 +3,7 @@ package service
 import (
 	"context"
 
-	payload "auth-service-rizkysr90-pos/internal/payload/http/users"
+	"auth-service-rizkysr90-pos/internal/payload"
 )
 
 type UsersService interface {

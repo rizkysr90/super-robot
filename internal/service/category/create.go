@@ -1,7 +1,7 @@
 package category
 
 import (
-	payload "auth-service-rizkysr90-pos/internal/payload/http/category"
+	"auth-service-rizkysr90-pos/internal/payload"
 	"auth-service-rizkysr90-pos/internal/store"
 	"auth-service-rizkysr90-pos/internal/utility"
 	"context"
@@ -10,8 +10,9 @@ import (
 	"strings"
 	"time"
 
+	"auth-service-rizkysr90-pos/pkg/errorHandler"
+
 	"github.com/google/uuid"
-	"github.com/rizkysr90/rizkysr90-go-pkg/restapierror"
 	"github.com/rizkysr90/rizkysr90-go-pkg/sqldb"
 )
 
@@ -26,7 +27,7 @@ func (req *reqCreateCategory) sanitize() {
 }
 func (req *reqCreateCategory) validate() error {
 	if len(req.CategoryName) > 100 {
-		return restapierror.NewBadRequest(restapierror.WithMessage("max category name is 100 characters"))
+		return errorHandler.NewBadRequest(errorHandler.WithMessage("max category name is 100 characters"))
 	}
 	return nil
 }
@@ -43,7 +44,7 @@ func (c *CategoryService) Create(ctx context.Context,
 		return nil, err
 	}
 	if category.CategoryName == req.CategoryName {
-		return nil, restapierror.NewBadRequest(restapierror.WithMessage("duplicate category name"))
+		return nil, errorHandler.NewBadRequest(errorHandler.WithMessage("duplicate category name"))
 	}
 	insertedData := &store.CategoryData{
 		Id: uuid.NewString(),

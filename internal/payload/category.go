@@ -1,7 +1,6 @@
 package payload
 
 import (
-	payload "auth-service-rizkysr90-pos/internal/payload/http/pagination"
 	"time"
 )
 
@@ -36,6 +35,6 @@ type ReqGetAllCategory struct {
 	PageNumber int `json:"page_number"`
 }
 type ResGetAllCategory struct {
-	Data     CategoryData      `json:"data"`
-	Metadata payload.Pagination `json:"metadata"`
+	Data     []CategoryData      `json:"data"`
+	Metadata Pagination `json:"metadata"`
 }

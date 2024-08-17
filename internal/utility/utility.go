@@ -1,16 +1,15 @@
 package utility
 
 import (
+	"auth-service-rizkysr90-pos/pkg/errorHandler"
 	"strings"
-
-	"github.com/rizkysr90/rizkysr90-go-pkg/restapierror"
 )
 
-func ReturnAPIError(code int, message, details string) *restapierror.RestAPIError {
-	return &restapierror.RestAPIError{
+func ReturnAPIError(code int, message, info string) *errorHandler.HttpError {
+	return &errorHandler.HttpError{
 		Code:    code,
 		Message: message,
-		Details: details,
+		Info: info,
 	}
 }
 func SanitizeReqBody(input string) string {

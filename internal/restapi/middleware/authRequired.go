@@ -5,7 +5,7 @@ import (
 
 	jwttoken "auth-service-rizkysr90-pos/pkg/jwt"
 
-	"github.com/rizkysr90/rizkysr90-go-pkg/restapierror"
+	"auth-service-rizkysr90-pos/pkg/errorHandler"
 
 	"github.com/gin-gonic/gin"
 )
@@ -15,7 +15,7 @@ func AuthRequired(jwt *jwttoken.JWT) gin.HandlerFunc {
 		getAuthHeader := ctx.Request.Header.Get("Authorization")
 		splitAuthHeader := strings.Split(getAuthHeader, " ")
 		if len(splitAuthHeader) < 2 {
-			err := restapierror.NewUnauthorized(restapierror.WithMessage("access token not provided"))
+			err := errorHandler.NewUnauthorized(errorHandler.WithMessage("access token not provided"))
 			ctx.Error(err)
 			return
 		}
@@ -31,7 +31,7 @@ func AuthRequiredCookies(jwt *jwttoken.JWT) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		access_token, err := ctx.Request.Cookie("access_token")
 		if err != nil {
-			ctx.Error(restapierror.NewUnauthorized(restapierror.WithMessage(err.Error())))
+			ctx.Error(errorHandler.NewUnauthorized(errorHandler.WithMessage(err.Error())))
 			return
 		}
 		if access_token.Value != "" {
@@ -39,7 +39,7 @@ func AuthRequiredCookies(jwt *jwttoken.JWT) gin.HandlerFunc {
 			claims, err := jwt.Authorize(access_token.Value)
 			if err != nil {
 				// authorization error
-				err = restapierror.NewUnauthorized(restapierror.WithMessage(err.Error()))
+				err = errorHandler.NewUnauthorized(errorHandler.WithMessage(err.Error()))
 				ctx.Error(err)
 				return
 			}
@@ -50,14 +50,14 @@ func AuthRequiredCookies(jwt *jwttoken.JWT) gin.HandlerFunc {
 			// Token not found in cookies or failed to authorize, check for token in headers
 			token := ctx.GetHeader("Authorization")
 			if token == "" {
-				err := restapierror.NewUnauthorized(restapierror.WithMessage("access token not provided"))
+				err := errorHandler.NewUnauthorized(errorHandler.WithMessage("access token not provided"))
 				ctx.Error(err)
 				return
 			}
 			// Remove "Bearer " prefix if present
 			token = strings.TrimPrefix(token, "Bearer ")
 			if _, err := jwt.Authorize(token); err != nil {
-				ctx.Error(restapierror.NewUnauthorized(restapierror.WithMessage(err.Error())))
+				ctx.Error(errorHandler.NewUnauthorized(errorHandler.WithMessage(err.Error())))
 				return
 			}
 			ctx.Next()

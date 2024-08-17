@@ -1,29 +1,30 @@
 package users
 
 import (
-	payload "auth-service-rizkysr90-pos/internal/payload/http/users"
+	"auth-service-rizkysr90-pos/internal/payload"
 	"auth-service-rizkysr90-pos/internal/store"
 	"context"
 	"database/sql"
 	"errors"
 	"time"
 
+	"auth-service-rizkysr90-pos/pkg/errorHandler"
+
 	"github.com/google/uuid"
-	"github.com/rizkysr90/rizkysr90-go-pkg/restapierror"
 	"github.com/rizkysr90/rizkysr90-go-pkg/sqldb"
 	"golang.org/x/crypto/bcrypt"
 )
 
 func (u *UserService) CreateUser(ctx context.Context, req *payload.ReqCreateUsers) (*payload.ResCreateUsers, error) {
 	if req.ConfirmPassword != req.Password {
-		return nil, restapierror.NewBadRequest(restapierror.WithMessage("invalid password"))
+		return nil, errorHandler.NewBadRequest(errorHandler.WithMessage("invalid password"))
 	}
 	user, err := u.userStore.FindByUsername(ctx, req.Username)
 	if err != nil && !errors.Is(sql.ErrNoRows, err) {
 		return nil, err
 	}
 	if user != nil {
-		return nil, restapierror.NewBadRequest(restapierror.WithMessage("duplicate username"))
+		return nil, errorHandler.NewBadRequest(errorHandler.WithMessage("duplicate username"))
 	}
 	password, err := bcrypt.GenerateFromPassword([]byte(req.Password), 10) 
 	if err != nil {

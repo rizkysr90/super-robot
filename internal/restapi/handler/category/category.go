@@ -2,7 +2,7 @@ package category
 
 import (
 	"auth-service-rizkysr90-pos/internal/config"
-	payload "auth-service-rizkysr90-pos/internal/payload/http/category"
+	"auth-service-rizkysr90-pos/internal/payload"
 	"auth-service-rizkysr90-pos/internal/service"
 	"auth-service-rizkysr90-pos/pkg/errorHandler"
 	"net/http"

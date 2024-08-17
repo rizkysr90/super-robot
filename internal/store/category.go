@@ -15,7 +15,6 @@ type CategoryData struct {
 
 	Pagination *Pagination
 }
-
 type Category interface {
 	Create(ctx context.Context, category *CategoryData) error
 	Update(ctx context.Context, category *CategoryData) error

@@ -15,7 +15,7 @@ func LogMiddleware(logger zerolog.Logger) gin.HandlerFunc {
 			panic(errReqBody)
 		}
 		// Convert the struct to JSON format
-		getResBody, errResBody := GetResBodyValue(ctx)
+		getResBody, errResBody := GetRequstBodyValue(ctx)
 		if errResBody != nil {
 			panic(errResBody)
 		}

@@ -15,8 +15,9 @@ import (
 
 	"auth-service-rizkysr90-pos/internal/restapi/middleware"
 
+	"auth-service-rizkysr90-pos/pkg/errorHandler"
+
 	"github.com/gin-gonic/gin"
-	"github.com/rizkysr90/rizkysr90-go-pkg/restapierror"
 	cors "github.com/rs/cors/wrapper/gin"
 	"github.com/rs/zerolog"
 )
@@ -100,7 +101,7 @@ func New(
 	authGroup.GET("api/v1/privateroutes")
 
 	server.NoRoute(func(c *gin.Context) {
-		c.Error(restapierror.NewNotFound(restapierror.WithMessage("route not found")))
+		c.Error(errorHandler.NewNotFound(errorHandler.WithMessage("route not found")))
 	})
 	return server, nil
 }
