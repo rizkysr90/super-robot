@@ -3,11 +3,9 @@ package category
 import (
 	"auth-service-rizkysr90-pos/internal/payload"
 	"auth-service-rizkysr90-pos/internal/store"
-	"auth-service-rizkysr90-pos/internal/utility"
 	"context"
 	"database/sql"
 	"errors"
-	"log"
 	"strings"
 	"time"
 
@@ -22,7 +20,7 @@ type reqCreateCategory struct {
 }
 
 func (req *reqCreateCategory) sanitize() {
-	req.CategoryName = utility.SanitizeReqBody(req.CategoryName)
+	req.CategoryName = strings.TrimSpace(req.CategoryName)
 	req.CategoryName = strings.ToUpper(req.CategoryName)
 }
 func (req *reqCreateCategory) validate() error {
@@ -30,7 +28,7 @@ func (req *reqCreateCategory) validate() error {
 		return errorHandler.NewBadRequest(errorHandler.WithInfo("category name is required"))
 	}
 	if len(req.CategoryName) > 100 {
-		return errorHandler.NewBadRequest(errorHandler.WithMessage("max category name is 100 characters"))
+		return errorHandler.NewBadRequest(errorHandler.WithInfo("max category name is 100 characters"))
 	}
 	return nil
 }
@@ -46,7 +44,7 @@ func (c *Service) Create(ctx context.Context,
 		return nil, err
 	}
 	if category != nil {
-		return nil, errorHandler.NewBadRequest(errorHandler.WithMessage("duplicate category name"))
+		return nil, errorHandler.NewBadRequest(errorHandler.WithInfo("duplicate category name"))
 	}
 	insertedData := &store.CategoryData{
 		ID:           uuid.NewString(),
@@ -54,7 +52,6 @@ func (c *Service) Create(ctx context.Context,
 		CreatedAt:    time.Now().UTC(),
 		UpdatedAt:    time.Now().UTC(),
 	}
-	log.Println("HEREEE", insertedData)
 	err = sqldb.WithinTx(ctx, c.db, func(qe sqldb.QueryExecutor) error {
 		tx := sqldb.WithTxContext(ctx, qe)
 		return c.categoryStore.Create(tx, insertedData)

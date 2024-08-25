@@ -36,7 +36,7 @@ func (c *Service) DeleteCategory(ctx context.Context,
 	_, err := c.categoryStore.FindByID(ctx, input.ID)
 	if err != nil {
 		if errors.Is(sql.ErrNoRows, err) {
-			return nil, errorHandler.NewNotFound()
+			return nil, errorHandler.NewNotFound(errorHandler.WithInfo("category not found"))
 		}
 		return nil, err
 	}

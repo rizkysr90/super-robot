@@ -48,7 +48,7 @@ func (c *Service) EditCategory(ctx context.Context,
 		return nil, err
 	}
 	if category != nil && category.ID != input.ID {
-		return nil, errorHandler.NewBadRequest(errorHandler.WithMessage("duplicate category name"))
+		return nil, errorHandler.NewBadRequest(errorHandler.WithInfo("duplicate category name"))
 	}
 	updatedData := store.CategoryData{
 		ID:           input.ID,

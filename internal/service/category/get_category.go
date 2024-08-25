@@ -33,8 +33,9 @@ func (c *Service) GetCategoryByID(ctx context.Context,
 	category, err := c.categoryStore.FindByID(ctx, request.CategoryID)
 	if err != nil {
 		if errors.Is(sql.ErrNoRows, err) {
-			return nil, errorHandler.NewNotFound()
+			return nil, errorHandler.NewNotFound(errorHandler.WithInfo("category not found"))
 		}
+		return nil,err
 	}
 	return &payload.ResGetCategoryByID{
 		CategoryData: &payload.CategoryData{

@@ -32,7 +32,7 @@ func (c *Service) GetCategories(ctx context.Context,
 		return nil, err
 	}
 	if len(categories) == 0 {
-		return nil, errorHandler.NewNotFound()
+		return nil, errorHandler.NewNotFound(errorHandler.WithInfo("not found"))
 	}
 	result := &payload.ResGetAllCategory{
 		Data: []payload.CategoryData{},
@@ -42,6 +42,9 @@ func (c *Service) GetCategories(ctx context.Context,
 			TotalPages:    int(math.Floor(float64(categories[0].Pagination.TotalElements) / float64(input.PageSize))),
 			TotalElements: categories[0].Pagination.TotalElements,
 		},
+	}
+	if result.Metadata.TotalPages == 0 {
+		result.Metadata.TotalPages = 1
 	}
 	for _, element := range categories {
 		data := payload.CategoryData{
