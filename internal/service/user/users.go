@@ -7,14 +7,15 @@ import (
 )
 
 type UserService struct {
-	db *sql.DB
+	db        *sql.DB
 	userStore store.UserStore
-	jwt *jwttoken.JWT
+	jwt       *jwttoken.JWT
 }
+
 func NewUsersService(sqlDB *sql.DB, userStore store.UserStore, jwt *jwttoken.JWT) *UserService {
 	return &UserService{
-		db: sqlDB,
+		db:        sqlDB,
 		userStore: userStore,
-		jwt: jwt,
+		jwt:       jwt,
 	}
 }

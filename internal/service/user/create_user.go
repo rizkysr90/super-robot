@@ -26,24 +26,23 @@ func (u *UserService) CreateUser(ctx context.Context, req *payload.ReqCreateUser
 	if user != nil {
 		return nil, errorHandler.NewBadRequest(errorHandler.WithMessage("duplicate username"))
 	}
-	password, err := bcrypt.GenerateFromPassword([]byte(req.Password), 10) 
+	password, err := bcrypt.GenerateFromPassword([]byte(req.Password), 10)
 	if err != nil {
 		return nil, err
 	}
 	insertedUserData := &store.User{
-		ID: uuid.NewString(),
+		ID:        uuid.NewString(),
 		CreatedAt: time.Now().UTC(),
 		UpdatedAt: time.Now().UTC(),
-		Username: req.Username,
-		Password: string(password),
+		Username:  req.Username,
+		Password:  string(password),
 	}
 	err = sqldb.WithinTx(ctx, u.db, func(qe sqldb.QueryExecutor) error {
 		tx := sqldb.WithTxContext(ctx, qe)
 		return u.userStore.Create(tx, insertedUserData)
-
 	})
 	if err != nil {
-		return nil,err
+		return nil, err
 	}
 	return &payload.ResCreateUsers{}, nil
 }

@@ -12,6 +12,7 @@ import (
 type reqGetCategories struct {
 	*payload.ReqGetAllCategory
 }
+
 func (request *reqGetCategories) sanitize() {
 	if request.PageNumber == 0 {
 		request.PageNumber = 1
@@ -20,14 +21,12 @@ func (request *reqGetCategories) sanitize() {
 		request.PageSize = 20
 	}
 }
-func (c *CategoryService) GetCategories(ctx context.Context,  
+func (c *Service) GetCategories(ctx context.Context,
 	request *payload.ReqGetAllCategory) (*payload.ResGetAllCategory, error) {
-	
-
 	input := reqGetCategories{request}
 	input.sanitize()
 
-	categories, err := c.categoryStore.FindAllPagination(ctx, 
+	categories, err := c.categoryStore.FindAllPagination(ctx,
 		&store.Pagination{PageSize: input.PageSize, PageNumber: input.PageNumber})
 	if err != nil {
 		return nil, err
@@ -38,19 +37,19 @@ func (c *CategoryService) GetCategories(ctx context.Context,
 	result := &payload.ResGetAllCategory{
 		Data: []payload.CategoryData{},
 		Metadata: payload.Pagination{
-			PageSize: input.PageSize,
-			PageNumber: input.PageNumber,
-			TotalPages:  int(math.Floor(float64(categories[0].Pagination.TotalElements) / float64(input.PageSize))),
+			PageSize:      input.PageSize,
+			PageNumber:    input.PageNumber,
+			TotalPages:    int(math.Floor(float64(categories[0].Pagination.TotalElements) / float64(input.PageSize))),
 			TotalElements: categories[0].Pagination.TotalElements,
 		},
 	}
 	for _, element := range categories {
 		data := payload.CategoryData{
-			Id: element.Id,
+			ID:           element.ID,
 			CategoryName: element.CategoryName,
-			CreatedAt: element.CreatedAt,
-			UpdatedAt: element.UpdatedAt,
-			DeletedAt: element.DeletedAt.Time,
+			CreatedAt:    element.CreatedAt,
+			UpdatedAt:    element.UpdatedAt,
+			DeletedAt:    element.DeletedAt.Time,
 		}
 		result.Data = append(result.Data, data)
 	}

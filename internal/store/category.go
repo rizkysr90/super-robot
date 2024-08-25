@@ -7,19 +7,19 @@ import (
 )
 
 type CategoryData struct {
-	Id string
-	CategoryName string
 	CreatedAt    time.Time
 	UpdatedAt    time.Time
+	Pagination   *Pagination
 	DeletedAt    sql.NullTime
-
-	Pagination *Pagination
+	ID           string
+	CategoryName string
 }
+
 type Category interface {
 	Create(ctx context.Context, category *CategoryData) error
 	Update(ctx context.Context, category *CategoryData) error
-	SoftDelete(ctx context.Context, categoryId string) error
-	FindById(ctx context.Context, categoryId string) (*CategoryData, error)
+	SoftDelete(ctx context.Context, categoryID string) error
+	FindByID(ctx context.Context, categoryID string) (*CategoryData, error)
 	FindAllPagination(ctx context.Context, p *Pagination) ([]CategoryData, error)
 	FindByName(ctx context.Context, categoryName string) (*CategoryData, error)
 }

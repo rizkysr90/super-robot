@@ -35,9 +35,9 @@ func (j *JWT) GenerateRefreshToken(jwtClaims *JWTClaims) (string, error) {
 		return "", err
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"iss":  "rizkysr90-pos",
-		"sub":  jwtClaims.UserID,
-		"exp":  time.Now().Add((time.Hour * 24) * 7).Unix(), // 1 weeks expiry
+		"iss": "rizkysr90-pos",
+		"sub": jwtClaims.UserID,
+		"exp": time.Now().Add((time.Hour * 24) * 7).Unix(), // 1 weeks expiry
 		// "exp": time.Now().Add(time.Minute * 2).Unix(), // 2 minute expiry
 
 	})
@@ -56,18 +56,18 @@ func (j *JWT) GenerateRefreshToken(jwtClaims *JWTClaims) (string, error) {
 func (j *JWT) Generate(jwtClaims *JWTClaims) (string, error) {
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"iss":  "rizkysr90-pos",
-		"sub":  jwtClaims.UserID,
-		"exp":  time.Now().Add(time.Minute * 5).Unix(), // 5 minutes expiry
+		"iss": "rizkysr90-pos",
+		"sub": jwtClaims.UserID,
+		"exp": time.Now().Add(time.Minute * 5).Unix(), // 5 minutes expiry
 
 	})
 	// Sign the token with the secret key
-    signedToken, err := token.SignedString([]byte(j.secretKey))
-    if err != nil {
-        return "", err
-    }
+	signedToken, err := token.SignedString([]byte(j.secretKey))
+	if err != nil {
+		return "", err
+	}
 
-    return signedToken, nil
+	return signedToken, nil
 }
 func (j *JWT) Authorize(tokenString string) (*MyCustomClaims, error) {
 	jwtToken, err := jwt.ParseWithClaims(tokenString, &MyCustomClaims{}, func(t *jwt.Token) (interface{}, error) {

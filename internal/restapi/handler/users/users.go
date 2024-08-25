@@ -36,8 +36,8 @@ func (u *UsersHandler) LoginUser(ctx *gin.Context) {
 		ctx.Error(err)
 		return
 	}
-	data, err := u.usersService.LoginUser(ctx, payload);
-	if  err != nil {
+	data, err := u.usersService.LoginUser(ctx, payload)
+	if err != nil {
 		ctx.Error(err)
 		return
 	}
@@ -53,11 +53,10 @@ func (u *UsersHandler) CreateUser(ctx *gin.Context) {
 		ctx.Error(err)
 		return
 	}
-	data, err := u.usersService.CreateUser(ctx, payload);
-	if  err != nil {
+	data, err := u.usersService.CreateUser(ctx, payload)
+	if err != nil {
 		ctx.Error(err)
 		return
 	}
 	ctx.JSON(http.StatusOK, data)
 }
-

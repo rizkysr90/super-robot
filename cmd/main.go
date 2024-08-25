@@ -36,12 +36,12 @@ func main() {
 		return
 	}
 	defer func() { sqlDB.Close() }()
-	log.Println("HOREE : ",cfg.RestAPIPort)
+	log.Println("HOREE : ", cfg.RestAPIPort)
 	restAPIserver, err := restapi.New(cfg, sqlDB, logger)
 	if err != nil {
 		logger.Error().Err(sqlDBErr).Msgf("restapi: main failed to construct server: %s", err)
 	}
-	log.Println("HOREE : ",cfg.RestAPIPort)
+	log.Println("HOREE : ", cfg.RestAPIPort)
 	err = restAPIserver.Run(cfg.RestAPIPort) // listen and serve on 0.0.0.0:8080
 	if err != nil {
 		logger.Error().Err(sqlDBErr).Msgf("restapi: main failed to run server: %s", err)

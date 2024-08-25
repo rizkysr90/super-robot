@@ -9,7 +9,7 @@ func ReturnAPIError(code int, message, info string) *errorHandler.HttpError {
 	return &errorHandler.HttpError{
 		Code:    code,
 		Message: message,
-		Info: info,
+		Info:    info,
 	}
 }
 func SanitizeReqBody(input string) string {

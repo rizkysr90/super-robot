@@ -88,6 +88,18 @@ func New(
 	server.POST("/api/v1/categories", func(ctx *gin.Context) {
 		categoryHandler.CreateCategory(ctx)
 	})
+	server.GET("/api/v1/categories", func(ctx *gin.Context) {
+		categoryHandler.GetAllCategories(ctx)
+	})
+	server.GET("/api/v1/categories/:category_id", func(ctx *gin.Context) {
+		categoryHandler.GetCategoryByID(ctx)
+	})
+	server.PUT("/api/v1/categories/:category_id", func(ctx *gin.Context) {
+		categoryHandler.EditCategoryByID(ctx)
+	})
+	server.DELETE("/api/v1/categories/:category_id", func(ctx *gin.Context) {
+		categoryHandler.DeleteCategory(ctx)
+	})
 	// server.POST("api/v1/auth/users/login", func(ctx *gin.Context) {
 	// 	authHandler.LoginUser(ctx)
 	// })
@@ -101,7 +113,9 @@ func New(
 	authGroup.GET("api/v1/privateroutes")
 
 	server.NoRoute(func(c *gin.Context) {
-		c.Error(errorHandler.NewNotFound(errorHandler.WithMessage("route not found")))
+		if err := c.Error(errorHandler.NewNotFound(errorHandler.WithMessage("route not found"))); err != nil {
+			logger.Error().Msg(err.Error())
+		}
 	})
 	return server, nil
 }

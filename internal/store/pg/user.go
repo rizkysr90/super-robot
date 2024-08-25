@@ -20,7 +20,7 @@ func NewUserDB(db *sql.DB) *Users {
 	}
 }
 
-func(u *Users) FindByUsername(ctx context.Context, username string) (*store.User, error) {
+func (u *Users) FindByUsername(ctx context.Context, username string) (*store.User, error) {
 	query := `
 		SELECT id, username, password, access_token FROM users
 		WHERE username = $1 AND deleted_at IS NULL
@@ -31,12 +31,11 @@ func(u *Users) FindByUsername(ctx context.Context, username string) (*store.User
 	if err := row.Err(); err != nil {
 		return nil, err
 	}
-	err := row.Scan(&data.ID, &data.Username,&data.Password, &data.AccessToken)
+	err := row.Scan(&data.ID, &data.Username, &data.Password, &data.AccessToken)
 	if err != nil {
 		return nil, err
 	}
 	return data, nil
-
 }
 
 func (u *Users) Create(ctx context.Context, user *store.User) error {

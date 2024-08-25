@@ -12,7 +12,7 @@ import (
 
 type CategoryHandler struct {
 	categoryService service.CategoryService
-	config       config.Config
+	config          config.Config
 }
 
 func NewCategoryHandler(
@@ -33,8 +33,72 @@ func (c *CategoryHandler) CreateCategory(ctx *gin.Context) {
 		ctx.Error(err)
 		return
 	}
-	data, err := c.categoryService.Create(ctx, payload);
-	if  err != nil {
+	data, err := c.categoryService.Create(ctx, payload)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+	ctx.JSON(http.StatusCreated, data)
+}
+func (c *CategoryHandler) GetAllCategories(ctx *gin.Context) {
+	payload := &payload.ReqGetAllCategory{}
+	if err := ctx.ShouldBind(payload); err != nil {
+		err := errorHandler.NewBadRequest(
+			errorHandler.WithInfo("invalid payload"),
+			errorHandler.WithMessage(err.Error()),
+		)
+		ctx.Error(err)
+		return
+	}
+	data, err := c.categoryService.GetCategories(ctx, payload)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+	ctx.JSON(http.StatusOK, data)
+}
+
+func (c *CategoryHandler) GetCategoryByID(ctx *gin.Context) {
+	categoryID := ctx.Param("category_id")
+	payloadRequest := payload.ReqGetCategoryByID{
+		CategoryID: categoryID,
+	}
+
+	data, err := c.categoryService.GetCategoryByID(ctx, &payloadRequest)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+	ctx.JSON(http.StatusOK, data)
+}
+func (c *CategoryHandler) EditCategoryByID(ctx *gin.Context) {
+	categoryID := ctx.Param("category_id")
+	payloadRequest := payload.ReqUpdateCategory{
+		ID: categoryID,
+	}
+	if err := ctx.ShouldBind(&payloadRequest); err != nil {
+		err := errorHandler.NewBadRequest(
+			errorHandler.WithInfo("invalid payload"),
+			errorHandler.WithMessage(err.Error()),
+		)
+		ctx.Error(err)
+		return
+	}
+	data, err := c.categoryService.EditCategory(ctx, &payloadRequest)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+	ctx.JSON(http.StatusOK, data)
+}
+func (c *CategoryHandler) DeleteCategory(ctx *gin.Context) {
+	categoryID := ctx.Param("category_id")
+	payloadRequest := payload.ReqDeleteCategory{
+		ID: categoryID,
+	}
+
+	data, err := c.categoryService.DeleteCategory(ctx, &payloadRequest)
+	if err != nil {
 		ctx.Error(err)
 		return
 	}

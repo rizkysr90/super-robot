@@ -7,22 +7,22 @@ import (
 )
 
 type flatEnv struct {
-	AppName           string `env:"APP_NAME"`
-	AppEnv            string `env:"APP_ENV"` // local|dev|uat|sit|prod
+	APIVersionBaseURL string `env:"API_VERSION_BASE_URL"`
+	DBPassword        string `env:"DB_PASSWORD,unset"`
 	RestAPIPort       string `env:"REST_API_PORT"`
 	DBHost            string `env:"DB_HOST"`
-	DBDatabase        string `env:"DB_DATABASE"`
+	AppName           string `env:"APP_NAME"`
 	DBUsername        string `env:"DB_USERNAME"`
-	DBPassword        string `env:"DB_PASSWORD,unset"` // sensitive, unset from environment after parse!
+	AppEnv            string `env:"APP_ENV"`
 	APIKey            string `env:"API_KEY,unset"`
-	APIVersionBaseURL string `env:"API_VERSION_BASE_URL"`
+	DBDatabase        string `env:"DB_DATABASE"`
 	LogLevel          string `env:"LOG_LEVEL"`
-	DBPort            int    `env:"DB_PORT"`
-	DBConnMaxOpen     int    `env:"DB_CONN_MAX_OPEN"`
-	DBConnMaxIdle     int    `env:"DB_CONN_MAX_IDLE"`
-	PrivateKeyJWT     string `env:"PRIVATE_KEY_JWT,unset"`
+	SecretKeyJWT      string `env:"SECRET_KEY_JWT,unset"`
 	PublicKeyJWT      string `env:"PUBLIC_KEY_JWT,unset"`
-	SecretKeyJWT string 	`env:"SECRET_KEY_JWT,unset"`
+	PrivateKeyJWT     string `env:"PRIVATE_KEY_JWT,unset"`
+	DBConnMaxIdle     int    `env:"DB_CONN_MAX_IDLE"`
+	DBConnMaxOpen     int    `env:"DB_CONN_MAX_OPEN"`
+	DBPort            int    `env:"DB_PORT"`
 }
 type Config struct {
 	AppName           string
@@ -31,8 +31,8 @@ type Config struct {
 	APIKey            string
 	APIVersionBaseURL string
 	LogLevel          string
+	SecretKeyJWT      string
 	PgSQL             pgx.Config
-	SecretKeyJWT 	  string
 }
 
 func LoadFromEnv() (Config, error) {
@@ -58,6 +58,6 @@ func newConfig(envCfg flatEnv) Config {
 		APIKey:            envCfg.APIKey,
 		APIVersionBaseURL: envCfg.APIVersionBaseURL,
 		LogLevel:          envCfg.LogLevel,
-		SecretKeyJWT: envCfg.SecretKeyJWT,
+		SecretKeyJWT:      envCfg.SecretKeyJWT,
 	}
 }

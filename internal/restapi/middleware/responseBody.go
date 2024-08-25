@@ -7,7 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// Custom response writer to capture the response body
+// Custom response writer to capture the response body.
 type responseWriter struct {
 	gin.ResponseWriter
 	body *bytes.Buffer
