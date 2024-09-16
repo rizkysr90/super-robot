@@ -4,6 +4,7 @@ import (
 	store "auth-service-rizkysr90-pos/internal/store/mocks"
 
 	"github.com/DATA-DOG/go-sqlmock"
+	"github.com/stretchr/testify/assert"
 
 	"database/sql"
 	"testing"
@@ -26,4 +27,18 @@ func initTestService(t *testing.T) (
 	}
 
 	return svc, mockCategoryStore, sqlMock, db
+}
+func TestNewCategoryService(t *testing.T) {
+	// Create a mock SQL database connection (using a real DB is not necessary for this test)
+	db := &sql.DB{}
+
+	// Create a mock category store
+	mockCategoryStore := new(store.MockCategoryStore)
+
+	// Initialize the service
+	svc := NewCategoryService(db, mockCategoryStore)
+
+	// Assert that the service is initialized with the correct values
+	assert.Equal(t, db, svc.db)
+	assert.Equal(t, mockCategoryStore, svc.categoryStore)
 }

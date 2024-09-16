@@ -6,6 +6,7 @@ import (
 	"auth-service-rizkysr90-pos/internal/service"
 	"auth-service-rizkysr90-pos/pkg/errorHandler"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -42,14 +43,35 @@ func (c *CategoryHandler) CreateCategory(ctx *gin.Context) {
 }
 func (c *CategoryHandler) GetAllCategories(ctx *gin.Context) {
 	payload := &payload.ReqGetAllCategory{}
-	if err := ctx.ShouldBind(payload); err != nil {
+	
+	// Extract page_number and page_size from query parameters
+	pageNumber := ctx.DefaultQuery("page_number", "1")
+	pageSize := ctx.DefaultQuery("page_size", "20")
+
+	// Convert string to int
+	pageNumberInt, err := strconv.Atoi(pageNumber)
+	if err != nil {
 		err := errorHandler.NewBadRequest(
-			errorHandler.WithInfo("invalid payload"),
+			errorHandler.WithInfo("invalid page_number"),
 			errorHandler.WithMessage(err.Error()),
 		)
 		ctx.Error(err)
 		return
 	}
+
+	pageSizeInt, err := strconv.Atoi(pageSize)
+	if err != nil {
+		err := errorHandler.NewBadRequest(
+			errorHandler.WithInfo("invalid page_size"),
+			errorHandler.WithMessage(err.Error()),
+		)
+		ctx.Error(err)
+		return
+	}
+
+	// Assign to payload
+	payload.PageNumber = pageNumberInt
+	payload.PageSize = pageSizeInt
 	data, err := c.categoryService.GetCategories(ctx, payload)
 	if err != nil {
 		ctx.Error(err)
