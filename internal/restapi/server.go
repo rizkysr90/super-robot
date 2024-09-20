@@ -5,20 +5,19 @@ import (
 
 	"auth-service-rizkysr90-pos/internal/config"
 	categoryHandler "auth-service-rizkysr90-pos/internal/restapi/handler/category"
+	producthandler "auth-service-rizkysr90-pos/internal/restapi/handler/product"
 	usersHandler "auth-service-rizkysr90-pos/internal/restapi/handler/users"
-
-	categoryService "auth-service-rizkysr90-pos/internal/service/category"
-	usersService "auth-service-rizkysr90-pos/internal/service/user"
-
-	"auth-service-rizkysr90-pos/internal/store/pg"
-	jwttoken "auth-service-rizkysr90-pos/pkg/jwt"
-
 	"auth-service-rizkysr90-pos/internal/restapi/middleware"
-
+	categoryService "auth-service-rizkysr90-pos/internal/service/category"
+	"auth-service-rizkysr90-pos/internal/service/productservice"
+	usersService "auth-service-rizkysr90-pos/internal/service/user"
+	"auth-service-rizkysr90-pos/internal/store/pg"
 	"auth-service-rizkysr90-pos/pkg/errorHandler"
+	jwttoken "auth-service-rizkysr90-pos/pkg/jwt"
 
 	"github.com/gin-gonic/gin"
 	cors "github.com/rs/cors/wrapper/gin"
+
 	"github.com/rs/zerolog"
 )
 
@@ -30,38 +29,13 @@ func New(
 	// Setup rest api server and its provided services.
 	server := gin.New()
 	jwt := jwttoken.New(cfg.SecretKeyJWT)
-	// server.Use(func(ctx *gin.Context) {
-	// 	startTime := time.Now()
-	// 	ctx.Next()
-	// 	// Log request duration and response status
-	// 	if ctx.Writer.Status() >= http.StatusBadRequest {
-	// 		logger.Error().
-	// 			Str("method", ctx.Request.Method).
-	// 			Str("url", ctx.Request.URL.String()).
-	// 			Str("client_ip", ctx.ClientIP()).
-	// 			Str("user_agent", ctx.GetHeader("User-Agent")).
-	// 			Dur("duration", time.Since(startTime)).
-	// 			Int("status", ctx.Writer.Status()).
-	// 			Msg(ctx.Errors[0].Err.Error())
-	// 	} else {
-	// 		logger.Info().
-	// 			Str("method", ctx.Request.Method).
-	// 			Str("url", ctx.Request.URL.String()).
-	// 			Str("client_ip", ctx.ClientIP()).
-	// 			Str("user_agent", ctx.GetHeader("User-Agent")).
-	// 			Dur("duration", time.Since(startTime)).
-	// 			Int("status", ctx.Writer.Status()).
-	// 			Msg("Request processed")
-	// 	}
-	// })
-	// server.Use(restapimiddleware.Recovery(logger))
+
+	
 	server.Use(middleware.Recovery(logger))
-	// Log middleware
 	server.Use(middleware.LogMiddleware(logger))
 	server.Use(middleware.ResponseBody())
 	server.Use(middleware.ErrorHandler(logger))
 	server.Use(middleware.RequestBodyMiddleware())
-	// corsHandler := cors.AllowAll()
 	server.Use(cors.New(cors.Options{
 		AllowedOrigins:   []string{"http://localhost:3000"},
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
@@ -79,6 +53,10 @@ func New(
 	categoryService := categoryService.NewCategoryService(sqlDB, categoryStore)
 	categoryHandler := categoryHandler.NewCategoryHandler(categoryService)
 
+	// product service
+	productStore := pg.NewProduct(sqlDB)
+	productService := productservice.NewProductService(sqlDB, productStore)
+	productHandler := producthandler.NewCategoryHandler(*productService)
 	server.POST("api/v1/login/users", func(ctx *gin.Context) {
 		usersHandler.LoginUser(ctx)
 	})
@@ -99,6 +77,21 @@ func New(
 	})
 	server.DELETE("/api/v1/categories/:category_id", func(ctx *gin.Context) {
 		categoryHandler.DeleteCategory(ctx)
+	})
+	server.POST("/api/v1/products", func(ctx *gin.Context) {
+		productHandler.CreateProduct(ctx)
+	})
+	server.PUT("/api/v1/products/:product_id", func(ctx *gin.Context) {
+		productHandler.UpdateProduct(ctx)
+	})
+	server.GET("/api/v1/products/:product_id", func(ctx *gin.Context) {
+		productHandler.GetProductByID(ctx)
+	})
+	server.GET("/api/v1/products", func(ctx *gin.Context) {
+		productHandler.GetAllProducts(ctx)
+	})
+	server.DELETE("/api/v1/products/:product_id", func(ctx *gin.Context) {
+		productHandler.DeleteProductByID(ctx)
 	})
 	// server.POST("api/v1/auth/users/login", func(ctx *gin.Context) {
 	// 	authHandler.LoginUser(ctx)

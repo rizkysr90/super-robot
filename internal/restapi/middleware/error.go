@@ -4,7 +4,6 @@ import (
 	"auth-service-rizkysr90-pos/pkg/errorHandler"
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -58,8 +57,6 @@ func ErrorHandler(logger zerolog.Logger) gin.HandlerFunc {
 		hasErrors := len(ctx.Errors) > 0
 		if hasErrors {
 			ginErr := ctx.Errors[0]
-			log.Println("WADIDAWW", ctx.Errors[0])
-			log.Println("HADUHH", ginErr.Err)
 			// Type assertion from gin.Error to errorHandler.HttpError
 			if restAPIErr, ok := ginErr.Err.(*errorHandler.HttpError); ok {
 				loggerErrorFormat(ctx, logger, restAPIErr, zerolog.WarnLevel)
@@ -68,7 +65,6 @@ func ErrorHandler(logger zerolog.Logger) gin.HandlerFunc {
 				ctx.AbortWithStatusJSON(restAPIErr.Code, restAPIErr)
 
 			} else {
-				log.Println("IN HEREEEE")
 				httpErr := errorHandler.HttpError{
 					Code:    500,
 					Info:    "Internal Server Error",

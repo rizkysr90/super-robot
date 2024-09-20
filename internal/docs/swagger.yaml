@@ -1,0 +1,499 @@
+basePath: /api/v1
+definitions:
+  errorHandler.HttpError:
+    properties:
+      code:
+        type: integer
+      info:
+        type: string
+      message: {}
+    type: object
+  payload.CategoryData:
+    properties:
+      category_name:
+        type: string
+      created_at:
+        type: string
+      deleted_at:
+        type: string
+      id:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  payload.Pagination:
+    properties:
+      page_number:
+        type: integer
+      page_size:
+        type: integer
+      total_elements:
+        type: integer
+      total_pages:
+        type: integer
+    type: object
+  payload.ProductData:
+    properties:
+      base_price:
+        type: number
+      category_id:
+        type: string
+      category_name:
+        description: From categories table
+        type: string
+      created_at:
+        type: string
+      deleted_at:
+        type: string
+      price:
+        type: number
+      product_id:
+        type: string
+      product_name:
+        type: string
+      stock_quantity:
+        type: integer
+      updated_at:
+        type: string
+    type: object
+  payload.ReqCreateCategory:
+    properties:
+      category_name:
+        type: string
+    type: object
+  payload.ReqCreateProduct:
+    properties:
+      base_price:
+        minimum: 0
+        type: number
+      category_id:
+        type: string
+      price:
+        minimum: 0
+        type: number
+      product_name:
+        maxLength: 40
+        type: string
+      stock_quantity:
+        minimum: 0
+        type: integer
+    required:
+    - category_id
+    - product_name
+    type: object
+  payload.ReqUpdateCategory:
+    properties:
+      category_name:
+        type: string
+      id:
+        type: string
+    type: object
+  payload.ReqUpdateProduct:
+    properties:
+      base_price:
+        minimum: 0
+        type: number
+      category_id:
+        type: string
+      price:
+        minimum: 0
+        type: number
+      product_id:
+        type: string
+      product_name:
+        maxLength: 40
+        type: string
+      stock_quantity:
+        minimum: 0
+        type: integer
+    required:
+    - category_id
+    - product_id
+    - product_name
+    type: object
+  payload.ResCreateCategory:
+    type: object
+  payload.ResCreateProduct:
+    type: object
+  payload.ResDeleteCategory:
+    type: object
+  payload.ResDeleteProductByID:
+    type: object
+  payload.ResGetAllCategory:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/payload.CategoryData'
+        type: array
+      metadata:
+        $ref: '#/definitions/payload.Pagination'
+    type: object
+  payload.ResGetAllProducts:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/payload.ProductData'
+        type: array
+      metadata:
+        $ref: '#/definitions/payload.Pagination'
+    type: object
+  payload.ResGetCategoryByID:
+    properties:
+      data:
+        $ref: '#/definitions/payload.CategoryData'
+    type: object
+  payload.ResGetProductByID:
+    properties:
+      data:
+        $ref: '#/definitions/payload.ProductData'
+    type: object
+  payload.ResUpdateCategory:
+    type: object
+  payload.ResUpdateProduct:
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: rizki plastik point of sale api server.
+  version: "1.0"
+paths:
+  /api/v1/products/{product_id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a product by its ID
+      parameters:
+      - description: Product ID
+        in: path
+        name: product_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/payload.ResDeleteProductByID'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errorHandler.HttpError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errorHandler.HttpError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorHandler.HttpError'
+      summary: Delete a product
+      tags:
+      - products
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a single product's details by its ID
+      parameters:
+      - description: Product ID
+        in: path
+        name: product_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/payload.ResGetProductByID'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errorHandler.HttpError'
+        "404":
+          description: Product not found
+          schema:
+            $ref: '#/definitions/errorHandler.HttpError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorHandler.HttpError'
+      summary: Get a product by ID
+      tags:
+      - products
+    put:
+      consumes:
+      - application/json
+      description: Update an existing product's details
+      parameters:
+      - description: Product ID
+        in: path
+        name: product_id
+        required: true
+        type: string
+      - description: Product information to update
+        in: body
+        name: product
+        required: true
+        schema:
+          $ref: '#/definitions/payload.ReqUpdateProduct'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/payload.ResUpdateProduct'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errorHandler.HttpError'
+        "404":
+          description: Product not found
+          schema:
+            $ref: '#/definitions/errorHandler.HttpError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorHandler.HttpError'
+      summary: Update a product
+      tags:
+      - products
+  /categories:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve all categories with optional pagination
+      parameters:
+      - default: 1
+        description: 'Page number (default: 1)'
+        in: query
+        minimum: 1
+        name: page_number
+        type: integer
+      - default: 20
+        description: 'Page size (default: 20)'
+        in: query
+        maximum: 100
+        minimum: 1
+        name: page_size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/payload.ResGetAllCategory'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errorHandler.HttpError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorHandler.HttpError'
+      summary: Get all categories
+      tags:
+      - categories
+    post:
+      consumes:
+      - application/json
+      description: Create a new category with the provided name
+      parameters:
+      - description: Category to create
+        in: body
+        name: category
+        required: true
+        schema:
+          $ref: '#/definitions/payload.ReqCreateCategory'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/payload.ResCreateCategory'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errorHandler.HttpError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorHandler.HttpError'
+      summary: Create a new category
+      tags:
+      - categories
+  /categories/{category_id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a specific category by its ID
+      parameters:
+      - description: Category ID
+        in: path
+        name: category_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/payload.ResDeleteCategory'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errorHandler.HttpError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errorHandler.HttpError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorHandler.HttpError'
+      summary: Delete a category
+      tags:
+      - categories
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a specific category by its ID
+      parameters:
+      - description: Category ID
+        in: path
+        name: category_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/payload.ResGetCategoryByID'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errorHandler.HttpError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errorHandler.HttpError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorHandler.HttpError'
+      summary: Get a category by ID
+      tags:
+      - categories
+    put:
+      consumes:
+      - application/json
+      description: Update a specific category's name by its ID
+      parameters:
+      - description: Category ID
+        in: path
+        name: category_id
+        required: true
+        type: string
+      - description: Updated category information
+        in: body
+        name: category
+        required: true
+        schema:
+          $ref: '#/definitions/payload.ReqUpdateCategory'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/payload.ResUpdateCategory'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errorHandler.HttpError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errorHandler.HttpError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorHandler.HttpError'
+      summary: Edit a category by ID
+      tags:
+      - categories
+  /products:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a list of products with optional filtering and pagination
+      parameters:
+      - default: 10
+        description: Number of items per page
+        in: query
+        name: page_size
+        type: integer
+      - default: 1
+        description: Page number
+        in: query
+        name: page_number
+        type: integer
+      - description: Category ID to filter products
+        in: query
+        name: category_id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/payload.ResGetAllProducts'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errorHandler.HttpError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorHandler.HttpError'
+      summary: Get all products
+      tags:
+      - products
+    post:
+      consumes:
+      - application/json
+      description: Create a new product with the provided details
+      parameters:
+      - description: Product details
+        in: body
+        name: product
+        required: true
+        schema:
+          $ref: '#/definitions/payload.ReqCreateProduct'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/payload.ResCreateProduct'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errorHandler.HttpError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorHandler.HttpError'
+      summary: Create a new product
+      tags:
+      - products
+swagger: "2.0"

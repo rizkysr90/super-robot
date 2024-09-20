@@ -5,12 +5,20 @@ import (
 	"log"
 
 	"auth-service-rizkysr90-pos/internal/config"
+	"auth-service-rizkysr90-pos/internal/docs" // This is where Swag will generate its docs.go file
 	"auth-service-rizkysr90-pos/internal/restapi"
 
 	pgx "github.com/rizkysr90/rizkysr90-go-pkg/pgx"
 	logger "github.com/rizkysr90/rizkysr90-go-pkg/zerolog"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
+// @Rizki Plastik API
+// @version 1.0
+// @description rizki plastik point of sale api server.
+// @host localhost:8080
+// @BasePath /api/v1
 func main() {
 	ctx := context.Background()
 	// -----------------------------------------------------------------------------------------------------------------
@@ -36,12 +44,13 @@ func main() {
 		return
 	}
 	defer func() { sqlDB.Close() }()
-	log.Println("HOREE : ", cfg.RestAPIPort)
 	restAPIserver, err := restapi.New(cfg, sqlDB, logger)
+	docs.SwaggerInfo.BasePath =  "/api/v1"
+	restAPIserver.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
 	if err != nil {
 		logger.Error().Err(sqlDBErr).Msgf("restapi: main failed to construct server: %s", err)
 	}
-	log.Println("HOREE : ", cfg.RestAPIPort)
 	err = restAPIserver.Run(cfg.RestAPIPort) // listen and serve on 0.0.0.0:8080
 	if err != nil {
 		logger.Error().Err(sqlDBErr).Msgf("restapi: main failed to run server: %s", err)

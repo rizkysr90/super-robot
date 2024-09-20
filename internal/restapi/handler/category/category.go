@@ -23,7 +23,17 @@ func NewCategoryHandler(
 		categoryService: categoryService,
 	}
 }
-
+// CreateCategory godoc
+// @Summary Create a new category
+// @Description Create a new category with the provided name
+// @Tags categories
+// @Accept json
+// @Produce json
+// @Param category body payload.ReqCreateCategory true "Category to create"
+// @Success 201 {object} payload.ResCreateCategory
+// @Failure 400 {object} errorHandler.HttpError
+// @Failure 500 {object} errorHandler.HttpError
+// @Router /categories [post]
 func (c *CategoryHandler) CreateCategory(ctx *gin.Context) {
 	payload := &payload.ReqCreateCategory{}
 	if err := ctx.ShouldBind(payload); err != nil {
@@ -41,6 +51,19 @@ func (c *CategoryHandler) CreateCategory(ctx *gin.Context) {
 	}
 	ctx.JSON(http.StatusCreated, data)
 }
+
+// GetAllCategories godoc
+// @Summary Get all categories
+// @Description Retrieve all categories with optional pagination
+// @Tags categories
+// @Accept json
+// @Produce json
+// @Param page_number query int false "Page number (default: 1)" minimum(1) default(1)
+// @Param page_size query int false "Page size (default: 20)" minimum(1) maximum(100) default(20)
+// @Success 200 {object} payload.ResGetAllCategory
+// @Failure 400 {object} errorHandler.HttpError
+// @Failure 500 {object} errorHandler.HttpError
+// @Router /categories [get]
 func (c *CategoryHandler) GetAllCategories(ctx *gin.Context) {
 	payload := &payload.ReqGetAllCategory{}
 	
@@ -79,7 +102,18 @@ func (c *CategoryHandler) GetAllCategories(ctx *gin.Context) {
 	}
 	ctx.JSON(http.StatusOK, data)
 }
-
+// GetCategoryByID godoc
+// @Summary Get a category by ID
+// @Description Retrieve a specific category by its ID
+// @Tags categories
+// @Accept json
+// @Produce json
+// @Param category_id path string true "Category ID"
+// @Success 200 {object} payload.ResGetCategoryByID
+// @Failure 400 {object} errorHandler.HttpError
+// @Failure 404 {object} errorHandler.HttpError
+// @Failure 500 {object} errorHandler.HttpError
+// @Router /categories/{category_id} [get]
 func (c *CategoryHandler) GetCategoryByID(ctx *gin.Context) {
 	categoryID := ctx.Param("category_id")
 	payloadRequest := payload.ReqGetCategoryByID{
@@ -93,6 +127,19 @@ func (c *CategoryHandler) GetCategoryByID(ctx *gin.Context) {
 	}
 	ctx.JSON(http.StatusOK, data)
 }
+// EditCategoryByID godoc
+// @Summary Edit a category by ID
+// @Description Update a specific category's name by its ID
+// @Tags categories
+// @Accept json
+// @Produce json
+// @Param category_id path string true "Category ID"
+// @Param category body payload.ReqUpdateCategory true "Updated category information"
+// @Success 200 {object} payload.ResUpdateCategory
+// @Failure 400 {object} errorHandler.HttpError
+// @Failure 404 {object} errorHandler.HttpError
+// @Failure 500 {object} errorHandler.HttpError
+// @Router /categories/{category_id} [put]
 func (c *CategoryHandler) EditCategoryByID(ctx *gin.Context) {
 	categoryID := ctx.Param("category_id")
 	payloadRequest := payload.ReqUpdateCategory{
@@ -113,6 +160,18 @@ func (c *CategoryHandler) EditCategoryByID(ctx *gin.Context) {
 	}
 	ctx.JSON(http.StatusOK, data)
 }
+// DeleteCategory godoc
+// @Summary Delete a category
+// @Description Delete a specific category by its ID
+// @Tags categories
+// @Accept json
+// @Produce json
+// @Param category_id path string true "Category ID"
+// @Success 200 {object} payload.ResDeleteCategory
+// @Failure 400 {object} errorHandler.HttpError
+// @Failure 404 {object} errorHandler.HttpError
+// @Failure 500 {object} errorHandler.HttpError
+// @Router /categories/{category_id} [delete]
 func (c *CategoryHandler) DeleteCategory(ctx *gin.Context) {
 	categoryID := ctx.Param("category_id")
 	payloadRequest := payload.ReqDeleteCategory{
