@@ -523,6 +523,52 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/products/generate-barcode": {
+            "post": {
+                "description": "Generate a PDF containing barcodes for a single product",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/pdf"
+                ],
+                "tags": [
+                    "products"
+                ],
+                "summary": "Generate barcode PDF for a single product",
+                "parameters": [
+                    {
+                        "description": "Product ID",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/payload.GenerateBarcodeRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "file"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/errorHandler.HttpError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/errorHandler.HttpError"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -554,6 +600,14 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "payload.GenerateBarcodeRequest": {
+            "type": "object",
+            "properties": {
+                "product_id": {
                     "type": "string"
                 }
             }

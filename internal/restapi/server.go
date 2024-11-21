@@ -93,6 +93,9 @@ func New(
 	server.DELETE("/api/v1/products/:product_id", func(ctx *gin.Context) {
 		productHandler.DeleteProductByID(ctx)
 	})
+	server.POST("/api/v1/products/generate-barcode", func(ctx *gin.Context) {
+		productHandler.GenerateBarcodePDF(ctx)
+	})
 	// server.POST("api/v1/auth/users/login", func(ctx *gin.Context) {
 	// 	authHandler.LoginUser(ctx)
 	// })

@@ -6,6 +6,7 @@ toolchain go1.22.5
 
 require (
 	github.com/DATA-DOG/go-sqlmock v1.5.2
+	github.com/boombuler/barcode v1.0.0
 	github.com/caarlos0/env/v8 v8.0.0
 	github.com/gin-gonic/gin v1.10.0
 	github.com/go-playground/validator/v10 v10.22.1
@@ -14,6 +15,7 @@ require (
 	github.com/rizkysr90/rizkysr90-go-pkg v0.0.0-20240420154856-a4674c2bc1d6
 	github.com/rs/cors/wrapper/gin v0.0.0-20240228164225-8d33ca4794ea
 	github.com/rs/zerolog v1.32.0
+	github.com/signintech/gopdf v0.27.1
 	github.com/stretchr/testify v1.9.0
 	github.com/swaggo/files v1.0.1
 	github.com/swaggo/gin-swagger v1.6.0
@@ -51,6 +53,8 @@ require (
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/pelletier/go-toml/v2 v2.2.3 // indirect
+	github.com/phpdave11/gofpdi v1.0.14-0.20211212211723-1f10f9844311 // indirect
+	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/rs/cors v1.10.1 // indirect
 	github.com/stretchr/objx v0.5.2 // indirect

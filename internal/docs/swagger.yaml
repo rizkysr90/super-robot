@@ -21,6 +21,11 @@ definitions:
       updated_at:
         type: string
     type: object
+  payload.GenerateBarcodeRequest:
+    properties:
+      product_id:
+        type: string
+    type: object
   payload.Pagination:
     properties:
       page_number:
@@ -494,6 +499,36 @@ paths:
           schema:
             $ref: '#/definitions/errorHandler.HttpError'
       summary: Create a new product
+      tags:
+      - products
+  /products/generate-barcode:
+    post:
+      consumes:
+      - application/json
+      description: Generate a PDF containing barcodes for a single product
+      parameters:
+      - description: Product ID
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/payload.GenerateBarcodeRequest'
+      produces:
+      - application/pdf
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: file
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errorHandler.HttpError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorHandler.HttpError'
+      summary: Generate barcode PDF for a single product
       tags:
       - products
 swagger: "2.0"

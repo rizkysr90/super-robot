@@ -186,3 +186,33 @@ func (c *ProductHandler) DeleteProductByID(ctx *gin.Context) {
 	}
 	ctx.JSON(http.StatusOK, data)
 }
+// GenerateBarcodePDF godoc
+// @Summary Generate barcode PDF for a single product
+// @Description Generate a PDF containing barcodes for a single product
+// @Tags products
+// @Accept json
+// @Produce application/pdf
+// @Param request body payload.GenerateBarcodeRequest true "Product ID"
+// @Success 200 {file} application/pdf
+// @Failure 400 {object} errorHandler.HttpError
+// @Failure 500 {object} errorHandler.HttpError
+// @Router /products/generate-barcode [post]
+func (h *ProductHandler) GenerateBarcodePDF(ctx *gin.Context) {
+    var req payload.GenerateBarcodeRequest
+    if err := ctx.ShouldBindJSON(&req); err != nil {
+        ctx.Error(errorHandler.NewBadRequest(
+            errorHandler.WithInfo("invalid request"),
+            errorHandler.WithMessage(err.Error()),
+        ))
+        return
+    }
+
+    response, err := h.productService.GenerateBarcodePDF(ctx, &req)
+    if err != nil {
+        ctx.Error(err)
+        return
+    }
+
+    ctx.Header("Content-Disposition", "attachment; filename=product_barcode.pdf")
+    ctx.Data(http.StatusOK, "application/pdf", response.PDFBytes)
+}
