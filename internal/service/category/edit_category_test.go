@@ -16,7 +16,7 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
-func TestService_EditCategory(t *testing.T) {
+func TestServiceEditCategory(t *testing.T) {
 	fixedUUID := uuid.NewString()
 	tests := []struct {
 		name             string
@@ -54,7 +54,9 @@ func TestService_EditCategory(t *testing.T) {
 			input: &payload.ReqUpdateCategory{
 				CategoryName: "Valid Category",
 			},
-			mockExpectations: func(mockCategoryStore *mocks.MockCategoryStore, sqlMock sqlmock.Sqlmock) {},
+			mockExpectations: func(mockCategoryStore *mocks.MockCategoryStore, sqlMock sqlmock.Sqlmock) {
+				// it's empty because we dont need mocking
+			},
 			expectedError: func(err error) bool {
 				return err != nil && err.Error() == "id is required"
 			},
@@ -65,7 +67,9 @@ func TestService_EditCategory(t *testing.T) {
 			input: &payload.ReqUpdateCategory{
 				ID: "valid-id",
 			},
-			mockExpectations: func(mockCategoryStore *mocks.MockCategoryStore, sqlMock sqlmock.Sqlmock) {},
+			mockExpectations: func(mockCategoryStore *mocks.MockCategoryStore, sqlMock sqlmock.Sqlmock) {
+				// it's empty because we dont need mocking
+			},
 			expectedError: func(err error) bool {
 				return err != nil && err.Error() == "category name is required"
 			},
@@ -77,7 +81,9 @@ func TestService_EditCategory(t *testing.T) {
 				ID:           "valid-id",
 				CategoryName: strings.Repeat("A", 201), // Exceeding the limit
 			},
-			mockExpectations: func(mockCategoryStore *mocks.MockCategoryStore, sqlMock sqlmock.Sqlmock) {},
+			mockExpectations: func(mockCategoryStore *mocks.MockCategoryStore, sqlMock sqlmock.Sqlmock) {
+				// it's empty because we dont need mocking
+			},
 			expectedError: func(err error) bool {
 				return err != nil && err.Error() == "too long, max 200 character"
 			},

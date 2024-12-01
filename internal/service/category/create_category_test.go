@@ -14,7 +14,7 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
-func TestService_Create(t *testing.T) {
+func TestCreateCategoryService(t *testing.T) {
 	tests := []struct {
 		name             string
 		input            *payload.ReqCreateCategory
@@ -43,7 +43,9 @@ func TestService_Create(t *testing.T) {
 			input: &payload.ReqCreateCategory{
 				CategoryName: "",
 			},
-			mockExpectations: func(mockCategoryStore *mocks.MockCategoryStore, sqlMock sqlmock.Sqlmock) {},
+			mockExpectations: func(mockCategoryStore *mocks.MockCategoryStore, sqlMock sqlmock.Sqlmock) {
+				// it empty because if category name it should run any assertion
+			},
 			expectedError: func(err error) bool {
 				// Check if the error message contains the expected prefix
 				return err != nil && err.Error() == "category name is required"
@@ -55,7 +57,9 @@ func TestService_Create(t *testing.T) {
 			input: &payload.ReqCreateCategory{
 				CategoryName: "A very long category name that exceeds the maximum allowed length for a category name  allowed length for a category name",
 			},
-			mockExpectations: func(mockCategoryStore *mocks.MockCategoryStore, sqlMock sqlmock.Sqlmock) {},
+			mockExpectations: func(mockCategoryStore *mocks.MockCategoryStore, sqlMock sqlmock.Sqlmock) {
+				// it empty because if category name it should run any assertion
+			},
 			expectedError: func(err error) bool {
 				// Check if the error message contains the expected prefix
 				return err != nil && err.Error() == "max category name is 100 characters"

@@ -56,55 +56,32 @@ func New(
 	productStore := pg.NewProduct(sqlDB)
 	productService := productservice.NewProductService(sqlDB, productStore)
 	productHandler := producthandler.NewCategoryHandler(*productService)
+
 	server.POST("api/v1/login/users", func(ctx *gin.Context) {
 		usersHandler.LoginUser(ctx)
 	})
 	server.POST("api/v1/signup/users", func(ctx *gin.Context) {
 		usersHandler.CreateUser(ctx)
 	})
-	server.POST("/api/v1/categories", func(ctx *gin.Context) {
-		categoryHandler.CreateCategory(ctx)
-	})
-	server.GET("/api/v1/categories", func(ctx *gin.Context) {
-		categoryHandler.GetAllCategories(ctx)
-	})
-	server.GET("/api/v1/categories/:category_id", func(ctx *gin.Context) {
-		categoryHandler.GetCategoryByID(ctx)
-	})
-	server.PUT("/api/v1/categories/:category_id", func(ctx *gin.Context) {
-		categoryHandler.EditCategoryByID(ctx)
-	})
-	server.DELETE("/api/v1/categories/:category_id", func(ctx *gin.Context) {
-		categoryHandler.DeleteCategory(ctx)
-	})
-	server.POST("/api/v1/products", func(ctx *gin.Context) {
-		productHandler.CreateProduct(ctx)
-	})
-	server.PUT("/api/v1/products/:product_id", func(ctx *gin.Context) {
-		productHandler.UpdateProduct(ctx)
-	})
-	server.GET("/api/v1/products/:product_id", func(ctx *gin.Context) {
-		productHandler.GetProductByID(ctx)
-	})
-	server.GET("/api/v1/products", func(ctx *gin.Context) {
-		productHandler.GetAllProducts(ctx)
-	})
-	server.DELETE("/api/v1/products/:product_id", func(ctx *gin.Context) {
-		productHandler.DeleteProductByID(ctx)
-	})
-	server.POST("/api/v1/products/generate-barcode", func(ctx *gin.Context) {
-		productHandler.GenerateBarcodePDF(ctx)
-	})
-	// server.POST("api/v1/auth/users/login", func(ctx *gin.Context) {
-	// 	authHandler.LoginUser(ctx)
-	// })
-	// server.POST("/api/v1/auth/users/refreshtoken", func(ctx *gin.Context) {
-	// 	authHandler.RefreshToken(ctx)
-	// })
-
-	// PRIVATE ROUTES
-	authGroup := server.Group("")
-	authGroup.GET("api/v1/privateroutes")
+	// Create a route group for categories
+	categoryRoutes := server.Group("/api/v1/categories")
+	{
+		categoryRoutes.POST("", categoryHandler.CreateCategory)
+		categoryRoutes.GET("", categoryHandler.GetAllCategories)
+		categoryRoutes.GET("/:category_id", categoryHandler.GetCategoryByID)
+		categoryRoutes.PUT("/:category_id", categoryHandler.EditCategoryByID)
+		categoryRoutes.DELETE("/:category_id", categoryHandler.DeleteCategory)
+	}
+	// Create a route group for products
+	productRoutes := server.Group("/api/v1/products")
+	{
+		productRoutes.POST("", productHandler.CreateProduct)
+		productRoutes.PUT("/:product_id", productHandler.UpdateProduct)
+		productRoutes.GET("/:product_id", productHandler.GetProductByID)
+		productRoutes.GET("", productHandler.GetAllProducts)
+		productRoutes.DELETE("/:product_id", productHandler.DeleteProductByID)
+		productRoutes.POST("/generate-barcode", productHandler.GenerateBarcodePDF)
+	}
 
 	server.NoRoute(func(c *gin.Context) {
 		if err := c.Error(errorHandler.NewNotFound(errorHandler.WithMessage("route not found"))); err != nil {

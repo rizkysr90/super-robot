@@ -16,6 +16,7 @@ import (
 )
 
 func TestDeleteCategory(t *testing.T) {
+	const existingID = "existing-id"
 	tests := []struct {
 		name             string
 		input            *payload.ReqDeleteCategory
@@ -26,13 +27,13 @@ func TestDeleteCategory(t *testing.T) {
 		{
 			name: "Valid Input",
 			input: &payload.ReqDeleteCategory{
-				ID: "existing-id",
+				ID: existingID,
 			},
 			mockExpectations: func(mockCategoryStore *mocks.MockCategoryStore, sqlMock sqlmock.Sqlmock) {
-				mockCategoryStore.On("FindByID", mock.Anything, "existing-id").Return(&store.CategoryData{
-					ID: "existing-id",
+				mockCategoryStore.On("FindByID", mock.Anything, existingID).Return(&store.CategoryData{
+					ID: existingID,
 				}, nil)
-				mockCategoryStore.On("SoftDelete", mock.Anything, "existing-id").Return(nil)
+				mockCategoryStore.On("SoftDelete", mock.Anything, existingID).Return(nil)
 				sqlMock.ExpectBegin()
 				sqlMock.ExpectCommit()
 			},
@@ -44,7 +45,9 @@ func TestDeleteCategory(t *testing.T) {
 			input: &payload.ReqDeleteCategory{
 				ID: "",
 			},
-			mockExpectations: func(mockCategoryStore *mocks.MockCategoryStore, sqlMock sqlmock.Sqlmock) {},
+			mockExpectations: func(mockCategoryStore *mocks.MockCategoryStore, sqlMock sqlmock.Sqlmock) {
+				// it's empty because we dont need mocking
+			},
 			expectedError: func(err error) bool {
 				return err != nil && err.Error() == "required id data"
 			},
@@ -66,13 +69,13 @@ func TestDeleteCategory(t *testing.T) {
 		{
 			name: "Database Error During Deletion",
 			input: &payload.ReqDeleteCategory{
-				ID: "existing-id",
+				ID: existingID,
 			},
 			mockExpectations: func(mockCategoryStore *mocks.MockCategoryStore, sqlMock sqlmock.Sqlmock) {
-				mockCategoryStore.On("FindByID", mock.Anything, "existing-id").Return(&store.CategoryData{
-					ID: "existing-id",
+				mockCategoryStore.On("FindByID", mock.Anything, existingID).Return(&store.CategoryData{
+					ID: existingID,
 				}, nil)
-				mockCategoryStore.On("SoftDelete", mock.Anything, "existing-id").Return(errors.New("db error"))
+				mockCategoryStore.On("SoftDelete", mock.Anything, existingID).Return(errors.New("db error"))
 				sqlMock.ExpectBegin()
 				sqlMock.ExpectRollback()
 			},
