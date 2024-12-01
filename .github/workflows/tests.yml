@@ -16,6 +16,12 @@ jobs:
         uses: actions/setup-go@v4
         with:
           go-version: "1.21"
+      
+      # Configure Git for private repositories
+      - name: Configure Git for private modules
+      env:
+        TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+      run: git config --global url."https://${TOKEN}@github.com/".insteadOf "https://github.com/"
 
       - name: Install dependencies
         run: make vendor
