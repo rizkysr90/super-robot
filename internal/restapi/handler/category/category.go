@@ -5,18 +5,18 @@ import (
 	"strconv"
 
 	"rizkysr90-pos/internal/payload"
-	"rizkysr90-pos/internal/service"
+	"rizkysr90-pos/internal/service/category"
 	"rizkysr90-pos/pkg/errorHandler"
 
 	"github.com/gin-gonic/gin"
 )
 
 type CategoryHandler struct {
-	categoryService service.CategoryService
+	categoryService *category.Service
 }
 
 func NewCategoryHandler(
-	categoryService service.CategoryService,
+	categoryService *category.Service,
 ) *CategoryHandler {
 	return &CategoryHandler{
 		categoryService: categoryService,

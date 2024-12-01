@@ -9,6 +9,11 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+const (
+	errMissingProductID    = "missing product ID"
+	errProductIDIsRequired = "Product ID is required"
+)
+
 type ProductHandler struct {
 	productService productservice.Service
 }
@@ -98,8 +103,8 @@ func (c *ProductHandler) UpdateProduct(ctx *gin.Context) {
 	productID := ctx.Param("product_id")
 	if productID == "" {
 		ctx.Error(errorHandler.NewBadRequest(
-			errorHandler.WithInfo("missing product ID"),
-			errorHandler.WithMessage("Product ID is required"),
+			errorHandler.WithInfo(errMissingProductID),
+			errorHandler.WithMessage(errProductIDIsRequired),
 		))
 		return
 	}
@@ -139,8 +144,8 @@ func (c *ProductHandler) GetProductByID(ctx *gin.Context) {
 	productID := ctx.Param("product_id")
 	if productID == "" {
 		ctx.Error(errorHandler.NewBadRequest(
-			errorHandler.WithInfo("missing product ID"),
-			errorHandler.WithMessage("Product ID is required"),
+			errorHandler.WithInfo(errMissingProductID),
+			errorHandler.WithMessage(errProductIDIsRequired),
 		))
 		return
 	}
@@ -172,8 +177,8 @@ func (c *ProductHandler) DeleteProductByID(ctx *gin.Context) {
 	productID := ctx.Param("product_id")
 	if productID == "" {
 		ctx.Error(errorHandler.NewBadRequest(
-			errorHandler.WithInfo("missing product ID"),
-			errorHandler.WithMessage("Product ID is required"),
+			errorHandler.WithInfo(errMissingProductID),
+			errorHandler.WithMessage(errProductIDIsRequired),
 		))
 		return
 	}

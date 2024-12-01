@@ -18,6 +18,7 @@ import (
 
 func TestGetCategoryByID(t *testing.T) {
 	fixedTime := time.Now().UTC()
+	const existingID = "existing-id"
 	tests := []struct {
 		name             string
 		input            *payload.ReqGetCategoryByID
@@ -28,11 +29,11 @@ func TestGetCategoryByID(t *testing.T) {
 		{
 			name: "Valid Input",
 			input: &payload.ReqGetCategoryByID{
-				CategoryID: "existing-id",
+				CategoryID: existingID,
 			},
 			mockExpectations: func(mockCategoryStore *mocks.MockCategoryStore, sqlMock sqlmock.Sqlmock) {
-				mockCategoryStore.On("FindByID", mock.Anything, "existing-id").Return(&store.CategoryData{
-					ID:           "existing-id",
+				mockCategoryStore.On("FindByID", mock.Anything, existingID).Return(&store.CategoryData{
+					ID:           existingID,
 					CategoryName: "Category Name",
 					CreatedAt:    fixedTime,
 					UpdatedAt:    fixedTime,
@@ -42,7 +43,7 @@ func TestGetCategoryByID(t *testing.T) {
 			expectedError: nil,
 			expectedResponse: &payload.ResGetCategoryByID{
 				CategoryData: &payload.CategoryData{
-					ID:           "existing-id",
+					ID:           existingID,
 					CategoryName: "Category Name",
 					CreatedAt:    fixedTime,
 					UpdatedAt:    fixedTime,
@@ -55,7 +56,9 @@ func TestGetCategoryByID(t *testing.T) {
 			input: &payload.ReqGetCategoryByID{
 				CategoryID: "",
 			},
-			mockExpectations: func(mockCategoryStore *mocks.MockCategoryStore, sqlMock sqlmock.Sqlmock) {},
+			mockExpectations: func(mockCategoryStore *mocks.MockCategoryStore, sqlMock sqlmock.Sqlmock) {
+				// it's empty because we dont need mocking
+			},
 			expectedError: func(err error) bool {
 				return err != nil && err.Error() == "category_id is required"
 			},
@@ -77,10 +80,10 @@ func TestGetCategoryByID(t *testing.T) {
 		{
 			name: "Database Error During Retrieval",
 			input: &payload.ReqGetCategoryByID{
-				CategoryID: "existing-id",
+				CategoryID: existingID,
 			},
 			mockExpectations: func(mockCategoryStore *mocks.MockCategoryStore, sqlMock sqlmock.Sqlmock) {
-				mockCategoryStore.On("FindByID", mock.Anything, "existing-id").Return(nil, errors.New("db error"))
+				mockCategoryStore.On("FindByID", mock.Anything, existingID).Return(nil, errors.New("db error"))
 			},
 			expectedError: func(err error) bool {
 				return err != nil && err.Error() == "db error"
