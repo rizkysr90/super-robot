@@ -6,14 +6,12 @@ import (
 	"rizkysr90-pos/internal/config"
 	categoryHandler "rizkysr90-pos/internal/restapi/handler/category"
 	producthandler "rizkysr90-pos/internal/restapi/handler/product"
-	usersHandler "rizkysr90-pos/internal/restapi/handler/users"
 	"rizkysr90-pos/internal/restapi/middleware"
 	categoryService "rizkysr90-pos/internal/service/category"
 	"rizkysr90-pos/internal/service/productservice"
-	usersService "rizkysr90-pos/internal/service/user"
 	"rizkysr90-pos/internal/store/pg"
+	documentgen "rizkysr90-pos/pkg/documentGen"
 	"rizkysr90-pos/pkg/errorHandler"
-	jwttoken "rizkysr90-pos/pkg/jwt"
 
 	"github.com/gin-gonic/gin"
 	cors "github.com/rs/cors/wrapper/gin"
@@ -28,7 +26,6 @@ func New(
 ) (*gin.Engine, error) {
 	// Setup rest api server and its provided services.
 	server := gin.New()
-	jwt := jwttoken.New(cfg.SecretKeyJWT)
 
 	server.Use(middleware.Recovery(logger))
 	server.Use(middleware.LogMiddleware(logger))
@@ -42,11 +39,6 @@ func New(
 		AllowCredentials: true,
 	}))
 
-	// Users service
-	usersStore := pg.NewUserDB(sqlDB)
-	usersService := usersService.NewUsersService(sqlDB, usersStore, jwt)
-	usersHandler := usersHandler.NewUsersHandler(usersService, cfg)
-
 	// category service
 	categoryStore := pg.NewCategory(sqlDB)
 	categoryService := categoryService.NewCategoryService(sqlDB, categoryStore)
@@ -54,15 +46,10 @@ func New(
 
 	// product service
 	productStore := pg.NewProduct(sqlDB)
-	productService := productservice.NewProductService(sqlDB, productStore)
+	documentGenerator := documentgen.NewDocumentGenerator()
+	productService := productservice.NewProductService(sqlDB, productStore, documentGenerator)
 	productHandler := producthandler.NewCategoryHandler(*productService)
 
-	server.POST("api/v1/login/users", func(ctx *gin.Context) {
-		usersHandler.LoginUser(ctx)
-	})
-	server.POST("api/v1/signup/users", func(ctx *gin.Context) {
-		usersHandler.CreateUser(ctx)
-	})
 	// Create a route group for categories
 	categoryRoutes := server.Group("/api/v1/categories")
 	{

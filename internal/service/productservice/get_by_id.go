@@ -22,7 +22,7 @@ func (request *reqGetByID) validate() error {
 	// For example, if ProductID should be a specific format:
 	// validate.RegisterValidation("product_id_format", validateProductIDFormat)
 
-	err := validate.Struct(request)
+	err := validate.Struct(request.data)
 	if err != nil {
 		//nolint:errorlint
 		validationErrors, ok := err.(validator.ValidationErrors)
