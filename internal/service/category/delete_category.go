@@ -1,12 +1,12 @@
 package category
 
 import (
-	"auth-service-rizkysr90-pos/internal/payload"
-	"auth-service-rizkysr90-pos/pkg/errorHandler"
-	"auth-service-rizkysr90-pos/pkg/validator"
 	"context"
 	"database/sql"
 	"errors"
+	"rizkysr90-pos/internal/payload"
+	"rizkysr90-pos/pkg/errorHandler"
+	"rizkysr90-pos/pkg/validator"
 	"strings"
 
 	"github.com/rizkysr90/rizkysr90-go-pkg/sqldb"

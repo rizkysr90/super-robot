@@ -1,12 +1,13 @@
+//nolint:godot
 package main
 
 import (
 	"context"
 	"log"
 
-	"auth-service-rizkysr90-pos/internal/config"
-	"auth-service-rizkysr90-pos/internal/docs" // This is where Swag will generate its docs.go file
-	"auth-service-rizkysr90-pos/internal/restapi"
+	"rizkysr90-pos/internal/config"
+	"rizkysr90-pos/internal/docs" // This is where Swag will generate its docs.go file
+	"rizkysr90-pos/internal/restapi"
 
 	pgx "github.com/rizkysr90/rizkysr90-go-pkg/pgx"
 	logger "github.com/rizkysr90/rizkysr90-go-pkg/zerolog"
@@ -45,7 +46,7 @@ func main() {
 	}
 	defer func() { sqlDB.Close() }()
 	restAPIserver, err := restapi.New(cfg, sqlDB, logger)
-	docs.SwaggerInfo.BasePath =  "/api/v1"
+	docs.SwaggerInfo.BasePath = "/api/v1"
 	restAPIserver.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	if err != nil {

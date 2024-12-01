@@ -1,7 +1,6 @@
 package validator
 
 import (
-	"auth-service-rizkysr90-pos/internal/constant"
 	"reflect"
 	"regexp"
 	"strings"
@@ -57,15 +56,6 @@ func ValidateOnlyNumber(input string) bool {
 	// Regular expression to match only digits (0-9)
 	regex := regexp.MustCompile(`^[0-9]+$`)
 	return regex.MatchString(input)
-}
-func ValidateRoles(role int) bool {
-	values := []int{constant.RBAC_ADMIN, constant.RBAC_OPERATIONAL}
-	for _, v := range values {
-		if role == v {
-			return true // Input value found in array, so it's valid
-		}
-	}
-	return false // Input value not found in array, so it's invalid
 }
 func ValidatePassword(password string) bool {
 	/*

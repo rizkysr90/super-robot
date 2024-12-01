@@ -1,4 +1,4 @@
-module auth-service-rizkysr90-pos
+module rizkysr90-pos
 
 go 1.22.0
 

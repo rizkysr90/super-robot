@@ -1,7 +1,7 @@
 package category
 
 import (
-	store "auth-service-rizkysr90-pos/internal/store/mocks"
+	store "rizkysr90-pos/internal/store/mocks"
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/stretchr/testify/assert"
@@ -22,7 +22,7 @@ func initTestService(t *testing.T) (
 	}
 	// Initialize the service with the mock store
 	svc := &Service{
-		db: db,
+		db:            db,
 		categoryStore: mockCategoryStore,
 	}
 

@@ -1,12 +1,12 @@
 package category
 
 import (
-	"auth-service-rizkysr90-pos/internal/payload"
-	"auth-service-rizkysr90-pos/internal/store"
 	"context"
 	"math"
+	"rizkysr90-pos/internal/payload"
+	"rizkysr90-pos/internal/store"
 
-	"auth-service-rizkysr90-pos/pkg/errorHandler"
+	"rizkysr90-pos/pkg/errorHandler"
 )
 
 type reqGetCategories struct {

@@ -7,19 +7,19 @@ import (
 	"fmt"
 	"strings"
 
-	"auth-service-rizkysr90-pos/internal/helper"
-	"auth-service-rizkysr90-pos/internal/payload"
-	"auth-service-rizkysr90-pos/internal/store"
-	"auth-service-rizkysr90-pos/pkg/errorHandler"
+	"rizkysr90-pos/internal/helper"
+	"rizkysr90-pos/internal/payload"
+	"rizkysr90-pos/internal/store"
+	"rizkysr90-pos/pkg/errorHandler"
 
 	"github.com/go-playground/validator/v10"
-	"github.com/google/uuid"
 	"github.com/rizkysr90/rizkysr90-go-pkg/sqldb"
 )
 
 type reqCreateProduct struct {
 	data *payload.ReqCreateProduct
 }
+
 func (req *reqCreateProduct) sanitize() {
 	// Sanitize
 	req.data.ProductName = strings.TrimSpace(req.data.ProductName)
@@ -32,16 +32,14 @@ func (req *reqCreateProduct) validate() error {
 	// Initialize validator
 	validate := validator.New()
 
-	// Custom validation for CategoryID (UUID format)
-	validate.RegisterValidation("uuid", func(fl validator.FieldLevel) bool {
-		_, err := uuid.Parse(fl.Field().String())
-		return err == nil
-	})
-
 	// Validate
 	err := validate.Struct(req.data)
 	if err != nil {
-		validationErrors := err.(validator.ValidationErrors)
+		//nolint:errorlint
+		validationErrors, ok := err.(validator.ValidationErrors)
+		if !ok {
+			return errorHandler.NewInternalServer()
+		}
 		for _, e := range validationErrors {
 			httpError := errorHandler.HttpError{
 				Code:    400,
@@ -56,7 +54,7 @@ func (req *reqCreateProduct) validate() error {
 	}
 	return nil
 }
-func (s *Service) CreateProduct(ctx context.Context, 
+func (s *Service) CreateProduct(ctx context.Context,
 	request *payload.ReqCreateProduct) (*payload.ResCreateProduct, error) {
 	input := &reqCreateProduct{request}
 	input.sanitize()
@@ -76,18 +74,18 @@ func (s *Service) CreateProduct(ctx context.Context,
 		return nil, errorHandler.NewInternalServer(errorHandler.WithInfo(err.Error()))
 	}
 	insertedData := store.ProductData{
-		ProductID: getProductID,
-		ProductName: request.ProductName,
-		Price: request.Price,
-		BasePrice: request.BasePrice,
+		ProductID:     getProductID,
+		ProductName:   request.ProductName,
+		Price:         request.Price,
+		BasePrice:     request.BasePrice,
 		StockQuantity: request.StockQuantity,
-		CategoryID: request.CategoryID,
+		CategoryID:    request.CategoryID,
 	}
-	if err := sqldb.WithinTx(ctx, s.db, func(qe sqldb.QueryExecutor) error {
+	if err = sqldb.WithinTx(ctx, s.db, func(qe sqldb.QueryExecutor) error {
 		txContext := sqldb.WithTxContext(ctx, qe)
 		return s.productStore.Insert(txContext, &insertedData)
 	}); err != nil {
-		return nil,err
+		return nil, err
 	}
 	return &payload.ResCreateProduct{}, nil
 }

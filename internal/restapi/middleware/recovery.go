@@ -1,17 +1,16 @@
 package middleware
 
 import (
-	"auth-service-rizkysr90-pos/pkg/errorHandler"
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"rizkysr90-pos/pkg/errorHandler"
 	"runtime/debug"
 
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog"
 )
 
-//nolint:gocognit
 func Recovery(logger zerolog.Logger) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		defer func() {
@@ -47,10 +46,8 @@ func Recovery(logger zerolog.Logger) gin.HandlerFunc {
 						Str("stack", string(stackTrace)).
 						Msg(fmt.Sprintf("%s %s", ctx.Request.Method, ctx.Request.URL.String()))
 					ctx.AbortWithStatusJSON(http.StatusInternalServerError, httpErr)
-
 				}
 			}
-
 		}()
 		// Call the next handler
 		ctx.Next()

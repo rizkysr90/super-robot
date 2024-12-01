@@ -1,10 +1,11 @@
 package middleware
 
 import (
-	"auth-service-rizkysr90-pos/pkg/errorHandler"
 	"bytes"
+	"errors"
 	"io"
 	"net/http"
+	"rizkysr90-pos/pkg/errorHandler"
 
 	"github.com/gin-gonic/gin"
 )
@@ -39,5 +40,9 @@ func GetRequstBodyValue(ctx *gin.Context) ([]byte, error) {
 		getRequestBodyErr := errorHandler.NewInternalServer(errorHandler.WithInfo("Request body not found in context"))
 		return nil, getRequestBodyErr
 	}
-	return requestBody.([]byte), nil
+	requestBodyData, ok := requestBody.([]byte)
+	if !ok {
+		return nil, errors.New("failed to assert response body")
+	}
+	return requestBodyData, nil
 }

@@ -1,9 +1,9 @@
 package pg
 
 import (
-	"auth-service-rizkysr90-pos/internal/store"
 	"context"
 	"database/sql"
+	"rizkysr90-pos/internal/store"
 	"time"
 
 	"github.com/rizkysr90/rizkysr90-go-pkg/sqldb"

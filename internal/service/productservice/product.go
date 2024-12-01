@@ -1,18 +1,18 @@
 package productservice
 
 import (
-	"auth-service-rizkysr90-pos/internal/store"
 	"database/sql"
+	"rizkysr90-pos/internal/store"
 )
 
 type Service struct {
-	db            *sql.DB
+	db           *sql.DB
 	productStore store.Product
 }
 
 func NewProductService(sqlDB *sql.DB, productStore store.Product) *Service {
 	return &Service{
-		db:            sqlDB,
+		db:           sqlDB,
 		productStore: productStore,
 	}
 }

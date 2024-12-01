@@ -1,15 +1,15 @@
 package category
 
 import (
-	"auth-service-rizkysr90-pos/internal/payload"
-	"auth-service-rizkysr90-pos/internal/store"
 	"context"
 	"database/sql"
 	"errors"
+	"rizkysr90-pos/internal/payload"
+	"rizkysr90-pos/internal/store"
 	"strings"
 	"time"
 
-	"auth-service-rizkysr90-pos/pkg/errorHandler"
+	"rizkysr90-pos/pkg/errorHandler"
 
 	"github.com/google/uuid"
 	"github.com/rizkysr90/rizkysr90-go-pkg/sqldb"

@@ -3,17 +3,17 @@ package restapi
 import (
 	"database/sql"
 
-	"auth-service-rizkysr90-pos/internal/config"
-	categoryHandler "auth-service-rizkysr90-pos/internal/restapi/handler/category"
-	producthandler "auth-service-rizkysr90-pos/internal/restapi/handler/product"
-	usersHandler "auth-service-rizkysr90-pos/internal/restapi/handler/users"
-	"auth-service-rizkysr90-pos/internal/restapi/middleware"
-	categoryService "auth-service-rizkysr90-pos/internal/service/category"
-	"auth-service-rizkysr90-pos/internal/service/productservice"
-	usersService "auth-service-rizkysr90-pos/internal/service/user"
-	"auth-service-rizkysr90-pos/internal/store/pg"
-	"auth-service-rizkysr90-pos/pkg/errorHandler"
-	jwttoken "auth-service-rizkysr90-pos/pkg/jwt"
+	"rizkysr90-pos/internal/config"
+	categoryHandler "rizkysr90-pos/internal/restapi/handler/category"
+	producthandler "rizkysr90-pos/internal/restapi/handler/product"
+	usersHandler "rizkysr90-pos/internal/restapi/handler/users"
+	"rizkysr90-pos/internal/restapi/middleware"
+	categoryService "rizkysr90-pos/internal/service/category"
+	"rizkysr90-pos/internal/service/productservice"
+	usersService "rizkysr90-pos/internal/service/user"
+	"rizkysr90-pos/internal/store/pg"
+	"rizkysr90-pos/pkg/errorHandler"
+	jwttoken "rizkysr90-pos/pkg/jwt"
 
 	"github.com/gin-gonic/gin"
 	cors "github.com/rs/cors/wrapper/gin"
@@ -30,7 +30,6 @@ func New(
 	server := gin.New()
 	jwt := jwttoken.New(cfg.SecretKeyJWT)
 
-	
 	server.Use(middleware.Recovery(logger))
 	server.Use(middleware.LogMiddleware(logger))
 	server.Use(middleware.ResponseBody())
@@ -105,7 +104,6 @@ func New(
 
 	// PRIVATE ROUTES
 	authGroup := server.Group("")
-	authGroup.Use(middleware.AuthRequiredCookies(jwt))
 	authGroup.GET("api/v1/privateroutes")
 
 	server.NoRoute(func(c *gin.Context) {

@@ -1,12 +1,12 @@
 package users
 
 import (
-	"auth-service-rizkysr90-pos/internal/payload"
-	"auth-service-rizkysr90-pos/pkg/errorHandler"
-	jwttoken "auth-service-rizkysr90-pos/pkg/jwt"
 	"context"
 	"database/sql"
 	"errors"
+	"rizkysr90-pos/internal/payload"
+	"rizkysr90-pos/pkg/errorHandler"
+	jwttoken "rizkysr90-pos/pkg/jwt"
 
 	"golang.org/x/crypto/bcrypt"
 

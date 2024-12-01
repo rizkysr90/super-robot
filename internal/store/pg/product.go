@@ -1,14 +1,14 @@
 package pg
 
 import (
-	"auth-service-rizkysr90-pos/internal/store"
 	"context"
 	"database/sql"
 	"time"
 
+	"rizkysr90-pos/internal/store"
+
 	"github.com/rizkysr90/rizkysr90-go-pkg/sqldb"
 )
-
 
 type Product struct {
 	db *sql.DB
@@ -79,14 +79,14 @@ func (p *Product) GetByName(ctx context.Context, productNameInput string) (*stor
 		WHERE product_name = $1 AND deleted_at IS NULL
 	`
 	var (
-		productID string
-		productName string
-		price float64
-		basePrice float64
+		productID     string
+		productName   string
+		price         float64
+		basePrice     float64
 		stockQuantity int32
-		createdAt time.Time
-		updatedAt sql.NullTime
-		deletedAt sql.NullTime
+		createdAt     time.Time
+		updatedAt     sql.NullTime
+		deletedAt     sql.NullTime
 	)
 	err := sqldb.WithinTxContextOrDB(ctx, p.db).QueryRowContext(ctx, query, productNameInput).Scan(
 		&productID,
@@ -102,17 +102,17 @@ func (p *Product) GetByName(ctx context.Context, productNameInput string) (*stor
 		return nil, err
 	}
 	return &store.ProductData{
-		ProductID: productID,
-		ProductName: productName,
-		Price: price,
-		BasePrice: basePrice,
+		ProductID:     productID,
+		ProductName:   productName,
+		Price:         price,
+		BasePrice:     basePrice,
 		StockQuantity: int(stockQuantity),
-		CreatedAt: createdAt,
-		UpdatedAt: updatedAt.Time,
-		DeletedAt: deletedAt.Time,
+		CreatedAt:     createdAt,
+		UpdatedAt:     updatedAt.Time,
+		DeletedAt:     deletedAt.Time,
 	}, nil
 }
-func (p *Product) GetAll(ctx context.Context, 
+func (p *Product) GetAll(ctx context.Context,
 	params *store.FilterProduct) ([]store.ProductData, int, error) {
 	query := `
 		SELECT 
@@ -137,7 +137,7 @@ ORDER BY
     p.created_at DESC 
 LIMIT $2 OFFSET $3
 	`
-	
+
 	var products []store.ProductData
 	var totalCount int
 
@@ -160,7 +160,7 @@ LIMIT $2 OFFSET $3
 			updatedAt     sql.NullTime
 		)
 
-		if err := rows.Scan(
+		if err = rows.Scan(
 			&productID,
 			&productName,
 			&price,
@@ -182,16 +182,16 @@ LIMIT $2 OFFSET $3
 			BasePrice:     basePrice,
 			StockQuantity: stockQuantity,
 			CreatedAt:     createdAt,
-			UpdatedAt: updatedAt.Time,
-			CategoryID: categoryID.String,
+			UpdatedAt:     updatedAt.Time,
+			CategoryID:    categoryID.String,
 			Category: &store.CategoryData{
-				ID: categoryID.String,
+				ID:           categoryID.String,
 				CategoryName: categoryName.String,
 			},
 		}
 		products = append(products, product)
 	}
-	if err := rows.Err(); err != nil {
+	if err = rows.Err(); err != nil {
 		return nil, 0, err
 	}
 	return products, totalCount, nil
@@ -230,14 +230,14 @@ WHERE
 	)
 	err := sqldb.WithinTxContextOrDB(ctx, p.db).QueryRowContext(ctx, query, productIDInput).Scan(
 		&productID,
-			&productName,
-			&price,
-			&basePrice,
-			&stockQuantity,
-			&categoryID,
-			&categoryName,
-			&createdAt,
-			&updatedAt,
+		&productName,
+		&price,
+		&basePrice,
+		&stockQuantity,
+		&categoryID,
+		&categoryName,
+		&createdAt,
+		&updatedAt,
 	)
 	if err != nil {
 		return nil, err
@@ -249,10 +249,10 @@ WHERE
 		BasePrice:     basePrice,
 		StockQuantity: stockQuantity,
 		CreatedAt:     createdAt,
-		UpdatedAt: updatedAt.Time,
-		CategoryID: categoryID.String,
+		UpdatedAt:     updatedAt.Time,
+		CategoryID:    categoryID.String,
 		Category: &store.CategoryData{
-			ID: categoryID.String,
+			ID:           categoryID.String,
 			CategoryName: categoryName.String,
 		},
 	}
@@ -272,6 +272,4 @@ func (p *Product) DeleteByID(ctx context.Context, productID string) error {
 		return nil
 	}
 	return sqldb.WithinTxContextOrError(ctx, updateFunc)
-	
 }
-

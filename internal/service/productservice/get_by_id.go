@@ -1,20 +1,20 @@
 package productservice
 
 import (
-	"auth-service-rizkysr90-pos/internal/payload"
-	"auth-service-rizkysr90-pos/pkg/errorHandler"
 	"context"
 	"database/sql"
 	"errors"
+	"rizkysr90-pos/internal/payload"
+	"rizkysr90-pos/pkg/errorHandler"
 	"strings"
 
 	"github.com/go-playground/validator/v10"
 )
 
-
 type reqGetByID struct {
 	data *payload.ReqGetProductByID
 }
+
 func (request *reqGetByID) validate() error {
 	validate := validator.New()
 
@@ -24,7 +24,11 @@ func (request *reqGetByID) validate() error {
 
 	err := validate.Struct(request)
 	if err != nil {
-		validationErrors := err.(validator.ValidationErrors)
+		//nolint:errorlint
+		validationErrors, ok := err.(validator.ValidationErrors)
+		if !ok {
+			return errorHandler.NewInternalServer()
+		}
 		return errorHandler.NewBadRequest(
 			errorHandler.WithInfo("validation error"),
 			errorHandler.WithMessage(formatValidationErrors(validationErrors)),
@@ -49,7 +53,8 @@ func formatValidationErrors(errors validator.ValidationErrors) string {
 func (request *reqGetByID) sanitize() {
 	request.data.ProductID = strings.TrimSpace(request.data.ProductID)
 }
-func (s *Service) GetProductByID(ctx context.Context, request *payload.ReqGetProductByID) (*payload.ResGetProductByID, error){
+func (s *Service) GetProductByID(
+	ctx context.Context, request *payload.ReqGetProductByID) (*payload.ResGetProductByID, error) {
 	input := reqGetByID{request}
 	input.sanitize()
 	if err := input.validate(); err != nil {
@@ -63,16 +68,16 @@ func (s *Service) GetProductByID(ctx context.Context, request *payload.ReqGetPro
 		return nil, err
 	}
 	productResponse := payload.ProductData{
-		ProductID: productData.ProductID,
-		ProductName: productData.ProductName,
-		Price: productData.Price,
-		BasePrice: productData.BasePrice,
+		ProductID:     productData.ProductID,
+		ProductName:   productData.ProductName,
+		Price:         productData.Price,
+		BasePrice:     productData.BasePrice,
 		StockQuantity: productData.StockQuantity,
-		CategoryID: productData.CategoryID,
-		CategoryName: productData.Category.CategoryName,
-		CreatedAt: productData.CreatedAt,
-		UpdatedAt: productData.UpdatedAt,
-		DeletedAt: productData.DeletedAt,
+		CategoryID:    productData.CategoryID,
+		CategoryName:  productData.Category.CategoryName,
+		CreatedAt:     productData.CreatedAt,
+		UpdatedAt:     productData.UpdatedAt,
+		DeletedAt:     productData.DeletedAt,
 	}
 	return &payload.ResGetProductByID{Data: productResponse}, nil
 }

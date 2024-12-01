@@ -5,23 +5,22 @@ import (
 	"errors"
 	"testing"
 
-	"auth-service-rizkysr90-pos/internal/payload"
-	"auth-service-rizkysr90-pos/internal/store"
-	"auth-service-rizkysr90-pos/internal/store/mocks"
+	"rizkysr90-pos/internal/payload"
+	"rizkysr90-pos/internal/store"
+	"rizkysr90-pos/internal/store/mocks"
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
 
-
 func TestService_Create(t *testing.T) {
 	tests := []struct {
-		name          string
-		input         *payload.ReqCreateCategory
+		name             string
+		input            *payload.ReqCreateCategory
 		mockExpectations func(mockCategoryStore *mocks.MockCategoryStore, sqlMock sqlmock.Sqlmock)
-		expectedError     func(err error) bool
-		expectedCategory  *payload.ResCreateCategory
+		expectedError    func(err error) bool
+		expectedCategory *payload.ResCreateCategory
 	}{
 		{
 			name: "Valid Input",
@@ -36,7 +35,7 @@ func TestService_Create(t *testing.T) {
 				sqlMock.ExpectBegin()
 				sqlMock.ExpectCommit()
 			},
-			expectedError: nil,
+			expectedError:    nil,
 			expectedCategory: &payload.ResCreateCategory{},
 		},
 		{

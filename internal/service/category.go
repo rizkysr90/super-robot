@@ -1,8 +1,8 @@
 package service
 
 import (
-	"auth-service-rizkysr90-pos/internal/payload"
 	"context"
+	"rizkysr90-pos/internal/payload"
 )
 
 type CategoryService interface {

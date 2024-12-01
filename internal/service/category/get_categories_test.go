@@ -7,16 +7,14 @@ import (
 	"testing"
 	"time"
 
-	"auth-service-rizkysr90-pos/internal/payload"
-	"auth-service-rizkysr90-pos/internal/store"
-	"auth-service-rizkysr90-pos/internal/store/mocks"
+	"rizkysr90-pos/internal/payload"
+	"rizkysr90-pos/internal/store"
+	"rizkysr90-pos/internal/store/mocks"
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
-
-
 
 func TestGetCategories(t *testing.T) {
 	fixedTime := time.Now().UTC()
@@ -41,8 +39,8 @@ func TestGetCategories(t *testing.T) {
 					{
 						ID:           "1",
 						CategoryName: "Category 1",
-						CreatedAt:   fixedTime,
-						UpdatedAt:   fixedTime,
+						CreatedAt:    fixedTime,
+						UpdatedAt:    fixedTime,
 						DeletedAt:    sql.NullTime{},
 						Pagination: &store.Pagination{
 							TotalElements: 2,
@@ -51,8 +49,8 @@ func TestGetCategories(t *testing.T) {
 					{
 						ID:           "2",
 						CategoryName: "Category 2",
-						CreatedAt:   fixedTime,
-						UpdatedAt:   fixedTime,
+						CreatedAt:    fixedTime,
+						UpdatedAt:    fixedTime,
 						DeletedAt:    sql.NullTime{},
 						Pagination: &store.Pagination{
 							TotalElements: 2,
@@ -66,15 +64,15 @@ func TestGetCategories(t *testing.T) {
 					{
 						ID:           "1",
 						CategoryName: "Category 1",
-						CreatedAt:   fixedTime,
-						UpdatedAt:   fixedTime,
+						CreatedAt:    fixedTime,
+						UpdatedAt:    fixedTime,
 						DeletedAt:    time.Time{},
 					},
 					{
 						ID:           "2",
 						CategoryName: "Category 2",
-						CreatedAt:   fixedTime,
-						UpdatedAt:   fixedTime,
+						CreatedAt:    fixedTime,
+						UpdatedAt:    fixedTime,
 						DeletedAt:    time.Time{},
 					},
 				},

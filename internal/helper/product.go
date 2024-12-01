@@ -4,6 +4,7 @@ import (
 	"crypto/rand"
 	"fmt"
 	"math/big"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -45,7 +46,7 @@ func generateRandomNumber(digits int) (int, error) {
 func calculateCheckDigit(input string) string {
 	// Remove prefix for calculation
 	numericPart := strings.TrimPrefix(input, productPrefix)
-	
+
 	sum := 0
 	for i, ch := range numericPart {
 		digit := int(ch - '0')
@@ -56,7 +57,7 @@ func calculateCheckDigit(input string) string {
 		}
 	}
 	checkDigit := (10 - (sum % 10)) % 10
-	return fmt.Sprintf("%d", checkDigit)
+	return strconv.Itoa(checkDigit)
 }
 
 func pow(base, exp int) int {

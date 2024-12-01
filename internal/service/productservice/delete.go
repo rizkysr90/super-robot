@@ -1,11 +1,11 @@
 package productservice
 
 import (
-	"auth-service-rizkysr90-pos/internal/payload"
-	"auth-service-rizkysr90-pos/pkg/errorHandler"
 	"context"
 	"database/sql"
 	"errors"
+	"rizkysr90-pos/internal/payload"
+	"rizkysr90-pos/pkg/errorHandler"
 	"strings"
 
 	"github.com/go-playground/validator/v10"
@@ -21,7 +21,11 @@ func (request *reqDeleteByID) validate() error {
 
 	err := validate.Struct(request.data)
 	if err != nil {
-		validationErrors := err.(validator.ValidationErrors)
+		//nolint:errorlint
+		validationErrors, ok := err.(validator.ValidationErrors)
+		if !ok {
+			return errorHandler.NewInternalServer()
+		}
 		return errorHandler.NewBadRequest(
 			errorHandler.WithInfo("validation error"),
 			errorHandler.WithMessage(formatValidationErrors(validationErrors)),
@@ -35,7 +39,8 @@ func (request *reqDeleteByID) sanitize() {
 	request.data.ProductID = strings.TrimSpace(request.data.ProductID)
 }
 
-func (s *Service) DeleteProductByID(ctx context.Context, request *payload.ReqDeleteProductByID) (*payload.ResDeleteProductByID, error) {
+func (s *Service) DeleteProductByID(ctx context.Context,
+	request *payload.ReqDeleteProductByID) (*payload.ResDeleteProductByID, error) {
 	input := reqDeleteByID{data: request}
 	input.sanitize()
 	if err := input.validate(); err != nil {
@@ -56,6 +61,5 @@ func (s *Service) DeleteProductByID(ctx context.Context, request *payload.ReqDel
 		)
 	}
 
-	return &payload.ResDeleteProductByID{
-	}, nil
+	return &payload.ResDeleteProductByID{}, nil
 }

@@ -6,9 +6,9 @@ import (
 	"strings"
 	"testing"
 
-	"auth-service-rizkysr90-pos/internal/payload"
-	"auth-service-rizkysr90-pos/internal/store"
-	"auth-service-rizkysr90-pos/internal/store/mocks" // Import your store mocks
+	"rizkysr90-pos/internal/payload"
+	"rizkysr90-pos/internal/store"
+	"rizkysr90-pos/internal/store/mocks" // Import your store mocks
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/google/uuid"
@@ -16,16 +16,14 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
-
-
 func TestService_EditCategory(t *testing.T) {
 	fixedUUID := uuid.NewString()
 	tests := []struct {
-		name              string
-		input             *payload.ReqUpdateCategory
-		mockExpectations  func(mockCategoryStore *mocks.MockCategoryStore, sqlMock sqlmock.Sqlmock)
-		expectedError     func(err error) bool
-		expectedCategory  *payload.ResUpdateCategory
+		name             string
+		input            *payload.ReqUpdateCategory
+		mockExpectations func(mockCategoryStore *mocks.MockCategoryStore, sqlMock sqlmock.Sqlmock)
+		expectedError    func(err error) bool
+		expectedCategory *payload.ResUpdateCategory
 	}{
 		{
 			name: "Valid Input",
@@ -38,12 +36,12 @@ func TestService_EditCategory(t *testing.T) {
 				mockCategoryStore.On("FindByName", mock.Anything, "UPDATED CATEGORY").Return(&store.CategoryData{
 					ID: fixedUUID, // This should be a fixed value to match the input ID
 				}, nil)
-				
+
 				// Mock the Update method to check that the ID matches and return no error
 				mockCategoryStore.On("Update", mock.Anything, mock.MatchedBy(func(categoryData *store.CategoryData) bool {
 					return categoryData.ID == fixedUUID && categoryData.CategoryName == "UPDATED CATEGORY"
 				})).Return(nil)
-				
+
 				// Set up SQL expectations for transaction
 				sqlMock.ExpectBegin()
 				sqlMock.ExpectCommit()

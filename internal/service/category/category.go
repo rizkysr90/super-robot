@@ -1,8 +1,8 @@
 package category
 
 import (
-	"auth-service-rizkysr90-pos/internal/store"
 	"database/sql"
+	"rizkysr90-pos/internal/store"
 )
 
 type Service struct {

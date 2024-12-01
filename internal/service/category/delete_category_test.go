@@ -6,9 +6,9 @@ import (
 	"errors"
 	"testing"
 
-	"auth-service-rizkysr90-pos/internal/payload"
-	"auth-service-rizkysr90-pos/internal/store"
-	"auth-service-rizkysr90-pos/internal/store/mocks" // Adjust the import path as necessary
+	"rizkysr90-pos/internal/payload"
+	"rizkysr90-pos/internal/store"
+	"rizkysr90-pos/internal/store/mocks" // Adjust the import path as necessary
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/stretchr/testify/assert"

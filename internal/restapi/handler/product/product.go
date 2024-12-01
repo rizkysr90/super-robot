@@ -1,10 +1,10 @@
 package producthandler
 
 import (
-	"auth-service-rizkysr90-pos/internal/payload"
-	"auth-service-rizkysr90-pos/internal/service/productservice"
-	"auth-service-rizkysr90-pos/pkg/errorHandler"
 	"net/http"
+	"rizkysr90-pos/internal/payload"
+	"rizkysr90-pos/internal/service/productservice"
+	"rizkysr90-pos/pkg/errorHandler"
 
 	"github.com/gin-gonic/gin"
 )
@@ -49,6 +49,7 @@ func (c *ProductHandler) CreateProduct(ctx *gin.Context) {
 	}
 	ctx.JSON(http.StatusCreated, data)
 }
+
 // GetAllProducts godoc
 // @Summary Get all products
 // @Description Retrieve a list of products with optional filtering and pagination
@@ -79,6 +80,7 @@ func (h *ProductHandler) GetAllProducts(ctx *gin.Context) {
 	}
 	ctx.JSON(http.StatusOK, response)
 }
+
 // UpdateProduct godoc
 // @Summary Update a product
 // @Description Update an existing product's details
@@ -186,6 +188,7 @@ func (c *ProductHandler) DeleteProductByID(ctx *gin.Context) {
 	}
 	ctx.JSON(http.StatusOK, data)
 }
+
 // GenerateBarcodePDF godoc
 // @Summary Generate barcode PDF for a single product
 // @Description Generate a PDF containing barcodes for a single product
@@ -198,21 +201,21 @@ func (c *ProductHandler) DeleteProductByID(ctx *gin.Context) {
 // @Failure 500 {object} errorHandler.HttpError
 // @Router /products/generate-barcode [post]
 func (h *ProductHandler) GenerateBarcodePDF(ctx *gin.Context) {
-    var req payload.GenerateBarcodeRequest
-    if err := ctx.ShouldBindJSON(&req); err != nil {
-        ctx.Error(errorHandler.NewBadRequest(
-            errorHandler.WithInfo("invalid request"),
-            errorHandler.WithMessage(err.Error()),
-        ))
-        return
-    }
+	var req payload.GenerateBarcodeRequest
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.Error(errorHandler.NewBadRequest(
+			errorHandler.WithInfo("invalid request"),
+			errorHandler.WithMessage(err.Error()),
+		))
+		return
+	}
 
-    response, err := h.productService.GenerateBarcodePDF(ctx, &req)
-    if err != nil {
-        ctx.Error(err)
-        return
-    }
+	response, err := h.productService.GenerateBarcodePDF(ctx, &req)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
 
-    ctx.Header("Content-Disposition", "attachment; filename=product_barcode.pdf")
-    ctx.Data(http.StatusOK, "application/pdf", response.PDFBytes)
+	ctx.Header("Content-Disposition", "attachment; filename=product_barcode.pdf")
+	ctx.Data(http.StatusOK, "application/pdf", response.PDFBytes)
 }

@@ -1,11 +1,11 @@
 package users
 
 import (
-	"auth-service-rizkysr90-pos/internal/config"
-	"auth-service-rizkysr90-pos/internal/payload"
-	"auth-service-rizkysr90-pos/internal/service"
-	"auth-service-rizkysr90-pos/pkg/errorHandler"
 	"net/http"
+	"rizkysr90-pos/internal/config"
+	"rizkysr90-pos/internal/payload"
+	"rizkysr90-pos/internal/service"
+	"rizkysr90-pos/pkg/errorHandler"
 
 	"github.com/gin-gonic/gin"
 )

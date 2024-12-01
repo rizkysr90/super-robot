@@ -24,8 +24,6 @@ linters-settings:
   goconst:
     min-len: 2
     min-occurrences: 2
-  goimports:
-    local-prefixes: bravo-go-example
   govet:
     check-shadowing: true
     settings:
@@ -113,7 +111,6 @@ linters: # don't use --enable-all
     - goconst
     - gocritic
     - gocyclo
-    - godot
     - godox
     # - goerr113
     - gofmt

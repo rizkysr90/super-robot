@@ -6,21 +6,21 @@ import (
 )
 
 type ProductData struct {
-	ProductID     string         
-	ProductName   string        
-	Price         float64        
-	BasePrice     float64        
-	StockQuantity int           
-	CategoryID    string  		
-	CreatedAt     time.Time      
-	UpdatedAt    time.Time 
-	DeletedAt    time.Time 
-	Category *CategoryData
+	Category      *CategoryData
+	CreatedAt     time.Time
+	UpdatedAt     time.Time
+	DeletedAt     time.Time
+	ProductID     string
+	ProductName   string
+	CategoryID    string
+	Price         float64
+	BasePrice     float64
+	StockQuantity int
 }
 type FilterProduct struct {
+	CategoryID string
 	Limit      int
 	Offset     int
-	CategoryID string
 }
 type Product interface {
 	Insert(ctx context.Context, insertedData *ProductData) error

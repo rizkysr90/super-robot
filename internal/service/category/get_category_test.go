@@ -7,15 +7,14 @@ import (
 	"testing"
 	"time"
 
-	"auth-service-rizkysr90-pos/internal/payload"
-	"auth-service-rizkysr90-pos/internal/store"
-	"auth-service-rizkysr90-pos/internal/store/mocks"
+	"rizkysr90-pos/internal/payload"
+	"rizkysr90-pos/internal/store"
+	"rizkysr90-pos/internal/store/mocks"
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
-
 
 func TestGetCategoryByID(t *testing.T) {
 	fixedTime := time.Now().UTC()

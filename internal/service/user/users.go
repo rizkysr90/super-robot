@@ -1,9 +1,9 @@
 package users
 
 import (
-	"auth-service-rizkysr90-pos/internal/store"
-	jwttoken "auth-service-rizkysr90-pos/pkg/jwt"
 	"database/sql"
+	"rizkysr90-pos/internal/store"
+	jwttoken "rizkysr90-pos/pkg/jwt"
 )
 
 type UserService struct {

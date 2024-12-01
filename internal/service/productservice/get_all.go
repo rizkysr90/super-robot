@@ -1,14 +1,13 @@
 package productservice
 
 import (
-	"auth-service-rizkysr90-pos/internal/payload"
-	"auth-service-rizkysr90-pos/internal/store"
-	"auth-service-rizkysr90-pos/pkg/errorHandler"
 	"context"
+	"rizkysr90-pos/internal/payload"
+	"rizkysr90-pos/internal/store"
+	"rizkysr90-pos/pkg/errorHandler"
 )
 
-
-func (s *Service) GetAllProducts(ctx context.Context, 
+func (s *Service) GetAllProducts(ctx context.Context,
 	request *payload.ReqGetAllProducts) (*payload.ResGetAllProducts, error) {
 	// Validate pagination parameters
 	if request.PageSize <= 0 {

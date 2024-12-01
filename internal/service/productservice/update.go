@@ -7,13 +7,12 @@ import (
 	"fmt"
 	"strings"
 
-	"auth-service-rizkysr90-pos/internal/helper"
-	"auth-service-rizkysr90-pos/internal/payload"
-	"auth-service-rizkysr90-pos/internal/store"
-	"auth-service-rizkysr90-pos/pkg/errorHandler"
+	"rizkysr90-pos/internal/helper"
+	"rizkysr90-pos/internal/payload"
+	"rizkysr90-pos/internal/store"
+	"rizkysr90-pos/pkg/errorHandler"
 
 	"github.com/go-playground/validator/v10"
-	"github.com/google/uuid"
 	"github.com/rizkysr90/rizkysr90-go-pkg/sqldb"
 )
 
@@ -32,15 +31,13 @@ func (req *reqUpdateProduct) sanitize() {
 func (req *reqUpdateProduct) validate() error {
 	httpErrors := []errorHandler.HttpError{}
 	validate := validator.New()
-
-	validate.RegisterValidation("uuid", func(fl validator.FieldLevel) bool {
-		_, err := uuid.Parse(fl.Field().String())
-		return err == nil
-	})
-
 	err := validate.Struct(req.data)
 	if err != nil {
-		validationErrors := err.(validator.ValidationErrors)
+		//nolint:errorlint
+		validationErrors, ok := err.(validator.ValidationErrors)
+		if !ok {
+			return errorHandler.NewInternalServer()
+		}
 		for _, e := range validationErrors {
 			httpError := errorHandler.HttpError{
 				Code:    400,
@@ -56,7 +53,8 @@ func (req *reqUpdateProduct) validate() error {
 	return nil
 }
 
-func (s *Service) UpdateProduct(ctx context.Context, request *payload.ReqUpdateProduct) (*payload.ResUpdateProduct, error) {
+func (s *Service) UpdateProduct(
+	ctx context.Context, request *payload.ReqUpdateProduct) (*payload.ResUpdateProduct, error) {
 	input := &reqUpdateProduct{request}
 	input.sanitize()
 	if err := input.validate(); err != nil {
@@ -79,7 +77,7 @@ func (s *Service) UpdateProduct(ctx context.Context, request *payload.ReqUpdateP
 		CategoryID:    request.CategoryID,
 	}
 
-	if err := sqldb.WithinTx(ctx, s.db, func(qe sqldb.QueryExecutor) error {
+	if err = sqldb.WithinTx(ctx, s.db, func(qe sqldb.QueryExecutor) error {
 		txContext := sqldb.WithTxContext(ctx, qe)
 		return s.productStore.Update(txContext, &updateData)
 	}); err != nil {

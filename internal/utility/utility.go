@@ -1,7 +1,7 @@
 package utility
 
 import (
-	"auth-service-rizkysr90-pos/pkg/errorHandler"
+	"rizkysr90-pos/pkg/errorHandler"
 	"strings"
 )
 

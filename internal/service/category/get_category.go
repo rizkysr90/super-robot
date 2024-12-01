@@ -1,12 +1,14 @@
 package category
 
 import (
-	"auth-service-rizkysr90-pos/internal/payload"
-	"auth-service-rizkysr90-pos/pkg/errorHandler"
-	"auth-service-rizkysr90-pos/pkg/validator"
 	"context"
 	"database/sql"
 	"errors"
+
+	"rizkysr90-pos/internal/payload"
+	"rizkysr90-pos/pkg/errorHandler"
+	"rizkysr90-pos/pkg/validator"
+
 	"strings"
 )
 
@@ -35,7 +37,7 @@ func (c *Service) GetCategoryByID(ctx context.Context,
 		if errors.Is(sql.ErrNoRows, err) {
 			return nil, errorHandler.NewNotFound(errorHandler.WithInfo("category not found"))
 		}
-		return nil,err
+		return nil, err
 	}
 	return &payload.ResGetCategoryByID{
 		CategoryData: &payload.CategoryData{

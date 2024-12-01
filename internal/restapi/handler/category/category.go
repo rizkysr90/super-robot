@@ -1,19 +1,18 @@
 package category
 
 import (
-	"auth-service-rizkysr90-pos/internal/config"
-	"auth-service-rizkysr90-pos/internal/payload"
-	"auth-service-rizkysr90-pos/internal/service"
-	"auth-service-rizkysr90-pos/pkg/errorHandler"
 	"net/http"
 	"strconv"
+
+	"rizkysr90-pos/internal/payload"
+	"rizkysr90-pos/internal/service"
+	"rizkysr90-pos/pkg/errorHandler"
 
 	"github.com/gin-gonic/gin"
 )
 
 type CategoryHandler struct {
 	categoryService service.CategoryService
-	config          config.Config
 }
 
 func NewCategoryHandler(
@@ -23,6 +22,7 @@ func NewCategoryHandler(
 		categoryService: categoryService,
 	}
 }
+
 // CreateCategory godoc
 // @Summary Create a new category
 // @Description Create a new category with the provided name
@@ -66,7 +66,7 @@ func (c *CategoryHandler) CreateCategory(ctx *gin.Context) {
 // @Router /categories [get]
 func (c *CategoryHandler) GetAllCategories(ctx *gin.Context) {
 	payload := &payload.ReqGetAllCategory{}
-	
+
 	// Extract page_number and page_size from query parameters
 	pageNumber := ctx.DefaultQuery("page_number", "1")
 	pageSize := ctx.DefaultQuery("page_size", "20")
@@ -102,6 +102,7 @@ func (c *CategoryHandler) GetAllCategories(ctx *gin.Context) {
 	}
 	ctx.JSON(http.StatusOK, data)
 }
+
 // GetCategoryByID godoc
 // @Summary Get a category by ID
 // @Description Retrieve a specific category by its ID
@@ -127,6 +128,7 @@ func (c *CategoryHandler) GetCategoryByID(ctx *gin.Context) {
 	}
 	ctx.JSON(http.StatusOK, data)
 }
+
 // EditCategoryByID godoc
 // @Summary Edit a category by ID
 // @Description Update a specific category's name by its ID
@@ -160,6 +162,7 @@ func (c *CategoryHandler) EditCategoryByID(ctx *gin.Context) {
 	}
 	ctx.JSON(http.StatusOK, data)
 }
+
 // DeleteCategory godoc
 // @Summary Delete a category
 // @Description Delete a specific category by its ID

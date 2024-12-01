@@ -5,7 +5,7 @@ import (
 	"database/sql"
 	"time"
 
-	"auth-service-rizkysr90-pos/internal/store"
+	"rizkysr90-pos/internal/store"
 
 	"github.com/rizkysr90/rizkysr90-go-pkg/sqldb"
 )

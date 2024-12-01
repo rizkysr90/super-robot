@@ -6,7 +6,7 @@ import (
 	"os"
 	"time"
 
-	"auth-service-rizkysr90-pos/pkg/errorHandler"
+	"rizkysr90-pos/pkg/errorHandler"
 
 	"github.com/golang-jwt/jwt/v5"
 )

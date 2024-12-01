@@ -1,9 +1,10 @@
+//nolint:forcetypeassert
 package mocks
 
 import (
 	"context"
 
-	"auth-service-rizkysr90-pos/internal/store"
+	"rizkysr90-pos/internal/store"
 
 	"github.com/stretchr/testify/mock"
 )

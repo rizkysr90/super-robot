@@ -1,8 +1,9 @@
 package middleware
 
 import (
-	"auth-service-rizkysr90-pos/pkg/errorHandler"
 	"bytes"
+	"errors"
+	"rizkysr90-pos/pkg/errorHandler"
 
 	"github.com/gin-gonic/gin"
 )
@@ -23,12 +24,10 @@ func ResponseBody() gin.HandlerFunc {
 		// Create a custom response writer to capture the response body
 		writer := &responseWriter{body: bytes.NewBufferString(""), ResponseWriter: c.Writer}
 		c.Writer = writer
-
 		// Proceed to the next middleware
 		c.Next()
 		// After the response is written, log the captured response body
 		c.Set("response_body", writer.body.Bytes())
-
 	}
 }
 func GetResBodyValue(ctx *gin.Context) ([]byte, error) {
@@ -39,5 +38,9 @@ func GetResBodyValue(ctx *gin.Context) ([]byte, error) {
 		getResBodyErr := errorHandler.NewInternalServer(errorHandler.WithInfo("Response body not found in context"))
 		return nil, getResBodyErr
 	}
-	return resBody.([]byte), nil
+	responseData, ok := resBody.([]byte)
+	if !ok {
+		return nil, errors.New("failed to assert response body")
+	}
+	return responseData, nil
 }
