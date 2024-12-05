@@ -6,21 +6,6 @@ import (
 	"rizkysr90-pos/pkg/errorHandler"
 )
 
-const (
-	barcodeWidth     = 1500 // 75mm in pixels
-	barcodeHeight    = 350  // 35mm in pixels
-	barcodesPerRow   = 3
-	barcodeSpacingX  = 10.0
-	barcodeSpacingY  = 50.0
-	startXOffset     = 10.0
-	startYOffset     = 10.0
-	barcodeWidthMM   = 150.0
-	barcodeHeightMM  = 35.0
-	productNameSize  = 8
-	productLabelSize = 6
-	maxBarcodes      = 30
-)
-
 // GenerateBarcodePDF generates a PDF containing barcodes for the given product.
 func (s *Service) GenerateBarcodePDF(ctx context.Context,
 	req *payload.GenerateBarcodeRequest) (*payload.GenerateBarcodeResponse, error) {

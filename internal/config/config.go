@@ -1,6 +1,8 @@
 package config
 
 import (
+	"rizkysr90-pos/internal/auth"
+
 	pgx "github.com/rizkysr90/rizkysr90-go-pkg/pgx"
 
 	"github.com/caarlos0/env/v8"
@@ -23,6 +25,10 @@ type flatEnv struct {
 	DBConnMaxIdle     int    `env:"DB_CONN_MAX_IDLE"`
 	DBConnMaxOpen     int    `env:"DB_CONN_MAX_OPEN"`
 	DBPort            int    `env:"DB_PORT"`
+	AuthClientID      string `env:"AUTH_CLIENT_ID"`
+	AuthRedirectUri   string `env:"AUTH_REDIRECT_URI"`
+	AuthClientSecret  string `env:"AUTH_CLIENT_SECRET"`
+	AuthUri           string `env:"AUTH_URI"`
 }
 type Config struct {
 	AppName           string
@@ -33,6 +39,7 @@ type Config struct {
 	LogLevel          string
 	SecretKeyJWT      string
 	PgSQL             pgx.Config
+	Auth              *auth.Config
 }
 
 func LoadFromEnv() (Config, error) {
@@ -59,5 +66,11 @@ func newConfig(envCfg flatEnv) Config {
 		APIVersionBaseURL: envCfg.APIVersionBaseURL,
 		LogLevel:          envCfg.LogLevel,
 		SecretKeyJWT:      envCfg.SecretKeyJWT,
+		Auth: &auth.Config{
+			BaseURL:      envCfg.AuthUri,
+			ClientID:     envCfg.AuthClientID,
+			RedirectURI:  envCfg.AuthRedirectUri,
+			ClientSecret: envCfg.AuthClientSecret,
+		},
 	}
 }

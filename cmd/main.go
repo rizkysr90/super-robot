@@ -5,6 +5,7 @@ import (
 	"context"
 	"log"
 
+	"rizkysr90-pos/internal/auth"
 	"rizkysr90-pos/internal/config"
 	"rizkysr90-pos/internal/docs" // This is where Swag will generate its docs.go file
 	"rizkysr90-pos/internal/restapi"
@@ -45,7 +46,18 @@ func main() {
 		return
 	}
 	defer func() { sqlDB.Close() }()
-	restAPIserver, err := restapi.New(cfg, sqlDB, logger)
+
+	authClient, err := auth.New(ctx, &auth.Config{
+		BaseURL:      cfg.Auth.BaseURL,
+		ClientID:     cfg.Auth.ClientID,
+		RedirectURI:  cfg.Auth.RedirectURI,
+		ClientSecret: cfg.Auth.ClientSecret,
+	})
+	if err != nil {
+		log.Fatalf("restApi: main failed to create auth client: %s", err)
+		return
+	}
+	restAPIserver, err := restapi.New(authClient, cfg, sqlDB, logger)
 	docs.SwaggerInfo.BasePath = "/api/v1"
 	restAPIserver.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 

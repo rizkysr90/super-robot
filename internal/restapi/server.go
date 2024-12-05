@@ -2,7 +2,9 @@ package restapi
 
 import (
 	"database/sql"
+	"net/http"
 
+	"rizkysr90-pos/internal/auth"
 	"rizkysr90-pos/internal/config"
 	categoryHandler "rizkysr90-pos/internal/restapi/handler/category"
 	producthandler "rizkysr90-pos/internal/restapi/handler/product"
@@ -10,6 +12,7 @@ import (
 	categoryService "rizkysr90-pos/internal/service/category"
 	"rizkysr90-pos/internal/service/productservice"
 	"rizkysr90-pos/internal/store/pg"
+	"rizkysr90-pos/internal/utility"
 	documentgen "rizkysr90-pos/pkg/documentGen"
 	"rizkysr90-pos/pkg/errorHandler"
 
@@ -20,6 +23,7 @@ import (
 )
 
 func New(
+	authClient *auth.Client,
 	cfg config.Config,
 	sqlDB *sql.DB,
 	logger zerolog.Logger,
@@ -39,6 +43,16 @@ func New(
 		AllowCredentials: true,
 	}))
 
+	server.GET("/oauth", func(ctx *gin.Context) {
+		stateID, err := utility.GenerateRandomBase64Str()
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		}
+		// if err = a.authStore.SetState(c, stateID); err != nil {
+		// 	c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		// }
+		ctx.Redirect(http.StatusFound, authClient.Oauth.AuthCodeURL(stateID))
+	})
 	// category service
 	categoryStore := pg.NewCategory(sqlDB)
 	categoryService := categoryService.NewCategoryService(sqlDB, categoryStore)
