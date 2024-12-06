@@ -3,8 +3,12 @@ package auth
 import (
 	"context"
 	"fmt"
+	"net/http"
+	"rizkysr90-pos/internal/store"
+	"rizkysr90-pos/internal/utility"
 
 	"github.com/coreos/go-oidc/v3/oidc"
+	"github.com/gin-gonic/gin"
 	"golang.org/x/oauth2"
 )
 
@@ -47,4 +51,15 @@ func New(ctx context.Context, config *Config) (*Client, error) {
 		OIDC:     verifier,
 		Provider: provider,
 	}, nil
+}
+
+func (a *Client) HandlerRedirect(ctx *gin.Context, stateAuthStore store.State) {
+	stateID, err := utility.GenerateRandomBase64Str()
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+	}
+	if err = stateAuthStore.Insert(ctx, stateID); err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+	}
+	ctx.Redirect(http.StatusFound, a.Oauth.AuthCodeURL(stateID))
 }
