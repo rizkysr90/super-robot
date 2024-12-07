@@ -8,4 +8,5 @@ type StateData struct {
 type State interface {
 	Insert(ctx context.Context, id string) error
 	FindOne(ctx context.Context, id string) (*StateData, error)
+	Delete(ctx context.Context, stateID string) error
 }

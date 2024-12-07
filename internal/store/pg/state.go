@@ -50,3 +50,18 @@ func (s *State) FindOne(ctx context.Context, stateID string) (*store.StateData, 
 	}
 	return data, nil
 }
+func (s *State) Delete(ctx context.Context, stateID string) error {
+	query := `
+		DELETE FROM states WHERE state_id = $1
+	`
+	deleteFunc := func(tx sqldb.QueryExecutor) error {
+		_, err := tx.ExecContext(ctx, query,
+			stateID,
+		)
+		if err != nil {
+			return err
+		}
+		return nil
+	}
+	return sqldb.WithinTxContextOrError(ctx, deleteFunc)
+}
