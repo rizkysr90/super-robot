@@ -41,8 +41,12 @@ func New(
 		AllowCredentials: true,
 	}))
 	authStateStore := pg.NewState(sqlDB)
+	sessionStore := pg.NewSession(sqlDB)
 	server.GET("/oauth", func(ctx *gin.Context) {
-		authClient.HandlerRedirect(ctx, authStateStore)
+		authClient.HandlerRedirect(ctx, sqlDB, authStateStore)
+	})
+	server.GET("/callback", func(ctx *gin.Context) {
+		authClient.HandlerCallback(ctx, sqlDB, authStateStore, sessionStore)
 	})
 	// category service
 	categoryStore := pg.NewCategory(sqlDB)
