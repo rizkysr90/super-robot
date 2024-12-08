@@ -5,11 +5,14 @@ import (
 
 	"rizkysr90-pos/internal/auth"
 	"rizkysr90-pos/internal/config"
+	"rizkysr90-pos/internal/restapi/handler"
 	categoryHandler "rizkysr90-pos/internal/restapi/handler/category"
 	producthandler "rizkysr90-pos/internal/restapi/handler/product"
 	"rizkysr90-pos/internal/restapi/middleware"
+	authService "rizkysr90-pos/internal/service/auth"
 	categoryService "rizkysr90-pos/internal/service/category"
 	"rizkysr90-pos/internal/service/productservice"
+
 	"rizkysr90-pos/internal/store/pg"
 	documentgen "rizkysr90-pos/pkg/documentGen"
 	"rizkysr90-pos/pkg/errorHandler"
@@ -40,14 +43,7 @@ func New(
 		AllowedHeaders:   []string{"*"}, // Allow all headers
 		AllowCredentials: true,
 	}))
-	authStateStore := pg.NewState(sqlDB)
-	sessionStore := pg.NewSession(sqlDB)
-	server.GET("/oauth", func(ctx *gin.Context) {
-		authClient.HandlerRedirect(ctx, sqlDB, authStateStore)
-	})
-	server.GET("/callback", func(ctx *gin.Context) {
-		authClient.HandlerCallback(ctx, sqlDB, authStateStore, sessionStore)
-	})
+
 	// category service
 	categoryStore := pg.NewCategory(sqlDB)
 	categoryService := categoryService.NewCategoryService(sqlDB, categoryStore)
@@ -59,6 +55,28 @@ func New(
 	productService := productservice.NewProductService(sqlDB, productStore, documentGenerator)
 	productHandler := producthandler.NewCategoryHandler(*productService)
 
+	// Auth service
+	authStateStore := pg.NewState(sqlDB)
+	sessionStore := pg.NewSession(sqlDB)
+	tenantStore := pg.NewTenant(sqlDB)
+	userStore := pg.NewUser(sqlDB)
+	authService := authService.NewAuthService(
+		sqlDB, authClient, authStateStore,
+		userStore, tenantStore,
+	)
+	authHandler := handler.NewAuthHandler(authClient, authService)
+
+	// server.GET("/oauth", func(ctx *gin.Context) {
+	// 	authClient.HandlerRedirect(ctx, sqlDB, authStateStore)
+	// })
+	server.GET("/callback", func(ctx *gin.Context) {
+		authClient.HandlerCallback(ctx, sqlDB, authStateStore, sessionStore)
+	})
+	// create a route group for auth
+	authRoutes := server.Group("/api/v1/auth")
+	{
+		authRoutes.GET("/register/owner", authHandler.OwnerRegistration)
+	}
 	// Create a route group for categories
 	categoryRoutes := server.Group("/api/v1/categories")
 	{

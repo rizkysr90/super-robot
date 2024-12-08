@@ -17,14 +17,15 @@ func NewState(db *sql.DB) *State {
 		db: db,
 	}
 }
-func (s *State) Insert(ctx context.Context, stateID string) error {
+func (s *State) Insert(ctx context.Context, stateData *store.StateData) error {
 	query := `
-		INSERT INTO states (state_id)
-		VALUES ($1)
+		INSERT INTO states (state_id, tenant_name)
+			VALUES ($1, NULLIF($2, ''));
 	`
 	createFunc := func(tx sqldb.QueryExecutor) error {
 		_, err := tx.ExecContext(ctx, query,
-			stateID,
+			stateData.ID,
+			stateData.TenantName,
 		)
 		if err != nil {
 			return err
@@ -35,7 +36,7 @@ func (s *State) Insert(ctx context.Context, stateID string) error {
 }
 func (s *State) FindOne(ctx context.Context, stateID string) (*store.StateData, error) {
 	query := `
-		SELECT state_id FROM states
+		SELECT state_id, tenant_name FROM states
 		WHERE state_id = $1
 	`
 	data := &store.StateData{}
@@ -44,7 +45,7 @@ func (s *State) FindOne(ctx context.Context, stateID string) (*store.StateData, 
 	if err := row.Err(); err != nil {
 		return nil, err
 	}
-	err := row.Scan(&data.ID)
+	err := row.Scan(&data.ID, &data.TenantName)
 	if err != nil {
 		return nil, err
 	}

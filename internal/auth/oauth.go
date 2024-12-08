@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"net/http"
 	"rizkysr90-pos/internal/store"
-	"rizkysr90-pos/internal/utility"
 	"time"
 
 	"github.com/coreos/go-oidc/v3/oidc"
@@ -58,21 +57,21 @@ func New(ctx context.Context, config *Config) (*Client, error) {
 	}, nil
 }
 
-func (a *Client) HandlerRedirect(ctx *gin.Context, sqlDB *sql.DB, stateAuthStore store.State) {
-	stateID, err := utility.GenerateRandomBase64Str()
-	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-	}
-	err = sqldb.WithinTx(ctx, sqlDB, func(tx sqldb.QueryExecutor) error {
-		txContext := sqldb.WithTxContext(ctx, tx)
-		return stateAuthStore.Insert(txContext, stateID)
-	})
-	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-	}
+// func (a *Client) HandlerRedirect(ctx *gin.Context, sqlDB *sql.DB, stateAuthStore store.State) {
+// 	stateID, err := utility.GenerateRandomBase64Str()
+// 	if err != nil {
+// 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+// 	}
+// 	err = sqldb.WithinTx(ctx, sqlDB, func(tx sqldb.QueryExecutor) error {
+// 		txContext := sqldb.WithTxContext(ctx, tx)
+// 		return stateAuthStore.Insert(txContext, stateID)
+// 	})
+// 	if err != nil {
+// 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+// 	}
 
-	ctx.Redirect(http.StatusFound, a.Oauth.AuthCodeURL(stateID))
-}
+// 	ctx.Redirect(http.StatusFound, a.Oauth.AuthCodeURL(stateID))
+// }
 
 func (a *Client) HandlerCallback(ctx *gin.Context,
 	db *sql.DB,

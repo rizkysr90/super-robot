@@ -1,12 +1,16 @@
 package store
 
-import "context"
+import (
+	"context"
+	"database/sql"
+)
 
 type StateData struct {
-	ID string
+	ID         string
+	TenantName sql.NullString
 }
 type State interface {
-	Insert(ctx context.Context, id string) error
+	Insert(ctx context.Context, tenantData *StateData) error
 	FindOne(ctx context.Context, id string) (*StateData, error)
 	Delete(ctx context.Context, stateID string) error
 }
