@@ -1,8 +1,12 @@
 package config
 
 import (
+	"fmt"
+	"log"
 	"rizkysr90-pos/internal/auth"
+	"strconv"
 
+	"github.com/redis/go-redis/v9"
 	pgx "github.com/rizkysr90/rizkysr90-go-pkg/pgx"
 
 	"github.com/caarlos0/env/v8"
@@ -29,6 +33,11 @@ type flatEnv struct {
 	AuthRedirectUri   string `env:"AUTH_REDIRECT_URI"`
 	AuthClientSecret  string `env:"AUTH_CLIENT_SECRET"`
 	AuthUri           string `env:"AUTH_URI"`
+	RedisUsername     string `env:"REDIS_USERNAME"`
+	RedisPassword     string `env:"REDIS_PASSWORD"`
+	RedisHost         string `env:"REDIS_HOST"`
+	RedisPort         string `env:"REDIS_PORT"`
+	RedisDatabase     string `env:"REDIS_DATABASE"`
 }
 type Config struct {
 	AppName           string
@@ -40,6 +49,7 @@ type Config struct {
 	SecretKeyJWT      string
 	PgSQL             pgx.Config
 	Auth              *auth.Config
+	RedisConfig       redis.Options
 }
 
 func LoadFromEnv() (Config, error) {
@@ -51,6 +61,10 @@ func LoadFromEnv() (Config, error) {
 	return newConfig(envCfg), nil
 }
 func newConfig(envCfg flatEnv) Config {
+	redisDB, err := strconv.Atoi(envCfg.RedisDatabase)
+	if err != nil {
+		log.Fatal("Database redis invalid : ", err)
+	}
 	return Config{
 		AppName:     envCfg.AppName,
 		AppEnv:      envCfg.AppEnv,
@@ -71,6 +85,12 @@ func newConfig(envCfg flatEnv) Config {
 			ClientID:     envCfg.AuthClientID,
 			RedirectURI:  envCfg.AuthRedirectUri,
 			ClientSecret: envCfg.AuthClientSecret,
+		},
+		RedisConfig: redis.Options{
+			Addr:     fmt.Sprintf("%s:%s", envCfg.RedisHost, envCfg.RedisPort),
+			Username: envCfg.RedisUsername,
+			Password: envCfg.RedisPassword,
+			DB:       redisDB,
 		},
 	}
 }

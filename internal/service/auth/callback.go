@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"rizkysr90-pos/internal/constant"
 	"rizkysr90-pos/internal/store"
 	"rizkysr90-pos/internal/utility"
 	"rizkysr90-pos/pkg/errorHandler"
@@ -22,7 +23,7 @@ type RequestCallback struct {
 	Code  string `validate:"required"`
 }
 type ResponseCallback struct {
-	SessionData *store.SessionData
+	SessionData *store.SessionRedisData
 }
 type requestCallback struct {
 	payload *RequestCallback
@@ -36,7 +37,7 @@ type UserInfoClaims struct {
 }
 
 func (req *requestCallback) sanitize() {
-	req.payload.State = strings.TrimSpace(req.payload.Code)
+	req.payload.State = strings.TrimSpace(req.payload.State)
 	req.payload.Code = strings.TrimSpace(req.payload.Code)
 }
 func (req *requestCallback) validate() error {
@@ -119,6 +120,25 @@ func (a *Auth) Callback(ctx context.Context, request *RequestCallback) (*Respons
 		OwnerID:   sql.NullString{String: setUserID, Valid: true},
 		UpdatedAt: sql.NullTime{Time: time.Now().UTC(), Valid: true},
 	}
+	generateSessionID, err := utility.GenerateRandomBase64Str()
+	if err != nil {
+		return nil, fmt.Errorf("failed to generate session id, got : %w", err)
+	}
+	sessionData := &store.SessionRedisData{
+		SessionID:    generateSessionID,
+		UserID:       setUserID,
+		UserType:     "headoffice",
+		UserEmail:    userInfoData.Email,
+		UserFullName: userInfoData.Name,
+		UserTenantID: setTenantID,
+		UserBranchID: "",
+		UserAuthType: string(constant.UserTypeGoogle),
+		UserRoles:    []string{},
+		CreatedAt:    time.Now().UTC(),
+	}
+	if err = a.session.Insert(ctx, sessionData); err != nil {
+		return nil, fmt.Errorf("failed to set redis data, got : %w", err)
+	}
 	// Remove state
 	err = sqldb.WithinTx(ctx, a.db, func(tx sqldb.QueryExecutor) error {
 		txContext := sqldb.WithTxContext(ctx, tx)
@@ -139,7 +159,7 @@ func (a *Auth) Callback(ctx context.Context, request *RequestCallback) (*Respons
 	if err != nil {
 		return nil, err
 	}
-	sessionData := &store.SessionData{}
+
 	return &ResponseCallback{SessionData: sessionData}, nil
 }
 func handleCallback(ctx context.Context, input *requestCallback) (*UserInfoClaims, error) {

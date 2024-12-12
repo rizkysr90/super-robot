@@ -14,10 +14,12 @@ import (
 	"rizkysr90-pos/internal/service/productservice"
 
 	"rizkysr90-pos/internal/store/pg"
+	rds "rizkysr90-pos/internal/store/redis"
 	documentgen "rizkysr90-pos/pkg/documentGen"
 	"rizkysr90-pos/pkg/errorHandler"
 
 	"github.com/gin-gonic/gin"
+	"github.com/redis/go-redis/v9"
 	cors "github.com/rs/cors/wrapper/gin"
 
 	"github.com/rs/zerolog"
@@ -28,6 +30,7 @@ func New(
 	cfg config.Config,
 	sqlDB *sql.DB,
 	logger zerolog.Logger,
+	redis *redis.Client,
 ) (*gin.Engine, error) {
 	// Setup rest api server and its provided services.
 	server := gin.New()
@@ -57,12 +60,12 @@ func New(
 
 	// Auth service
 	authStateStore := pg.NewState(sqlDB)
-	sessionStore := pg.NewSession(sqlDB)
 	tenantStore := pg.NewTenant(sqlDB)
 	userStore := pg.NewUser(sqlDB)
+	sessionStore := rds.NewSessionRedisManager(redis)
 	authService := authService.NewAuthService(
 		sqlDB, authClient, authStateStore,
-		userStore, tenantStore,
+		userStore, tenantStore, sessionStore,
 	)
 	authHandler := handler.NewAuthHandler(authClient, authService)
 
@@ -70,7 +73,7 @@ func New(
 	// 	authClient.HandlerRedirect(ctx, sqlDB, authStateStore)
 	// })
 	server.GET("/callback", func(ctx *gin.Context) {
-		authClient.HandlerCallback(ctx, sqlDB, authStateStore, sessionStore)
+		authHandler.Callback(ctx)
 	})
 	// create a route group for auth
 	authRoutes := server.Group("/api/v1/auth")

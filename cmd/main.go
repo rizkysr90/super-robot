@@ -10,6 +10,7 @@ import (
 	"rizkysr90-pos/internal/docs" // This is where Swag will generate its docs.go file
 	"rizkysr90-pos/internal/restapi"
 
+	"github.com/redis/go-redis/v9"
 	pgx "github.com/rizkysr90/rizkysr90-go-pkg/pgx"
 	logger "github.com/rizkysr90/rizkysr90-go-pkg/zerolog"
 	swaggerFiles "github.com/swaggo/files"
@@ -45,6 +46,12 @@ func main() {
 		logger.Error().Err(sqlDBErr).Msgf("pgSql: main failed to construct pgSql %s", sqlDBErr)
 		return
 	}
+	// RedisClient init
+	redisClient := redis.NewClient(&cfg.RedisConfig)
+	if err = redisClient.Ping(ctx).Err(); err != nil {
+		logger.Error().Err(sqlDBErr).Msgf("redis: main failed to construct redis %s", err.Error())
+		return
+	}
 	defer func() { sqlDB.Close() }()
 
 	authClient, err := auth.New(ctx, &auth.Config{
@@ -57,7 +64,7 @@ func main() {
 		log.Fatalf("restApi: main failed to create auth client: %s", err)
 		return
 	}
-	restAPIserver, err := restapi.New(authClient, cfg, sqlDB, logger)
+	restAPIserver, err := restapi.New(authClient, cfg, sqlDB, logger, redisClient)
 	docs.SwaggerInfo.BasePath = "/api/v1"
 	restAPIserver.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 

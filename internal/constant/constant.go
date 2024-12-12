@@ -6,3 +6,9 @@ const (
 	ErrInvalidAPIKey  = "Unauthorized: Invalid API key"
 	ErrInvalidFormat  = "Invalid Format"
 )
+
+type UserType string
+
+const (
+	UserTypeGoogle UserType = "google"
+)

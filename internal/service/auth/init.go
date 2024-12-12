@@ -12,11 +12,12 @@ type Auth struct {
 	stateStore  store.State
 	userStore   store.User
 	tenantStore store.Tenant
+	session     store.SessionRedis
 }
 
 func NewAuthService(
 	sqlDB *sql.DB, authClient *auth.Client, stateStore store.State,
-	userStore store.User, tenantStore store.Tenant,
+	userStore store.User, tenantStore store.Tenant, session store.SessionRedis,
 ) *Auth {
 	return &Auth{
 		db:          sqlDB,
@@ -24,5 +25,6 @@ func NewAuthService(
 		stateStore:  stateStore,
 		userStore:   userStore,
 		tenantStore: tenantStore,
+		session:     session,
 	}
 }
