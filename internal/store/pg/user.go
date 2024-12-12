@@ -55,3 +55,48 @@ func (u *User) Insert(ctx context.Context, userData *store.UserData) error {
 	}
 	return sqldb.WithinTxContextOrError(ctx, createFunc)
 }
+
+func (u *User) FindOne(ctx context.Context, filter *store.UserQueryFilter) (*store.UserData, error) {
+	query := `
+		SELECT id, email, full_name, google_id, auth_type, user_type, tenant_id
+		FROM users 
+		WHERE $1 = '' OR email = $1
+	`
+	data := &store.UserData{}
+	row := sqldb.WithinTxContextOrDB(ctx, u.db).
+		QueryRowContext(ctx, query, filter.Email)
+	if err := row.Err(); err != nil {
+		return nil, err
+	}
+	err := row.Scan(&data.ID, &data.Email, &data.FullName, &data.GoogleID, &data.AuthType,
+		&data.UserType, &data.TenantID)
+	if err != nil {
+		return nil, err
+	}
+	return data, nil
+}
+
+func (u *User) Update(ctx context.Context, userData *store.UserData) error {
+	query := `
+		UPDATE users SET
+			email = $2,
+			full_name = $3,
+			google_id = $4, 
+			last_login_at = $5
+		WHERE id = $1
+	`
+	updateFunc := func(tx sqldb.QueryExecutor) error {
+		_, err := tx.ExecContext(ctx, query,
+			userData.ID,
+			userData.Email,
+			userData.FullName,
+			userData.GoogleID,
+			userData.LastLoginAt,
+		)
+		if err != nil {
+			return err
+		}
+		return nil
+	}
+	return sqldb.WithinTxContextOrError(ctx, updateFunc)
+}

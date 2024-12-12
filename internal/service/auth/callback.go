@@ -95,31 +95,14 @@ func (a *Auth) Callback(ctx context.Context, request *RequestCallback) (*Respons
 	if err != nil {
 		return nil, err
 	}
+	userQueryFilter := &store.UserQueryFilter{Email: userInfoData.Email}
+	checkUserData, err := a.userStore.FindOne(ctx, userQueryFilter)
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		return nil, err
+	}
+	isSameEmail := checkUserData != nil
 	setUserID := uuid.NewString()
 	setTenantID := uuid.NewString()
-	insertedTenantData := &store.TenantData{
-		ID:        setTenantID,
-		Name:      userInfoData.StateData.TenantName.String,
-		OwnerID:   sql.NullString{String: "", Valid: false},
-		CreatedAt: time.Now().UTC(),
-	}
-	insertedUserData := &store.UserData{
-		ID:           setUserID,
-		Email:        userInfoData.Email,
-		FullName:     userInfoData.Name,
-		GoogleID:     sql.NullString{String: userInfoData.Sub, Valid: true},
-		PasswordHash: sql.NullString{String: "", Valid: false},
-		AuthType:     "google",
-		UserType:     "owner",
-		TenantID:     setTenantID,
-		CreatedAt:    time.Now().UTC(),
-		LastLoginAt:  time.Now().UTC(),
-	}
-	updatedTenantData := &store.TenantData{
-		ID:        setTenantID,
-		OwnerID:   sql.NullString{String: setUserID, Valid: true},
-		UpdatedAt: sql.NullTime{Time: time.Now().UTC(), Valid: true},
-	}
 	generateSessionID, err := utility.GenerateRandomBase64Str()
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate session id, got : %w", err)
@@ -139,25 +122,71 @@ func (a *Auth) Callback(ctx context.Context, request *RequestCallback) (*Respons
 	if err = a.session.Insert(ctx, sessionData); err != nil {
 		return nil, fmt.Errorf("failed to set redis data, got : %w", err)
 	}
-	// Remove state
-	err = sqldb.WithinTx(ctx, a.db, func(tx sqldb.QueryExecutor) error {
-		txContext := sqldb.WithTxContext(ctx, tx)
-		if err = a.stateStore.Delete(txContext, userInfoData.StateData.ID); err != nil {
-			return fmt.Errorf("failed to delete state data, got : %w", err)
+	if isSameEmail {
+		updatedData := &store.UserData{
+			ID:          checkUserData.ID,
+			LastLoginAt: time.Now().UTC(),
+			Email:       checkUserData.Email,
+			FullName:    checkUserData.FullName,
+			GoogleID:    checkUserData.GoogleID,
 		}
-		if err = a.tenantStore.Insert(txContext, insertedTenantData); err != nil {
-			return fmt.Errorf("failed to insert tenant data, got : %w", err)
+		err = sqldb.WithinTx(ctx, a.db, func(tx sqldb.QueryExecutor) error {
+			txContext := sqldb.WithTxContext(ctx, tx)
+			if err = a.stateStore.Delete(txContext, userInfoData.StateData.ID); err != nil {
+				return fmt.Errorf("failed to delete state data, got : %w", err)
+			}
+			if err = a.userStore.Update(txContext, updatedData); err != nil {
+				return fmt.Errorf("failed to update user, got: %w", err)
+			}
+			return nil
+		})
+		if err != nil {
+			return nil, err
 		}
-		if err = a.userStore.Insert(txContext, insertedUserData); err != nil {
-			return fmt.Errorf("failed to insert user data, got : %w", err)
+	} else {
+		insertedTenantData := &store.TenantData{
+			ID:        setTenantID,
+			Name:      userInfoData.StateData.TenantName.String,
+			OwnerID:   sql.NullString{String: "", Valid: false},
+			CreatedAt: time.Now().UTC(),
 		}
-		if err = a.tenantStore.Update(txContext, updatedTenantData); err != nil {
-			return fmt.Errorf("failed to update tenant data, got : %w", err)
+		insertedUserData := &store.UserData{
+			ID:           setUserID,
+			Email:        userInfoData.Email,
+			FullName:     userInfoData.Name,
+			GoogleID:     sql.NullString{String: userInfoData.Sub, Valid: true},
+			PasswordHash: sql.NullString{String: "", Valid: false},
+			AuthType:     "google",
+			UserType:     "owner",
+			TenantID:     setTenantID,
+			CreatedAt:    time.Now().UTC(),
+			LastLoginAt:  time.Now().UTC(),
 		}
-		return nil
-	})
-	if err != nil {
-		return nil, err
+		updatedTenantData := &store.TenantData{
+			ID:        setTenantID,
+			OwnerID:   sql.NullString{String: setUserID, Valid: true},
+			UpdatedAt: sql.NullTime{Time: time.Now().UTC(), Valid: true},
+		}
+		// Remove state
+		err = sqldb.WithinTx(ctx, a.db, func(tx sqldb.QueryExecutor) error {
+			txContext := sqldb.WithTxContext(ctx, tx)
+			if err = a.stateStore.Delete(txContext, userInfoData.StateData.ID); err != nil {
+				return fmt.Errorf("failed to delete state data, got : %w", err)
+			}
+			if err = a.tenantStore.Insert(txContext, insertedTenantData); err != nil {
+				return fmt.Errorf("failed to insert tenant data, got : %w", err)
+			}
+			if err = a.userStore.Insert(txContext, insertedUserData); err != nil {
+				return fmt.Errorf("failed to insert user data, got : %w", err)
+			}
+			if err = a.tenantStore.Update(txContext, updatedTenantData); err != nil {
+				return fmt.Errorf("failed to update tenant data, got : %w", err)
+			}
+			return nil
+		})
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return &ResponseCallback{SessionData: sessionData}, nil

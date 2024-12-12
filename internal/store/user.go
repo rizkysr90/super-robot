@@ -21,7 +21,11 @@ type UserData struct {
 	DeletedAt    sql.NullTime
 	LastLoginAt  time.Time
 }
-
+type UserQueryFilter struct {
+	Email string
+}
 type User interface {
 	Insert(ctx context.Context, userData *UserData) error
+	FindOne(ctx context.Context, filter *UserQueryFilter) (*UserData, error)
+	Update(ctx context.Context, userData *UserData) error
 }
