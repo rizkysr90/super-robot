@@ -3,7 +3,6 @@ package auth
 import (
 	"context"
 	"database/sql"
-	"errors"
 	"fmt"
 	"rizkysr90-pos/internal/store"
 	"rizkysr90-pos/internal/utility"
@@ -14,7 +13,7 @@ import (
 )
 
 type RequestRegisterOwner struct {
-	TenantName string `json:"tenant_name"`
+	TenantName string `json:"tenant_name" validate:"required,max=100"`
 }
 type requestRegisterOwner struct {
 	payload *RequestRegisterOwner
@@ -24,10 +23,8 @@ func (req *requestRegisterOwner) sanitize() {
 	req.payload.TenantName = strings.TrimSpace(req.payload.TenantName)
 }
 func (req *requestRegisterOwner) validate() error {
-	if len(req.payload.TenantName) > 100 {
-		return errors.New("max tenant name length is 100 characters")
-	}
-	return nil
+	validationUtil := utility.NewValidationUtil()
+	return validationUtil.Validate(req.payload)
 }
 func (a *Auth) RegisterOwner(ctx context.Context, request *RequestRegisterOwner) (string, error) {
 	input := &requestRegisterOwner{payload: request}

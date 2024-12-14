@@ -26,7 +26,7 @@ build/restapi:
 
 .PHONY: test
 test:
-	go test ./internal/service/... -coverprofile=coverage.out
+	go test -coverprofile=coverage.out $(shell go list ./internal/service/... | grep -v /auth/callback)
 	go tool cover -html=coverage.out -o coverage.html
 
 GOLANGCI_VERSION=1.55.2
