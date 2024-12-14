@@ -13,33 +13,34 @@ import (
 )
 
 type flatEnv struct {
+	PrivateKeyJWT     string `env:"PRIVATE_KEY_JWT,unset"`
+	AuthURI           string `env:"AUTH_URI"`
 	APIVersionBaseURL string `env:"API_VERSION_BASE_URL"`
-	DBPassword        string `env:"DB_PASSWORD,unset"`
-	RestAPIPort       string `env:"REST_API_PORT"`
 	DBHost            string `env:"DB_HOST"`
-	AppName           string `env:"APP_NAME"`
+	RedisDatabase     string `env:"REDIS_DATABASE"`
 	DBUsername        string `env:"DB_USERNAME"`
 	AppEnv            string `env:"APP_ENV"`
-	APIKey            string `env:"API_KEY,unset"`
+	RedisPort         string `env:"REDIS_PORT"`
 	DBDatabase        string `env:"DB_DATABASE"`
 	LogLevel          string `env:"LOG_LEVEL"`
 	SecretKeyJWT      string `env:"SECRET_KEY_JWT,unset"`
 	PublicKeyJWT      string `env:"PUBLIC_KEY_JWT,unset"`
-	PrivateKeyJWT     string `env:"PRIVATE_KEY_JWT,unset"`
-	DBConnMaxIdle     int    `env:"DB_CONN_MAX_IDLE"`
-	DBConnMaxOpen     int    `env:"DB_CONN_MAX_OPEN"`
-	DBPort            int    `env:"DB_PORT"`
+	RestAPIPort       string `env:"REST_API_PORT"`
+	AppName           string `env:"APP_NAME"`
+	APIKey            string `env:"API_KEY,unset"`
+	RedisHost         string `env:"REDIS_HOST"`
 	AuthClientID      string `env:"AUTH_CLIENT_ID"`
-	AuthRedirectUri   string `env:"AUTH_REDIRECT_URI"`
+	AuthRedirectURI   string `env:"AUTH_REDIRECT_URI"`
 	AuthClientSecret  string `env:"AUTH_CLIENT_SECRET"`
-	AuthUri           string `env:"AUTH_URI"`
+	DBPassword        string `env:"DB_PASSWORD,unset"`
 	RedisUsername     string `env:"REDIS_USERNAME"`
 	RedisPassword     string `env:"REDIS_PASSWORD"`
-	RedisHost         string `env:"REDIS_HOST"`
-	RedisPort         string `env:"REDIS_PORT"`
-	RedisDatabase     string `env:"REDIS_DATABASE"`
+	DBPort            int    `env:"DB_PORT"`
+	DBConnMaxOpen     int    `env:"DB_CONN_MAX_OPEN"`
+	DBConnMaxIdle     int    `env:"DB_CONN_MAX_IDLE"`
 }
 type Config struct {
+	Auth              *auth.Config
 	AppName           string
 	AppEnv            string
 	RestAPIPort       string
@@ -47,9 +48,8 @@ type Config struct {
 	APIVersionBaseURL string
 	LogLevel          string
 	SecretKeyJWT      string
-	PgSQL             pgx.Config
-	Auth              *auth.Config
 	RedisConfig       redis.Options
+	PgSQL             pgx.Config
 }
 
 func LoadFromEnv() (Config, error) {
@@ -81,9 +81,9 @@ func newConfig(envCfg flatEnv) Config {
 		LogLevel:          envCfg.LogLevel,
 		SecretKeyJWT:      envCfg.SecretKeyJWT,
 		Auth: &auth.Config{
-			BaseURL:      envCfg.AuthUri,
+			BaseURL:      envCfg.AuthURI,
 			ClientID:     envCfg.AuthClientID,
-			RedirectURI:  envCfg.AuthRedirectUri,
+			RedirectURI:  envCfg.AuthRedirectURI,
 			ClientSecret: envCfg.AuthClientSecret,
 		},
 		RedisConfig: redis.Options{

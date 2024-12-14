@@ -27,7 +27,7 @@ import (
 
 func New(
 	authClient *auth.Client,
-	cfg config.Config,
+	_ config.Config,
 	sqlDB *sql.DB,
 	logger zerolog.Logger,
 	redis *redis.Client,

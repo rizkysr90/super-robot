@@ -7,19 +7,19 @@ import (
 )
 
 type UserData struct {
-	ID           string
-	Email        string
-	FullName     string
-	GoogleID     sql.NullString
-	PasswordHash sql.NullString
-	AuthType     string
-	UserType     string
-	TenantID     string
-	Tenant       *TenantData
-	CreatedAt    time.Time
-	UpdatedAt    sql.NullTime
-	DeletedAt    sql.NullTime
 	LastLoginAt  time.Time
+	CreatedAt    time.Time
+	Tenant       *TenantData
+	DeletedAt    sql.NullTime
+	UpdatedAt    sql.NullTime
+	UserType     string
+	ID           string
+	TenantID     string
+	AuthType     string
+	FullName     string
+	Email        string
+	PasswordHash sql.NullString
+	GoogleID     sql.NullString
 }
 type UserQueryFilter struct {
 	Email string

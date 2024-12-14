@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"log"
 	"net/http"
 	"rizkysr90-pos/internal/auth"
 	service "rizkysr90-pos/internal/service/auth"
@@ -25,6 +26,17 @@ func NewAuthHandler(
 	}
 }
 
+// OwnerRegistration godoc
+// @Summary Register owner for a tenant
+// @Description Initiates owner registration process and redirects to OAuth authorization
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param tenant query string true "Tenant name to register owner for"
+// @Success 302 {string} string "Redirect to OAuth authorization URL"
+// @Failure 400 {object} errorHandler.HttpError
+// @Failure 500 {object} errorHandler.HttpError
+// @Router /auth/register/owner [get]
 func (a *AuthHandler) OwnerRegistration(ctx *gin.Context) {
 	tenantName := ctx.Query("tenant")
 	if tenantName == "" {
@@ -32,13 +44,21 @@ func (a *AuthHandler) OwnerRegistration(ctx *gin.Context) {
 			errorHandler.WithInfo("invalid payload"),
 			errorHandler.WithMessage("tenantName is required"),
 		)
-		ctx.Error(err)
+		if errCtx := ctx.Error(err); errCtx != nil {
+			// Handle the error from ctx.Error
+			// You might want to log it or take other appropriate action
+			log.Printf("failed to send error response: %v", errCtx)
+		}
 		return
 	}
 	payload := &service.RequestRegisterOwner{TenantName: tenantName}
 	stateID, err := a.authService.RegisterOwner(ctx, payload)
 	if err != nil {
-		ctx.Error(err)
+		if errCtx := ctx.Error(err); errCtx != nil {
+			// Handle the error from ctx.Error
+			// You might want to log it or take other appropriate action
+			log.Printf("failed to send error response: %v", errCtx)
+		}
 		return
 	}
 	ctx.Redirect(http.StatusFound, a.authClient.Oauth.AuthCodeURL(stateID))
@@ -50,7 +70,11 @@ func (a *AuthHandler) Callback(ctx *gin.Context) {
 			errorHandler.WithInfo("invalid payload"),
 			errorHandler.WithMessage("state id is required"),
 		)
-		ctx.Error(err)
+		if errCtx := ctx.Error(err); errCtx != nil {
+			// Handle the error from ctx.Error
+			// You might want to log it or take other appropriate action
+			log.Printf("failed to send error response: %v", errCtx)
+		}
 		return
 	}
 	authorizationCode := ctx.Query("code")
@@ -59,13 +83,21 @@ func (a *AuthHandler) Callback(ctx *gin.Context) {
 			errorHandler.WithInfo("invalid code"),
 			errorHandler.WithMessage("authorization code is required"),
 		)
-		ctx.Error(err)
+		if errCtx := ctx.Error(err); errCtx != nil {
+			// Handle the error from ctx.Error
+			// You might want to log it or take other appropriate action
+			log.Printf("failed to send error response: %v", errCtx)
+		}
 		return
 	}
 	response, err := a.authService.Callback(ctx, &service.RequestCallback{
 		State: stateID, Code: authorizationCode})
 	if err != nil {
-		ctx.Error(err)
+		if errCtx := ctx.Error(err); errCtx != nil {
+			// Handle the error from ctx.Error
+			// You might want to log it or take other appropriate action
+			log.Printf("failed to send error response: %v", errCtx)
+		}
 		return
 	}
 
@@ -88,5 +120,4 @@ func (a *AuthHandler) Callback(ctx *gin.Context) {
 		true,                           // httpOnly
 	)
 	ctx.Redirect(http.StatusTemporaryRedirect, "/")
-
 }

@@ -30,10 +30,10 @@ type requestCallback struct {
 	auth    *Auth
 }
 type UserInfoClaims struct {
+	StateData *store.StateData
 	Email     string `json:"email"`
 	Name      string `json:"name"`
 	Sub       string `json:"sub"`
-	StateData *store.StateData
 }
 
 func (req *requestCallback) sanitize() {
@@ -64,7 +64,6 @@ func (req *requestCallback) exchangeToken(ctx context.Context) (*oauth2.Token, e
 		return nil, fmt.Errorf("failed to exchange the token, got : %w", err)
 	}
 	return oauth2Token, nil
-
 }
 func (req *requestCallback) getAndVerifyIDToken(ctx context.Context, token *oauth2.Token) (*oidc.IDToken, error) {
 	// Get raw ID token
@@ -85,22 +84,15 @@ func (req *requestCallback) getUserInfoData(idToken *oidc.IDToken) (*UserInfoCla
 	}
 	return UserInfoClaims, nil
 }
-func (a *Auth) Callback(ctx context.Context, request *RequestCallback) (*ResponseCallback, error) {
-	input := &requestCallback{payload: request, auth: a}
-	input.sanitize()
-	if err := input.validate(); err != nil {
-		return nil, err
-	}
-	userInfoData, err := handleCallback(ctx, input)
-	if err != nil {
-		return nil, err
-	}
-	userQueryFilter := &store.UserQueryFilter{Email: userInfoData.Email}
-	checkUserData, err := a.userStore.FindOne(ctx, userQueryFilter)
+func (req *requestCallback) checkExistingUser(ctx context.Context, email string) (*store.UserData, error) {
+	userQueryFilter := &store.UserQueryFilter{Email: email}
+	checkUserData, err := req.auth.userStore.FindOne(ctx, userQueryFilter)
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		return nil, err
 	}
-	isSameEmail := checkUserData != nil
+	return checkUserData, nil
+}
+func (req *requestCallback) setSessionData(userInfoData *UserInfoClaims) (*store.SessionRedisData, error) {
 	setUserID := uuid.NewString()
 	setTenantID := uuid.NewString()
 	generateSessionID, err := utility.GenerateRandomBase64Str()
@@ -119,95 +111,108 @@ func (a *Auth) Callback(ctx context.Context, request *RequestCallback) (*Respons
 		UserRoles:    []string{},
 		CreatedAt:    time.Now().UTC(),
 	}
+	return sessionData, nil
+}
+func (req *requestCallback) onlyUpdateUser(txContext context.Context, existingUser *store.UserData) error {
+	updatedData := &store.UserData{
+		ID:          existingUser.ID,
+		LastLoginAt: time.Now().UTC(),
+		Email:       existingUser.Email,
+		FullName:    existingUser.FullName,
+		GoogleID:    existingUser.GoogleID,
+	}
+	if err := req.auth.userStore.Update(txContext, updatedData); err != nil {
+		return fmt.Errorf("failed to update user, got: %w", err)
+	}
+	return nil
+}
+func (req *requestCallback) createNewUser(txContext context.Context,
+	sessionData *store.SessionRedisData, userInfoData *UserInfoClaims) error {
+	insertedTenantData := &store.TenantData{
+		ID:        sessionData.UserTenantID,
+		Name:      userInfoData.StateData.TenantName.String,
+		OwnerID:   sql.NullString{String: "", Valid: false},
+		CreatedAt: time.Now().UTC(),
+	}
+	insertedUserData := &store.UserData{
+		ID:           sessionData.UserID,
+		Email:        userInfoData.Email,
+		FullName:     userInfoData.Name,
+		GoogleID:     sql.NullString{String: userInfoData.Sub, Valid: true},
+		PasswordHash: sql.NullString{String: "", Valid: false},
+		AuthType:     "google",
+		UserType:     "owner",
+		TenantID:     sessionData.UserTenantID,
+		CreatedAt:    time.Now().UTC(),
+		LastLoginAt:  time.Now().UTC(),
+	}
+	updatedTenantData := &store.TenantData{
+		ID:        sessionData.UserTenantID,
+		OwnerID:   sql.NullString{String: sessionData.UserID, Valid: true},
+		UpdatedAt: sql.NullTime{Time: time.Now().UTC(), Valid: true},
+	}
+	if err := req.auth.tenantStore.Insert(txContext, insertedTenantData); err != nil {
+		return fmt.Errorf("failed to insert tenant data, got : %w", err)
+	}
+	if err := req.auth.userStore.Insert(txContext, insertedUserData); err != nil {
+		return fmt.Errorf("failed to insert user data, got : %w", err)
+	}
+	if err := req.auth.tenantStore.Update(txContext, updatedTenantData); err != nil {
+		return fmt.Errorf("failed to update tenant data, got : %w", err)
+	}
+	return nil
+}
+func (a *Auth) Callback(ctx context.Context, request *RequestCallback) (*ResponseCallback, error) {
+	input := &requestCallback{payload: request, auth: a}
+	input.sanitize()
+	if err := input.validate(); err != nil {
+		return nil, err
+	}
+	userInfoData, err := input.handleCallback(ctx)
+	if err != nil {
+		return nil, err
+	}
+	checkUserData, err := input.checkExistingUser(ctx, userInfoData.Email)
+	if err != nil {
+		return nil, err
+	}
+	isSameEmail := checkUserData != nil
+	sessionData, err := input.setSessionData(userInfoData)
+	if err != nil {
+		return nil, err
+	}
 	if err = a.session.Insert(ctx, sessionData); err != nil {
 		return nil, fmt.Errorf("failed to set redis data, got : %w", err)
 	}
-	if isSameEmail {
-		updatedData := &store.UserData{
-			ID:          checkUserData.ID,
-			LastLoginAt: time.Now().UTC(),
-			Email:       checkUserData.Email,
-			FullName:    checkUserData.FullName,
-			GoogleID:    checkUserData.GoogleID,
+	err = sqldb.WithinTx(ctx, a.db, func(tx sqldb.QueryExecutor) error {
+		txContext := sqldb.WithTxContext(ctx, tx)
+		if err = a.stateStore.Delete(txContext, userInfoData.StateData.ID); err != nil {
+			return fmt.Errorf("failed to delete state data, got : %w", err)
 		}
-		err = sqldb.WithinTx(ctx, a.db, func(tx sqldb.QueryExecutor) error {
-			txContext := sqldb.WithTxContext(ctx, tx)
-			if err = a.stateStore.Delete(txContext, userInfoData.StateData.ID); err != nil {
-				return fmt.Errorf("failed to delete state data, got : %w", err)
-			}
-			if err = a.userStore.Update(txContext, updatedData); err != nil {
-				return fmt.Errorf("failed to update user, got: %w", err)
-			}
-			return nil
-		})
-		if err != nil {
-			return nil, err
+		if isSameEmail {
+			return input.onlyUpdateUser(txContext, checkUserData)
 		}
-	} else {
-		insertedTenantData := &store.TenantData{
-			ID:        setTenantID,
-			Name:      userInfoData.StateData.TenantName.String,
-			OwnerID:   sql.NullString{String: "", Valid: false},
-			CreatedAt: time.Now().UTC(),
-		}
-		insertedUserData := &store.UserData{
-			ID:           setUserID,
-			Email:        userInfoData.Email,
-			FullName:     userInfoData.Name,
-			GoogleID:     sql.NullString{String: userInfoData.Sub, Valid: true},
-			PasswordHash: sql.NullString{String: "", Valid: false},
-			AuthType:     "google",
-			UserType:     "owner",
-			TenantID:     setTenantID,
-			CreatedAt:    time.Now().UTC(),
-			LastLoginAt:  time.Now().UTC(),
-		}
-		updatedTenantData := &store.TenantData{
-			ID:        setTenantID,
-			OwnerID:   sql.NullString{String: setUserID, Valid: true},
-			UpdatedAt: sql.NullTime{Time: time.Now().UTC(), Valid: true},
-		}
-		// Remove state
-		err = sqldb.WithinTx(ctx, a.db, func(tx sqldb.QueryExecutor) error {
-			txContext := sqldb.WithTxContext(ctx, tx)
-			if err = a.stateStore.Delete(txContext, userInfoData.StateData.ID); err != nil {
-				return fmt.Errorf("failed to delete state data, got : %w", err)
-			}
-			if err = a.tenantStore.Insert(txContext, insertedTenantData); err != nil {
-				return fmt.Errorf("failed to insert tenant data, got : %w", err)
-			}
-			if err = a.userStore.Insert(txContext, insertedUserData); err != nil {
-				return fmt.Errorf("failed to insert user data, got : %w", err)
-			}
-			if err = a.tenantStore.Update(txContext, updatedTenantData); err != nil {
-				return fmt.Errorf("failed to update tenant data, got : %w", err)
-			}
-			return nil
-		})
-		if err != nil {
-			return nil, err
-		}
-	}
-
+		return input.createNewUser(txContext, sessionData, userInfoData)
+	})
 	return &ResponseCallback{SessionData: sessionData}, nil
 }
-func handleCallback(ctx context.Context, input *requestCallback) (*UserInfoClaims, error) {
-	stateData, err := input.getAndVerifyState(ctx)
+func (req *requestCallback) handleCallback(ctx context.Context) (*UserInfoClaims, error) {
+	stateData, err := req.getAndVerifyState(ctx)
 	if err != nil {
 		return nil, errorHandler.NewInternalServer(
 			errorHandler.WithInfo(fmt.Sprintf("failed to get state, got : %s", err.Error())))
 	}
-	oauth2Token, err := input.exchangeToken(ctx)
+	oauth2Token, err := req.exchangeToken(ctx)
 	if err != nil {
 		return nil, errorHandler.NewInternalServer(
 			errorHandler.WithInfo(fmt.Sprintf("failed to exchange token, got : %s", err.Error())))
 	}
-	idToken, err := input.getAndVerifyIDToken(ctx, oauth2Token)
+	idToken, err := req.getAndVerifyIDToken(ctx, oauth2Token)
 	if err != nil {
 		return nil, errorHandler.NewInternalServer(
 			errorHandler.WithInfo(fmt.Sprintf("failed to get or verify id token, got : %s", err.Error())))
 	}
-	userInfoData, err := input.getUserInfoData(idToken)
+	userInfoData, err := req.getUserInfoData(idToken)
 	if err != nil {
 		return nil, errorHandler.NewInternalServer(
 			errorHandler.WithInfo(fmt.Sprintf("failed to get user info data, got : %s", err.Error())))

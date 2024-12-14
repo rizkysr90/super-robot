@@ -41,25 +41,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/payload.ResGetProductByID"
+                            "$ref": "#/definitions/rizkysr90-pos_internal_payload.ResGetProductByID"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/errorHandler.HttpError"
+                            "$ref": "#/definitions/rizkysr90-pos_pkg_errorHandler.HttpError"
                         }
                     },
                     "404": {
                         "description": "Product not found",
                         "schema": {
-                            "$ref": "#/definitions/errorHandler.HttpError"
+                            "$ref": "#/definitions/rizkysr90-pos_pkg_errorHandler.HttpError"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/errorHandler.HttpError"
+                            "$ref": "#/definitions/rizkysr90-pos_pkg_errorHandler.HttpError"
                         }
                     }
                 }
@@ -90,7 +90,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/payload.ReqUpdateProduct"
+                            "$ref": "#/definitions/rizkysr90-pos_internal_payload.ReqUpdateProduct"
                         }
                     }
                 ],
@@ -98,25 +98,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/payload.ResUpdateProduct"
+                            "$ref": "#/definitions/rizkysr90-pos_internal_payload.ResUpdateProduct"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/errorHandler.HttpError"
+                            "$ref": "#/definitions/rizkysr90-pos_pkg_errorHandler.HttpError"
                         }
                     },
                     "404": {
                         "description": "Product not found",
                         "schema": {
-                            "$ref": "#/definitions/errorHandler.HttpError"
+                            "$ref": "#/definitions/rizkysr90-pos_pkg_errorHandler.HttpError"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/errorHandler.HttpError"
+                            "$ref": "#/definitions/rizkysr90-pos_pkg_errorHandler.HttpError"
                         }
                     }
                 }
@@ -146,25 +146,69 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/payload.ResDeleteProductByID"
+                            "$ref": "#/definitions/rizkysr90-pos_internal_payload.ResDeleteProductByID"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/errorHandler.HttpError"
+                            "$ref": "#/definitions/rizkysr90-pos_pkg_errorHandler.HttpError"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/errorHandler.HttpError"
+                            "$ref": "#/definitions/rizkysr90-pos_pkg_errorHandler.HttpError"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/errorHandler.HttpError"
+                            "$ref": "#/definitions/rizkysr90-pos_pkg_errorHandler.HttpError"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/register/owner": {
+            "get": {
+                "description": "Initiates owner registration process and redirects to OAuth authorization",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Register owner for a tenant",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Tenant name to register owner for",
+                        "name": "tenant",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "302": {
+                        "description": "Redirect to OAuth authorization URL",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/rizkysr90-pos_pkg_errorHandler.HttpError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/rizkysr90-pos_pkg_errorHandler.HttpError"
                         }
                     }
                 }
@@ -206,19 +250,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/payload.ResGetAllCategory"
+                            "$ref": "#/definitions/rizkysr90-pos_internal_payload.ResGetAllCategory"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/errorHandler.HttpError"
+                            "$ref": "#/definitions/rizkysr90-pos_pkg_errorHandler.HttpError"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/errorHandler.HttpError"
+                            "$ref": "#/definitions/rizkysr90-pos_pkg_errorHandler.HttpError"
                         }
                     }
                 }
@@ -242,7 +286,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/payload.ReqCreateCategory"
+                            "$ref": "#/definitions/rizkysr90-pos_internal_payload.ReqCreateCategory"
                         }
                     }
                 ],
@@ -250,19 +294,19 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/payload.ResCreateCategory"
+                            "$ref": "#/definitions/rizkysr90-pos_internal_payload.ResCreateCategory"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/errorHandler.HttpError"
+                            "$ref": "#/definitions/rizkysr90-pos_pkg_errorHandler.HttpError"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/errorHandler.HttpError"
+                            "$ref": "#/definitions/rizkysr90-pos_pkg_errorHandler.HttpError"
                         }
                     }
                 }
@@ -294,25 +338,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/payload.ResGetCategoryByID"
+                            "$ref": "#/definitions/rizkysr90-pos_internal_payload.ResGetCategoryByID"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/errorHandler.HttpError"
+                            "$ref": "#/definitions/rizkysr90-pos_pkg_errorHandler.HttpError"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/errorHandler.HttpError"
+                            "$ref": "#/definitions/rizkysr90-pos_pkg_errorHandler.HttpError"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/errorHandler.HttpError"
+                            "$ref": "#/definitions/rizkysr90-pos_pkg_errorHandler.HttpError"
                         }
                     }
                 }
@@ -343,7 +387,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/payload.ReqUpdateCategory"
+                            "$ref": "#/definitions/rizkysr90-pos_internal_payload.ReqUpdateCategory"
                         }
                     }
                 ],
@@ -351,25 +395,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/payload.ResUpdateCategory"
+                            "$ref": "#/definitions/rizkysr90-pos_internal_payload.ResUpdateCategory"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/errorHandler.HttpError"
+                            "$ref": "#/definitions/rizkysr90-pos_pkg_errorHandler.HttpError"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/errorHandler.HttpError"
+                            "$ref": "#/definitions/rizkysr90-pos_pkg_errorHandler.HttpError"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/errorHandler.HttpError"
+                            "$ref": "#/definitions/rizkysr90-pos_pkg_errorHandler.HttpError"
                         }
                     }
                 }
@@ -399,25 +443,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/payload.ResDeleteCategory"
+                            "$ref": "#/definitions/rizkysr90-pos_internal_payload.ResDeleteCategory"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/errorHandler.HttpError"
+                            "$ref": "#/definitions/rizkysr90-pos_pkg_errorHandler.HttpError"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/errorHandler.HttpError"
+                            "$ref": "#/definitions/rizkysr90-pos_pkg_errorHandler.HttpError"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/errorHandler.HttpError"
+                            "$ref": "#/definitions/rizkysr90-pos_pkg_errorHandler.HttpError"
                         }
                     }
                 }
@@ -462,19 +506,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/payload.ResGetAllProducts"
+                            "$ref": "#/definitions/rizkysr90-pos_internal_payload.ResGetAllProducts"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/errorHandler.HttpError"
+                            "$ref": "#/definitions/rizkysr90-pos_pkg_errorHandler.HttpError"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/errorHandler.HttpError"
+                            "$ref": "#/definitions/rizkysr90-pos_pkg_errorHandler.HttpError"
                         }
                     }
                 }
@@ -498,7 +542,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/payload.ReqCreateProduct"
+                            "$ref": "#/definitions/rizkysr90-pos_internal_payload.ReqCreateProduct"
                         }
                     }
                 ],
@@ -506,19 +550,19 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/payload.ResCreateProduct"
+                            "$ref": "#/definitions/rizkysr90-pos_internal_payload.ResCreateProduct"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/errorHandler.HttpError"
+                            "$ref": "#/definitions/rizkysr90-pos_pkg_errorHandler.HttpError"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/errorHandler.HttpError"
+                            "$ref": "#/definitions/rizkysr90-pos_pkg_errorHandler.HttpError"
                         }
                     }
                 }
@@ -544,7 +588,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/payload.GenerateBarcodeRequest"
+                            "$ref": "#/definitions/rizkysr90-pos_internal_payload.GenerateBarcodeRequest"
                         }
                     }
                 ],
@@ -558,13 +602,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/errorHandler.HttpError"
+                            "$ref": "#/definitions/rizkysr90-pos_pkg_errorHandler.HttpError"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/errorHandler.HttpError"
+                            "$ref": "#/definitions/rizkysr90-pos_pkg_errorHandler.HttpError"
                         }
                     }
                 }
@@ -572,19 +616,7 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "errorHandler.HttpError": {
-            "type": "object",
-            "properties": {
-                "code": {
-                    "type": "integer"
-                },
-                "info": {
-                    "type": "string"
-                },
-                "message": {}
-            }
-        },
-        "payload.CategoryData": {
+        "rizkysr90-pos_internal_payload.CategoryData": {
             "type": "object",
             "properties": {
                 "category_name": {
@@ -604,7 +636,7 @@ const docTemplate = `{
                 }
             }
         },
-        "payload.GenerateBarcodeRequest": {
+        "rizkysr90-pos_internal_payload.GenerateBarcodeRequest": {
             "type": "object",
             "properties": {
                 "product_id": {
@@ -612,7 +644,7 @@ const docTemplate = `{
                 }
             }
         },
-        "payload.Pagination": {
+        "rizkysr90-pos_internal_payload.Pagination": {
             "type": "object",
             "properties": {
                 "page_number": {
@@ -629,7 +661,7 @@ const docTemplate = `{
                 }
             }
         },
-        "payload.ProductData": {
+        "rizkysr90-pos_internal_payload.ProductData": {
             "type": "object",
             "properties": {
                 "base_price": {
@@ -639,7 +671,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "category_name": {
-                    "description": "From categories table",
                     "type": "string"
                 },
                 "created_at": {
@@ -665,7 +696,7 @@ const docTemplate = `{
                 }
             }
         },
-        "payload.ReqCreateCategory": {
+        "rizkysr90-pos_internal_payload.ReqCreateCategory": {
             "type": "object",
             "properties": {
                 "category_name": {
@@ -673,7 +704,7 @@ const docTemplate = `{
                 }
             }
         },
-        "payload.ReqCreateProduct": {
+        "rizkysr90-pos_internal_payload.ReqCreateProduct": {
             "type": "object",
             "required": [
                 "category_id",
@@ -701,7 +732,7 @@ const docTemplate = `{
                 }
             }
         },
-        "payload.ReqUpdateCategory": {
+        "rizkysr90-pos_internal_payload.ReqUpdateCategory": {
             "type": "object",
             "properties": {
                 "category_name": {
@@ -712,7 +743,7 @@ const docTemplate = `{
                 }
             }
         },
-        "payload.ReqUpdateProduct": {
+        "rizkysr90-pos_internal_payload.ReqUpdateProduct": {
             "type": "object",
             "required": [
                 "category_id",
@@ -744,67 +775,79 @@ const docTemplate = `{
                 }
             }
         },
-        "payload.ResCreateCategory": {
+        "rizkysr90-pos_internal_payload.ResCreateCategory": {
             "type": "object"
         },
-        "payload.ResCreateProduct": {
+        "rizkysr90-pos_internal_payload.ResCreateProduct": {
             "type": "object"
         },
-        "payload.ResDeleteCategory": {
+        "rizkysr90-pos_internal_payload.ResDeleteCategory": {
             "type": "object"
         },
-        "payload.ResDeleteProductByID": {
+        "rizkysr90-pos_internal_payload.ResDeleteProductByID": {
             "type": "object"
         },
-        "payload.ResGetAllCategory": {
+        "rizkysr90-pos_internal_payload.ResGetAllCategory": {
             "type": "object",
             "properties": {
                 "data": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/payload.CategoryData"
+                        "$ref": "#/definitions/rizkysr90-pos_internal_payload.CategoryData"
                     }
                 },
                 "metadata": {
-                    "$ref": "#/definitions/payload.Pagination"
+                    "$ref": "#/definitions/rizkysr90-pos_internal_payload.Pagination"
                 }
             }
         },
-        "payload.ResGetAllProducts": {
+        "rizkysr90-pos_internal_payload.ResGetAllProducts": {
             "type": "object",
             "properties": {
                 "data": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/payload.ProductData"
+                        "$ref": "#/definitions/rizkysr90-pos_internal_payload.ProductData"
                     }
                 },
                 "metadata": {
-                    "$ref": "#/definitions/payload.Pagination"
+                    "$ref": "#/definitions/rizkysr90-pos_internal_payload.Pagination"
                 }
             }
         },
-        "payload.ResGetCategoryByID": {
+        "rizkysr90-pos_internal_payload.ResGetCategoryByID": {
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/payload.CategoryData"
+                    "$ref": "#/definitions/rizkysr90-pos_internal_payload.CategoryData"
                 }
             }
         },
-        "payload.ResGetProductByID": {
+        "rizkysr90-pos_internal_payload.ResGetProductByID": {
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/payload.ProductData"
+                    "$ref": "#/definitions/rizkysr90-pos_internal_payload.ProductData"
                 }
             }
         },
-        "payload.ResUpdateCategory": {
+        "rizkysr90-pos_internal_payload.ResUpdateCategory": {
             "type": "object"
         },
-        "payload.ResUpdateProduct": {
+        "rizkysr90-pos_internal_payload.ResUpdateProduct": {
             "type": "object"
+        },
+        "rizkysr90-pos_pkg_errorHandler.HttpError": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer"
+                },
+                "info": {
+                    "type": "string"
+                },
+                "message": {}
+            }
         }
     }
 }`
@@ -815,8 +858,8 @@ var SwaggerInfo = &swag.Spec{
 	Host:             "localhost:8080",
 	BasePath:         "/api/v1",
 	Schemes:          []string{},
-	Title:            "",
-	Description:      "rizki plastik point of sale api server.",
+	Title:            "Point of Sale API",
+	Description:      "API for Point of Sale System",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

@@ -7,13 +7,13 @@ import (
 )
 
 type TenantData struct {
+	CreatedAt time.Time
+	Owner     *UserData
+	UpdatedAt sql.NullTime
+	DeletedAt sql.NullTime
 	ID        string
 	Name      string
 	OwnerID   sql.NullString
-	Owner     *UserData
-	CreatedAt time.Time
-	UpdatedAt sql.NullTime
-	DeletedAt sql.NullTime
 }
 
 type Tenant interface {

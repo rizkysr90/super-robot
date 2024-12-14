@@ -34,7 +34,7 @@ func New(ctx context.Context, config *Config) (*Client, error) {
 	// Google's OAuth 2.0 endpoint
 	provider, err := oidc.NewProvider(ctx, providerURL)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get provider: %v", err)
+		return nil, fmt.Errorf("failed to get provider: %w", err)
 	}
 	// Create ID token verifier
 	verifier := provider.Verifier(&oidc.Config{ClientID: config.ClientID})
@@ -199,7 +199,7 @@ func (a *processorCallback) verifyIDTokenAndGetClaims(
 		return nil, fmt.Errorf("failed to verify id token, got : %w", err)
 	}
 	userInfoClaims := &userInfoClaims{}
-	if err := idToken.Claims(&userInfoClaims); err != nil {
+	if err = idToken.Claims(&userInfoClaims); err != nil {
 		return nil, fmt.Errorf("failed to extract claims, got : %w", err)
 	}
 	return userInfoClaims, nil

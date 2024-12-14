@@ -59,7 +59,7 @@ func (s *Session) Insert(ctx context.Context, sessionData *store.SessionRedisDat
 	pipe.HSet(ctx, key, fields)
 	pipe.Expire(ctx, key, s.defaultTTL)
 
-	if _, err := pipe.Exec(ctx); err != nil {
+	if _, err = pipe.Exec(ctx); err != nil {
 		return fmt.Errorf("failed to save session to redis: %w", err)
 	}
 
@@ -85,7 +85,7 @@ func (s *Session) Get(ctx context.Context, sessionID string) (*store.SessionRedi
 
 	// Parse roles from JSON string
 	var roles []string
-	if err := json.Unmarshal([]byte(fields["user:roles"]), &roles); err != nil {
+	if err = json.Unmarshal([]byte(fields["user:roles"]), &roles); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal user roles: %w", err)
 	}
 

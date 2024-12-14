@@ -5,9 +5,9 @@ import (
 	"context"
 	"log"
 
+	"rizkysr90-pos/docs" // This is where Swag will generate its docs.go file
 	"rizkysr90-pos/internal/auth"
 	"rizkysr90-pos/internal/config"
-	"rizkysr90-pos/internal/docs" // This is where Swag will generate its docs.go file
 	"rizkysr90-pos/internal/restapi"
 
 	"github.com/redis/go-redis/v9"
@@ -17,9 +17,9 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
-// @Rizki Plastik API
+// @title Point of Sale API
 // @version 1.0
-// @description rizki plastik point of sale api server.
+// @description API for Point of Sale System
 // @host localhost:8080
 // @BasePath /api/v1
 func main() {
@@ -61,7 +61,7 @@ func main() {
 		ClientSecret: cfg.Auth.ClientSecret,
 	})
 	if err != nil {
-		log.Fatalf("restApi: main failed to create auth client: %s", err)
+		logger.Error().Err(err).Msgf("restapi:  main failed to create auth client: %s", err)
 		return
 	}
 	restAPIserver, err := restapi.New(authClient, cfg, sqlDB, logger, redisClient)
@@ -69,10 +69,10 @@ func main() {
 	restAPIserver.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	if err != nil {
-		logger.Error().Err(sqlDBErr).Msgf("restapi: main failed to construct server: %s", err)
+		logger.Error().Err(err).Msgf("restapi: main failed to construct server: %s", err)
 	}
 	err = restAPIserver.Run(cfg.RestAPIPort) // listen and serve on 0.0.0.0:8080
 	if err != nil {
-		logger.Error().Err(sqlDBErr).Msgf("restapi: main failed to run server: %s", err)
+		logger.Error().Err(err).Msgf("restapi: main failed to run server: %s", err)
 	}
 }

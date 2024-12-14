@@ -6,6 +6,7 @@ import (
 )
 
 type SessionRedisData struct {
+	CreatedAt    time.Time
 	SessionID    string
 	UserID       string
 	UserType     string
@@ -15,7 +16,6 @@ type SessionRedisData struct {
 	UserBranchID string
 	UserAuthType string
 	UserRoles    []string
-	CreatedAt    time.Time
 }
 
 type SessionRedis interface {
