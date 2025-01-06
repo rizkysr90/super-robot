@@ -87,7 +87,10 @@ func (req *requestCallback) getUserInfoData(idToken *oidc.IDToken) (*UserInfoCla
 func (req *requestCallback) checkExistingUser(ctx context.Context, email string) (*store.UserData, error) {
 	userQueryFilter := &store.UserQueryFilter{Email: email}
 	checkUserData, err := req.auth.userStore.FindOne(ctx, userQueryFilter)
-	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, errorHandler.NewNotFound(errorHandler.WithInfo("user not found"))
+		}
 		return nil, err
 	}
 	return checkUserData, nil

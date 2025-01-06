@@ -265,6 +265,25 @@ paths:
       summary: Update a product
       tags:
       - products
+  /auth/owner/login:
+    get:
+      description: Initiates the OAuth login flow for owners
+      responses:
+        "302":
+          description: Redirect to OAuth provider
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/rizkysr90-pos_pkg_errorHandler.HttpError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/rizkysr90-pos_pkg_errorHandler.HttpError'
+      summary: Owner Login
+      tags:
+      - Authentication
   /auth/register/owner:
     get:
       consumes:
@@ -293,7 +312,7 @@ paths:
             $ref: '#/definitions/rizkysr90-pos_pkg_errorHandler.HttpError'
       summary: Register owner for a tenant
       tags:
-      - auth
+      - Authentication
   /categories:
     get:
       consumes:

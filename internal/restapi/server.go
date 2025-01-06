@@ -79,6 +79,7 @@ func New(
 	authRoutes := server.Group("/api/v1/auth")
 	{
 		authRoutes.GET("/register/owner", authHandler.OwnerRegistration)
+		authRoutes.GET("/login/owner", authHandler.OwnerLogin)
 	}
 	// Create a route group for categories
 	categoryRoutes := server.Group("/api/v1/categories")

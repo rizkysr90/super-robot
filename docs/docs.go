@@ -170,6 +170,35 @@ const docTemplate = `{
                 }
             }
         },
+        "/auth/owner/login": {
+            "get": {
+                "description": "Initiates the OAuth login flow for owners",
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Owner Login",
+                "responses": {
+                    "302": {
+                        "description": "Redirect to OAuth provider",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/rizkysr90-pos_pkg_errorHandler.HttpError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/rizkysr90-pos_pkg_errorHandler.HttpError"
+                        }
+                    }
+                }
+            }
+        },
         "/auth/register/owner": {
             "get": {
                 "description": "Initiates owner registration process and redirects to OAuth authorization",
@@ -180,7 +209,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "auth"
+                    "Authentication"
                 ],
                 "summary": "Register owner for a tenant",
                 "parameters": [

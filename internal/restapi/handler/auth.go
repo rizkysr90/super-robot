@@ -29,7 +29,7 @@ func NewAuthHandler(
 // OwnerRegistration godoc
 // @Summary Register owner for a tenant
 // @Description Initiates owner registration process and redirects to OAuth authorization
-// @Tags auth
+// @Tags Authentication
 // @Accept json
 // @Produce json
 // @Param tenant query string true "Tenant name to register owner for"
@@ -53,6 +53,26 @@ func (a *AuthHandler) OwnerRegistration(ctx *gin.Context) {
 	}
 	payload := &service.RequestRegisterOwner{TenantName: tenantName}
 	stateID, err := a.authService.RegisterOwner(ctx, payload)
+	if err != nil {
+		if errCtx := ctx.Error(err); errCtx != nil {
+			// Handle the error from ctx.Error
+			// You might want to log it or take other appropriate action
+			log.Printf("failed to send error response: %v", errCtx)
+		}
+		return
+	}
+	ctx.Redirect(http.StatusFound, a.authClient.Oauth.AuthCodeURL(stateID))
+}
+
+// @Summary Owner Login
+// @Description Initiates the OAuth login flow for owners
+// @Tags Authentication
+// @Success 302 {string} string "Redirect to OAuth provider"
+// @Failure 400 {object} errorHandler.HttpError
+// @Failure 500 {object} errorHandler.HttpError
+// @Router /auth/owner/login [get]
+func (a *AuthHandler) OwnerLogin(ctx *gin.Context) {
+	stateID, err := a.authService.LoginOwner(ctx)
 	if err != nil {
 		if errCtx := ctx.Error(err); errCtx != nil {
 			// Handle the error from ctx.Error
