@@ -13,43 +13,45 @@ import (
 )
 
 type flatEnv struct {
-	PrivateKeyJWT     string `env:"PRIVATE_KEY_JWT,unset"`
-	AuthURI           string `env:"AUTH_URI"`
-	APIVersionBaseURL string `env:"API_VERSION_BASE_URL"`
-	DBHost            string `env:"DB_HOST"`
-	RedisDatabase     string `env:"REDIS_DATABASE"`
-	DBUsername        string `env:"DB_USERNAME"`
-	AppEnv            string `env:"APP_ENV"`
-	RedisPort         string `env:"REDIS_PORT"`
-	DBDatabase        string `env:"DB_DATABASE"`
-	LogLevel          string `env:"LOG_LEVEL"`
-	SecretKeyJWT      string `env:"SECRET_KEY_JWT,unset"`
-	PublicKeyJWT      string `env:"PUBLIC_KEY_JWT,unset"`
-	RestAPIPort       string `env:"REST_API_PORT"`
-	AppName           string `env:"APP_NAME"`
-	APIKey            string `env:"API_KEY,unset"`
-	RedisHost         string `env:"REDIS_HOST"`
-	AuthClientID      string `env:"AUTH_CLIENT_ID"`
-	AuthRedirectURI   string `env:"AUTH_REDIRECT_URI"`
-	AuthClientSecret  string `env:"AUTH_CLIENT_SECRET"`
-	DBPassword        string `env:"DB_PASSWORD,unset"`
-	RedisUsername     string `env:"REDIS_USERNAME"`
-	RedisPassword     string `env:"REDIS_PASSWORD"`
-	DBPort            int    `env:"DB_PORT"`
-	DBConnMaxOpen     int    `env:"DB_CONN_MAX_OPEN"`
-	DBConnMaxIdle     int    `env:"DB_CONN_MAX_IDLE"`
+	PrivateKeyJWT        string `env:"PRIVATE_KEY_JWT,unset"`
+	AuthURI              string `env:"AUTH_URI"`
+	APIVersionBaseURL    string `env:"API_VERSION_BASE_URL"`
+	DBHost               string `env:"DB_HOST"`
+	RedisDatabase        string `env:"REDIS_DATABASE"`
+	DBUsername           string `env:"DB_USERNAME"`
+	AppEnv               string `env:"APP_ENV"`
+	RedisPort            string `env:"REDIS_PORT"`
+	DBDatabase           string `env:"DB_DATABASE"`
+	LogLevel             string `env:"LOG_LEVEL"`
+	SecretKeyJWT         string `env:"SECRET_KEY_JWT,unset"`
+	PublicKeyJWT         string `env:"PUBLIC_KEY_JWT,unset"`
+	RestAPIPort          string `env:"REST_API_PORT"`
+	AppName              string `env:"APP_NAME"`
+	APIKey               string `env:"API_KEY,unset"`
+	RedisHost            string `env:"REDIS_HOST"`
+	AuthClientID         string `env:"AUTH_CLIENT_ID"`
+	AuthRedirectURI      string `env:"AUTH_REDIRECT_URI"`
+	AuthClientSecret     string `env:"AUTH_CLIENT_SECRET"`
+	DBPassword           string `env:"DB_PASSWORD,unset"`
+	RedisUsername        string `env:"REDIS_USERNAME"`
+	RedisPassword        string `env:"REDIS_PASSWORD"`
+	DBPort               int    `env:"DB_PORT"`
+	DBConnMaxOpen        int    `env:"DB_CONN_MAX_OPEN"`
+	DBConnMaxIdle        int    `env:"DB_CONN_MAX_IDLE"`
+	MaxBranchesPerTenant int    `env:"MAX_BRANCHES_PER_TENANT"`
 }
 type Config struct {
-	Auth              *auth.Config
-	AppName           string
-	AppEnv            string
-	RestAPIPort       string
-	APIKey            string
-	APIVersionBaseURL string
-	LogLevel          string
-	SecretKeyJWT      string
-	RedisConfig       redis.Options
-	PgSQL             pgx.Config
+	Auth                 *auth.Config
+	AppName              string
+	AppEnv               string
+	RestAPIPort          string
+	APIKey               string
+	APIVersionBaseURL    string
+	LogLevel             string
+	SecretKeyJWT         string
+	RedisConfig          redis.Options
+	PgSQL                pgx.Config
+	MaxBranchesPerTenant int
 }
 
 func LoadFromEnv() (Config, error) {
@@ -92,5 +94,6 @@ func newConfig(envCfg flatEnv) Config {
 			Password: envCfg.RedisPassword,
 			DB:       redisDB,
 		},
+		MaxBranchesPerTenant: envCfg.MaxBranchesPerTenant,
 	}
 }

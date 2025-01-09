@@ -23,3 +23,11 @@ func (m *MockTenant) Update(ctx context.Context, tenantData *store.TenantData) e
 	args := m.Called(ctx, tenantData)
 	return args.Error(0)
 }
+
+func (m *MockTenant) FindOne(ctx context.Context, filter *store.TenantFilter) (*store.TenantData, error) {
+	args := m.Called(ctx, filter)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*store.TenantData), args.Error(1)
+}

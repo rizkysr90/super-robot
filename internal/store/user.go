@@ -23,6 +23,7 @@ type UserData struct {
 }
 type UserQueryFilter struct {
 	Email string
+	ID    string
 }
 type User interface {
 	Insert(ctx context.Context, userData *UserData) error

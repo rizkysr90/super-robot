@@ -18,15 +18,11 @@ func (m *MockUser) Insert(ctx context.Context, userData *store.UserData) error {
 	return args.Error(0)
 }
 
-// FindOne provides a mock function for finding a single user
 func (m *MockUser) FindOne(ctx context.Context, filter *store.UserQueryFilter) (*store.UserData, error) {
 	args := m.Called(ctx, filter)
-
-	// Handle the case where first return value might be nil
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
-
 	return args.Get(0).(*store.UserData), args.Error(1)
 }
 

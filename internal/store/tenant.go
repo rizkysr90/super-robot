@@ -15,8 +15,12 @@ type TenantData struct {
 	Name      string
 	OwnerID   sql.NullString
 }
-
+type TenantFilter struct {
+	ID   string
+	Name string
+}
 type Tenant interface {
 	Insert(ctx context.Context, tenantData *TenantData) error
 	Update(ctx context.Context, tenantData *TenantData) error
+	FindOne(ctx context.Context, filter *TenantFilter) (*TenantData, error)
 }

@@ -60,11 +60,13 @@ func (u *User) FindOne(ctx context.Context, filter *store.UserQueryFilter) (*sto
 	query := `
 		SELECT id, email, full_name, google_id, auth_type, user_type, tenant_id
 		FROM users 
-		WHERE $1 = '' OR email = $1
+		WHERE $1 = '' OR email = $1 AND
+		$2 = '' OR id = $2::uuid AND 
+		deleted_at IS NULL
 	`
 	data := &store.UserData{}
 	row := sqldb.WithinTxContextOrDB(ctx, u.db).
-		QueryRowContext(ctx, query, filter.Email)
+		QueryRowContext(ctx, query, filter.Email, filter.ID)
 	if err := row.Err(); err != nil {
 		return nil, err
 	}

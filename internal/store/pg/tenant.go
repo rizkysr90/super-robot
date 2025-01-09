@@ -53,3 +53,24 @@ func (t *Tenant) Update(ctx context.Context, tenantData *store.TenantData) error
 	}
 	return sqldb.WithinTxContextOrError(ctx, updateFunc)
 }
+func (t *Tenant) FindOne(ctx context.Context, filter *store.TenantFilter) (*store.TenantData, error) {
+	query := `
+		SELECT id, name, owner_id, created_at FROM tenants
+		WHERE 
+			$1 = '' OR id = $1::uuid AND
+			$2 = '' OR name = $2 AND
+		deleted_at IS NULL
+	`
+	data := &store.TenantData{}
+	row := sqldb.WithinTxContextOrDB(ctx, t.db).
+		QueryRowContext(ctx, query, filter.ID, filter.Name)
+	if err := row.Err(); err != nil {
+		return nil, err
+	}
+	err := row.Scan(&data.ID, &data.Name,
+		&data.OwnerID, &data.CreatedAt)
+	if err != nil {
+		return nil, err
+	}
+	return data, nil
+}

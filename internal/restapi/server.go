@@ -10,6 +10,7 @@ import (
 	producthandler "rizkysr90-pos/internal/restapi/handler/product"
 	"rizkysr90-pos/internal/restapi/middleware"
 	authService "rizkysr90-pos/internal/service/auth"
+	"rizkysr90-pos/internal/service/branches"
 	categoryService "rizkysr90-pos/internal/service/category"
 	"rizkysr90-pos/internal/service/productservice"
 
@@ -27,7 +28,7 @@ import (
 
 func New(
 	authClient *auth.Client,
-	_ config.Config,
+	cfg config.Config,
 	sqlDB *sql.DB,
 	logger zerolog.Logger,
 	redis *redis.Client,
@@ -69,6 +70,10 @@ func New(
 	)
 	authHandler := handler.NewAuthHandler(authClient, authService)
 
+	// branch service
+	branchStore := pg.NewBranches(sqlDB)
+	branchesService := branches.NewBranchService(sqlDB, &cfg, tenantStore, userStore, branchStore)
+	branchHandler := handler.NewBranchHandler(branchesService)
 	// server.GET("/oauth", func(ctx *gin.Context) {
 	// 	authClient.HandlerRedirect(ctx, sqlDB, authStateStore)
 	// })
@@ -80,6 +85,10 @@ func New(
 	{
 		authRoutes.GET("/register/owner", authHandler.OwnerRegistration)
 		authRoutes.GET("/login/owner", authHandler.OwnerLogin)
+	}
+	branchRoutes := server.Group("/api/v1/branches")
+	{
+		branchRoutes.POST("/", branchHandler.Create)
 	}
 	// Create a route group for categories
 	categoryRoutes := server.Group("/api/v1/categories")
