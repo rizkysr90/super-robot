@@ -89,6 +89,7 @@ func New(
 	branchRoutes := server.Group("/api/v1/branches")
 	{
 		branchRoutes.POST("/", branchHandler.Create)
+		branchRoutes.GET("/", branchHandler.GetBranches)
 	}
 	// Create a route group for categories
 	categoryRoutes := server.Group("/api/v1/categories")

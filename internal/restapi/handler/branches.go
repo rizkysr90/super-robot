@@ -61,7 +61,7 @@ func (h *Branches) Create(ctx *gin.Context) {
 // @Failure 422 {object} errorHandler.HttpError "Validation errors"
 // @Failure 500 {object} errorHandler.HttpError "Internal server error"
 // @Router /api/v1/branches [get]
-func (h *Branches) Branches(ctx *gin.Context) {
+func (h *Branches) GetBranches(ctx *gin.Context) {
 	// Initialize the pointer to the struct
 	request := &branches.RequestGetBranches{}
 
@@ -97,11 +97,11 @@ func (h *Branches) Branches(ctx *gin.Context) {
 	request.ActionBy = ctx.Query("action_by")
 	response := &branches.ResponseGetBranches{}
 	// TODO: Call your service layer
-	// response, err := service.GetBranches(ctx.Request.Context(), request)
-	// if err != nil {
-	//     // Handle error
-	//     return
-	// }
+	response, err := h.branchService.GetBranches(ctx.Request.Context(), request)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
 
 	ctx.JSON(http.StatusOK, response)
 }

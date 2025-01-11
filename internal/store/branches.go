@@ -18,12 +18,16 @@ type BranchesData struct {
 	CreatedByOwner sql.NullString
 }
 type BranchesFilter struct {
-	ID       string
-	Name     string
-	TenantID string
+	ID         string
+	Name       string
+	TenantID   string
+	PageSize   int
+	PageNumber int
 }
 type Branches interface {
 	FindOne(ctx context.Context, filter *BranchesFilter) (*BranchesData, error)
 	Insert(ctx context.Context, branchData *BranchesData) error
 	TotalBranches(ctx context.Context, tenantID string) (uint8, error)
+	FindManyWithPaginated(ctx context.Context, filter *BranchesFilter) (
+		[]BranchesData, *Pagination, error)
 }

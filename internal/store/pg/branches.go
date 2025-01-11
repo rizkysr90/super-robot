@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"rizkysr90-pos/internal/store"
+	"rizkysr90-pos/internal/utility"
 
 	"github.com/rizkysr90/rizkysr90-go-pkg/sqldb"
 )
@@ -88,4 +89,69 @@ func (b *Branches) TotalBranches(ctx context.Context, tenantID string) (uint8, e
 		return 0, err
 	}
 	return uint8(result), nil
+}
+
+func (b *Branches) FindManyWithPaginated(ctx context.Context, filter *store.BranchesFilter) (
+	[]store.BranchesData, *store.Pagination, error) {
+	query := `
+		SELECT 
+            id, 
+            tenant_id, 
+            name, 
+            address, 
+            created_at, 
+            created_by, 
+            created_by_owner,
+            COUNT(*) OVER() as total_count
+        FROM branches
+        WHERE 
+            ($3 = '' OR name = $3) AND
+            ($4 = '' OR tenant_id = $4::uuid)
+        ORDER BY name
+        LIMIT $1 OFFSET $2
+	`
+	// default page number is 1
+	offset := (filter.PageNumber - 1) * filter.PageSize
+	rows, err := sqldb.WithinTxContextOrDB(ctx, b.db).QueryContext(ctx, query,
+		filter.PageSize,
+		offset,
+		filter.Name,
+		filter.TenantID,
+	)
+	defer func() {
+		if rows != nil {
+			rows.Close()
+		}
+	}()
+
+	if err != nil {
+		return nil, nil, err
+	}
+	branches := make([]store.BranchesData, 0)
+	pagination := &store.Pagination{}
+	for rows.Next() {
+		branch := store.BranchesData{}
+		var totalElement int
+		err = rows.Scan(
+			&branch.BranchID,
+			&branch.TenantID,
+			&branch.Name,
+			&branch.Address,
+			&branch.CreatedAt,
+			&branch.CreatedBy,
+			&branch.CreatedByOwner,
+			&totalElement,
+		)
+		if err != nil {
+			return nil, nil, err
+		}
+		branches = append(branches, branch)
+	}
+	pagination = utility.CalculatePagination(filter.PageSize, filter.PageNumber, pagination.TotalElements)
+	err = rows.Err()
+	if err != nil {
+		return nil, nil, err
+	}
+	return branches, pagination, nil
+
 }
