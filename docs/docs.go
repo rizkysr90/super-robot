@@ -16,6 +16,84 @@ const docTemplate = `{
     "basePath": "{{.BasePath}}",
     "paths": {
         "/api/v1/branches": {
+            "get": {
+                "description": "Retrieves a paginated list of branches with optional filters",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Branches"
+                ],
+                "summary": "Get Branches",
+                "parameters": [
+                    {
+                        "maximum": 100,
+                        "minimum": 1,
+                        "type": "integer",
+                        "description": "Page size (default: 20)",
+                        "name": "page_size",
+                        "in": "query"
+                    },
+                    {
+                        "minimum": 1,
+                        "type": "integer",
+                        "description": "Page number (default: 1)",
+                        "name": "page_number",
+                        "in": "query"
+                    },
+                    {
+                        "maxLength": 100,
+                        "type": "string",
+                        "description": "Branch name filter",
+                        "name": "branch_name",
+                        "in": "query"
+                    },
+                    {
+                        "maxLength": 500,
+                        "type": "string",
+                        "description": "Tenant ID filter",
+                        "name": "tenant_id",
+                        "in": "query"
+                    },
+                    {
+                        "maxLength": 500,
+                        "type": "string",
+                        "description": "User performing the action",
+                        "name": "action_by",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully retrieved branches",
+                        "schema": {
+                            "$ref": "#/definitions/rizkysr90-pos_internal_service_branches.ResponseGetBranches"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request parameters",
+                        "schema": {
+                            "$ref": "#/definitions/rizkysr90-pos_pkg_errorHandler.HttpError"
+                        }
+                    },
+                    "422": {
+                        "description": "Validation errors",
+                        "schema": {
+                            "$ref": "#/definitions/rizkysr90-pos_pkg_errorHandler.HttpError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/rizkysr90-pos_pkg_errorHandler.HttpError"
+                        }
+                    }
+                }
+            },
             "post": {
                 "description": "Creates a new branch with the provided details",
                 "consumes": [
@@ -918,6 +996,39 @@ const docTemplate = `{
         "rizkysr90-pos_internal_payload.ResUpdateProduct": {
             "type": "object"
         },
+        "rizkysr90-pos_internal_service_branches.BranchesData": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "description": "Branch address\nRequired: false\nExample: Jl. Sudirman No. 123, Jakarta",
+                    "type": "string"
+                },
+                "created_at": {
+                    "description": "Creation timestamp\nRequired: true\nExample: 2025-01-11T14:30:00Z",
+                    "type": "string"
+                },
+                "created_by": {
+                    "description": "User who created the branch\nRequired: false\nMax Length: 255\nExample: jane.doe@company.com",
+                    "type": "string"
+                },
+                "created_by_owner": {
+                    "description": "Owner who created the branch\nRequired: false\nMax Length: 255\nExample: John Doe",
+                    "type": "string"
+                },
+                "id": {
+                    "description": "Branch UUID\nRequired: true\nExample: 550e8400-e29b-41d4-a716-446655440000",
+                    "type": "string"
+                },
+                "name": {
+                    "description": "Branch name\nRequired: true\nMax Length: 255\nExample: Main Branch Jakarta",
+                    "type": "string"
+                },
+                "tenant_id": {
+                    "description": "Tenant UUID\nRequired: true\nExample: 550e8400-e29b-41d4-a716-446655440001",
+                    "type": "string"
+                }
+            }
+        },
         "rizkysr90-pos_internal_service_branches.RequestCreate": {
             "type": "object",
             "properties": {
@@ -936,6 +1047,41 @@ const docTemplate = `{
                 "tenant_id": {
                     "description": "Tenant ID for the branch\nRequired: true\nMax Length: 500",
                     "type": "string"
+                }
+            }
+        },
+        "rizkysr90-pos_internal_service_branches.ResponseGetBranches": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/rizkysr90-pos_internal_service_branches.BranchesData"
+                    }
+                },
+                "pagination": {
+                    "$ref": "#/definitions/rizkysr90-pos_internal_store.Pagination"
+                }
+            }
+        },
+        "rizkysr90-pos_internal_store.Pagination": {
+            "type": "object",
+            "properties": {
+                "page_number": {
+                    "description": "Current page number\nRequired: true\nExample: 1\nMinimum: 1",
+                    "type": "integer"
+                },
+                "page_size": {
+                    "description": "Current page size\nRequired: true\nExample: 20\nMinimum: 1",
+                    "type": "integer"
+                },
+                "total_elements": {
+                    "description": "Total number of elements\nRequired: true\nExample: 100\nMinimum: 0",
+                    "type": "integer"
+                },
+                "total_pages": {
+                    "description": "Total number of pages\nRequired: true\nExample: 5\nMinimum: 0",
+                    "type": "integer"
                 }
             }
         },

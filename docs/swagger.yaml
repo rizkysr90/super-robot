@@ -147,6 +147,54 @@ definitions:
     type: object
   rizkysr90-pos_internal_payload.ResUpdateProduct:
     type: object
+  rizkysr90-pos_internal_service_branches.BranchesData:
+    properties:
+      address:
+        description: |-
+          Branch address
+          Required: false
+          Example: Jl. Sudirman No. 123, Jakarta
+        type: string
+      created_at:
+        description: |-
+          Creation timestamp
+          Required: true
+          Example: 2025-01-11T14:30:00Z
+        type: string
+      created_by:
+        description: |-
+          User who created the branch
+          Required: false
+          Max Length: 255
+          Example: jane.doe@company.com
+        type: string
+      created_by_owner:
+        description: |-
+          Owner who created the branch
+          Required: false
+          Max Length: 255
+          Example: John Doe
+        type: string
+      id:
+        description: |-
+          Branch UUID
+          Required: true
+          Example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      name:
+        description: |-
+          Branch name
+          Required: true
+          Max Length: 255
+          Example: Main Branch Jakarta
+        type: string
+      tenant_id:
+        description: |-
+          Tenant UUID
+          Required: true
+          Example: 550e8400-e29b-41d4-a716-446655440001
+        type: string
+    type: object
   rizkysr90-pos_internal_service_branches.RequestCreate:
     properties:
       address:
@@ -174,6 +222,46 @@ definitions:
           Max Length: 500
         type: string
     type: object
+  rizkysr90-pos_internal_service_branches.ResponseGetBranches:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/rizkysr90-pos_internal_service_branches.BranchesData'
+        type: array
+      pagination:
+        $ref: '#/definitions/rizkysr90-pos_internal_store.Pagination'
+    type: object
+  rizkysr90-pos_internal_store.Pagination:
+    properties:
+      page_number:
+        description: |-
+          Current page number
+          Required: true
+          Example: 1
+          Minimum: 1
+        type: integer
+      page_size:
+        description: |-
+          Current page size
+          Required: true
+          Example: 20
+          Minimum: 1
+        type: integer
+      total_elements:
+        description: |-
+          Total number of elements
+          Required: true
+          Example: 100
+          Minimum: 0
+        type: integer
+      total_pages:
+        description: |-
+          Total number of pages
+          Required: true
+          Example: 5
+          Minimum: 0
+        type: integer
+    type: object
   rizkysr90-pos_pkg_errorHandler.HttpError:
     properties:
       code:
@@ -190,6 +278,60 @@ info:
   version: "1.0"
 paths:
   /api/v1/branches:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves a paginated list of branches with optional filters
+      parameters:
+      - description: 'Page size (default: 20)'
+        in: query
+        maximum: 100
+        minimum: 1
+        name: page_size
+        type: integer
+      - description: 'Page number (default: 1)'
+        in: query
+        minimum: 1
+        name: page_number
+        type: integer
+      - description: Branch name filter
+        in: query
+        maxLength: 100
+        name: branch_name
+        type: string
+      - description: Tenant ID filter
+        in: query
+        maxLength: 500
+        name: tenant_id
+        type: string
+      - description: User performing the action
+        in: query
+        maxLength: 500
+        name: action_by
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved branches
+          schema:
+            $ref: '#/definitions/rizkysr90-pos_internal_service_branches.ResponseGetBranches'
+        "400":
+          description: Invalid request parameters
+          schema:
+            $ref: '#/definitions/rizkysr90-pos_pkg_errorHandler.HttpError'
+        "422":
+          description: Validation errors
+          schema:
+            $ref: '#/definitions/rizkysr90-pos_pkg_errorHandler.HttpError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/rizkysr90-pos_pkg_errorHandler.HttpError'
+      summary: Get Branches
+      tags:
+      - Branches
     post:
       consumes:
       - application/json
