@@ -145,6 +145,7 @@ func (b *Branches) FindManyWithPaginated(ctx context.Context, filter *store.Bran
 		if err != nil {
 			return nil, nil, err
 		}
+		pagination.TotalElements = totalElement
 		branches = append(branches, branch)
 	}
 	pagination = utility.CalculatePagination(filter.PageSize, filter.PageNumber, pagination.TotalElements)

@@ -47,6 +47,5 @@ func (m *MockBranchStore) FindManyWithPaginated(ctx context.Context,
 	if args.Get(1) != nil {
 		pagination = args.Get(1).(*store.Pagination)
 	}
-
 	return branches, pagination, args.Error(2)
 }

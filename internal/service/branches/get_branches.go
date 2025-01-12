@@ -137,6 +137,7 @@ func (s *Service) GetBranches(ctx context.Context, request *RequestGetBranches) 
 	if err != nil {
 		return nil, err
 	}
+
 	branchesData, pagination, err := s.branchStore.FindManyWithPaginated(ctx, &store.BranchesFilter{
 		Name:       request.BranchName,
 		TenantID:   request.TenantID,
@@ -146,7 +147,7 @@ func (s *Service) GetBranches(ctx context.Context, request *RequestGetBranches) 
 	if err != nil {
 		return nil, err
 	}
-	result := &ResponseGetBranches{}
+	result := &ResponseGetBranches{Pagination: *pagination}
 	for _, branch := range branchesData {
 		data := &BranchesData{
 			ID:             branch.BranchID,
@@ -159,8 +160,5 @@ func (s *Service) GetBranches(ctx context.Context, request *RequestGetBranches) 
 		}
 		result.Data = append(result.Data, *data)
 	}
-	return &ResponseGetBranches{
-		Pagination: *pagination,
-		Data:       []BranchesData{},
-	}, nil
+	return result, nil
 }
