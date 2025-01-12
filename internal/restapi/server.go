@@ -13,6 +13,7 @@ import (
 	"rizkysr90-pos/internal/service/branches"
 	categoryService "rizkysr90-pos/internal/service/category"
 	"rizkysr90-pos/internal/service/productservice"
+	"rizkysr90-pos/internal/service/roles"
 
 	"rizkysr90-pos/internal/store/pg"
 	rds "rizkysr90-pos/internal/store/redis"
@@ -74,6 +75,23 @@ func New(
 	branchStore := pg.NewBranches(sqlDB)
 	branchesService := branches.NewBranchService(sqlDB, &cfg, tenantStore, userStore, branchStore)
 	branchHandler := handler.NewBranchHandler(branchesService)
+
+	// roles service
+	assignmentRoleStore := pg.NewAssignmentRoles(sqlDB)
+	tenantPermissionStore := pg.NewTenantPermission(sqlDB)
+	workLocationStore := pg.NewWorkLocation(sqlDB)
+	rolesService := roles.NewService(
+		sqlDB,
+		&cfg,
+		tenantStore,
+		userStore,
+		branchStore,
+		assignmentRoleStore,
+		tenantPermissionStore,
+		workLocationStore,
+	)
+	rolesHandler := handler.NewRolesHandler(rolesService)
+
 	// server.GET("/oauth", func(ctx *gin.Context) {
 	// 	authClient.HandlerRedirect(ctx, sqlDB, authStateStore)
 	// })
@@ -90,6 +108,10 @@ func New(
 	{
 		branchRoutes.POST("/", branchHandler.Create)
 		branchRoutes.GET("/", branchHandler.GetBranches)
+	}
+	rolesRoutes := server.Group("/api/v1/roles")
+	{
+		rolesRoutes.POST("/", rolesHandler.Create)
 	}
 	// Create a route group for categories
 	categoryRoutes := server.Group("/api/v1/categories")

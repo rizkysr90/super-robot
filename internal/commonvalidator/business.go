@@ -9,6 +9,26 @@ import (
 	"rizkysr90-pos/pkg/errorHandler"
 )
 
+type IsOwnerData struct {
+	Tenant *store.TenantData
+	Check  bool
+}
+
+func IsOwner(ctx context.Context, tenantStore store.Tenant, tenantID, actionBy string) (*IsOwnerData, error) {
+	result := &IsOwnerData{}
+	tenantData, err := tenantStore.FindOne(ctx, &store.TenantFilter{ID: tenantID})
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, errorHandler.NewNotFound(errorHandler.WithInfo("IsOwnerValidate : tenant not found"))
+		}
+		return nil, err
+	}
+	if tenantData.OwnerID.String == actionBy {
+		result.Check = true
+	}
+	result.Tenant = tenantData
+	return result, nil
+}
 func IsAllowedUser(ctx context.Context, userStore store.User, actionByUserID string) (bool, *store.UserData, error) {
 	// First check if user exists
 	userData, err := userStore.FindOne(ctx, &store.UserQueryFilter{ID: actionByUserID})
