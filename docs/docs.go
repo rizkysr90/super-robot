@@ -300,6 +300,58 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/roles": {
+            "post": {
+                "description": "Creates a new role with the provided details",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Roles"
+                ],
+                "summary": "Create Role",
+                "parameters": [
+                    {
+                        "description": "Role creation request",
+                        "name": "payload",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/rizkysr90-pos_internal_service_roles.RequestCreateRoles"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Role created successfully",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request payload",
+                        "schema": {
+                            "$ref": "#/definitions/rizkysr90-pos_pkg_errorHandler.HttpError"
+                        }
+                    },
+                    "422": {
+                        "description": "Validation errors",
+                        "schema": {
+                            "$ref": "#/definitions/rizkysr90-pos_pkg_errorHandler.HttpError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/rizkysr90-pos_pkg_errorHandler.HttpError"
+                        }
+                    }
+                }
+            }
+        },
         "/auth/owner/login": {
             "get": {
                 "description": "Initiates the OAuth login flow for owners",
@@ -1061,6 +1113,31 @@ const docTemplate = `{
                 },
                 "pagination": {
                     "$ref": "#/definitions/rizkysr90-pos_internal_store.Pagination"
+                }
+            }
+        },
+        "rizkysr90-pos_internal_service_roles.RequestCreateRoles": {
+            "type": "object",
+            "properties": {
+                "action_by": {
+                    "description": "ID of the user performing the action\nRequired: true\nMax Length: 100",
+                    "type": "string"
+                },
+                "description": {
+                    "description": "Description of the role and its responsibilities\nRequired: true\nMax Length: 500",
+                    "type": "string"
+                },
+                "is_head_office_role": {
+                    "description": "Indicates if this is a head office role\nRequired: true\nDefault: false",
+                    "type": "boolean"
+                },
+                "name": {
+                    "description": "Name of the role\nRequired: true\nMax Length: 200",
+                    "type": "string"
+                },
+                "tenant_id": {
+                    "description": "Tenant ID for the role\nRequired: true\nMax Length: 500",
+                    "type": "string"
                 }
             }
         },

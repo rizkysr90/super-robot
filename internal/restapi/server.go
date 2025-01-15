@@ -80,6 +80,7 @@ func New(
 	assignmentRoleStore := pg.NewAssignmentRoles(sqlDB)
 	tenantPermissionStore := pg.NewTenantPermission(sqlDB)
 	workLocationStore := pg.NewWorkLocation(sqlDB)
+	tenantRoleStore := pg.NewTenantRole(sqlDB)
 	rolesService := roles.NewService(
 		sqlDB,
 		&cfg,
@@ -89,6 +90,7 @@ func New(
 		assignmentRoleStore,
 		tenantPermissionStore,
 		workLocationStore,
+		tenantRoleStore,
 	)
 	rolesHandler := handler.NewRolesHandler(rolesService)
 

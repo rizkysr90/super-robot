@@ -4,9 +4,14 @@ import (
 	"context"
 	"rizkysr90-pos/internal/commonvalidator"
 	"rizkysr90-pos/internal/constant"
+	"rizkysr90-pos/internal/store"
 	"rizkysr90-pos/internal/utility"
 	"rizkysr90-pos/pkg/errorHandler"
 	"strings"
+	"time"
+
+	"github.com/google/uuid"
+	"github.com/rizkysr90/rizkysr90-go-pkg/sqldb"
 )
 
 type RequestCreateRoles struct {
@@ -98,13 +103,23 @@ func (s *Service) Create(ctx context.Context, request *RequestCreateRoles) error
 		ctx,
 		input.TenantID,
 		input.ActionBy,
-		// "TESTING",
 		constant.RbacNewRole,
 	); err != nil {
 		return err
 	}
 	if !permission.IsAllowed {
-		return errorHandler.NewUnauthorized()
+		return errorHandler.NewUnauthorized(errorHandler.WithInfo("permission is not allowed"))
 	}
-	return nil
+	return sqldb.WithinTx(ctx, s.db, func(tx sqldb.QueryExecutor) error {
+		txContext := sqldb.WithTxContext(ctx, tx)
+		return s.tenantRoleStore.Insert(txContext, &store.TenantRoleData{
+			ID:               uuid.NewString(),
+			TenantID:         input.TenantID,
+			Name:             input.Name,
+			IsHeadOfficeRole: input.IsHeadOfficeRole,
+			Description:      input.Description,
+			CreatedAt:        time.Now().UTC(),
+			CreatedBy:        input.ActionBy,
+		})
+	})
 }

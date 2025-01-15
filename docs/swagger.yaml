@@ -231,6 +231,39 @@ definitions:
       pagination:
         $ref: '#/definitions/rizkysr90-pos_internal_store.Pagination'
     type: object
+  rizkysr90-pos_internal_service_roles.RequestCreateRoles:
+    properties:
+      action_by:
+        description: |-
+          ID of the user performing the action
+          Required: true
+          Max Length: 100
+        type: string
+      description:
+        description: |-
+          Description of the role and its responsibilities
+          Required: true
+          Max Length: 500
+        type: string
+      is_head_office_role:
+        description: |-
+          Indicates if this is a head office role
+          Required: true
+          Default: false
+        type: boolean
+      name:
+        description: |-
+          Name of the role
+          Required: true
+          Max Length: 200
+        type: string
+      tenant_id:
+        description: |-
+          Tenant ID for the role
+          Required: true
+          Max Length: 500
+        type: string
+    type: object
   rizkysr90-pos_internal_store.Pagination:
     properties:
       page_number:
@@ -468,6 +501,40 @@ paths:
       summary: Update a product
       tags:
       - products
+  /api/v1/roles:
+    post:
+      consumes:
+      - application/json
+      description: Creates a new role with the provided details
+      parameters:
+      - description: Role creation request
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/rizkysr90-pos_internal_service_roles.RequestCreateRoles'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Role created successfully
+          schema:
+            type: object
+        "400":
+          description: Invalid request payload
+          schema:
+            $ref: '#/definitions/rizkysr90-pos_pkg_errorHandler.HttpError'
+        "422":
+          description: Validation errors
+          schema:
+            $ref: '#/definitions/rizkysr90-pos_pkg_errorHandler.HttpError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/rizkysr90-pos_pkg_errorHandler.HttpError'
+      summary: Create Role
+      tags:
+      - Roles
   /auth/owner/login:
     get:
       description: Initiates the OAuth login flow for owners

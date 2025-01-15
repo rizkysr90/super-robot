@@ -15,6 +15,7 @@ type Service struct {
 	assignmentRoleStore   store.AssignmentRole
 	tenantPermissionStore store.TenantPermission
 	worklocationStore     store.WorkLocation
+	tenantRoleStore       store.TenantRole
 }
 
 func NewService(
@@ -26,6 +27,7 @@ func NewService(
 	assignmentRoleStore store.AssignmentRole,
 	tenantPermissionStore store.TenantPermission,
 	worklocationStore store.WorkLocation,
+	tenantRoleStore store.TenantRole,
 ) *Service {
 	return &Service{
 		db:                    sqlDB,
@@ -36,5 +38,6 @@ func NewService(
 		assignmentRoleStore:   assignmentRoleStore,
 		tenantPermissionStore: tenantPermissionStore,
 		worklocationStore:     worklocationStore,
+		tenantRoleStore:       tenantRoleStore,
 	}
 }

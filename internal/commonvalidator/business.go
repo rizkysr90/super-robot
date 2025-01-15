@@ -40,7 +40,6 @@ func IsAllowedUser(ctx context.Context, userStore store.User, actionByUserID str
 
 	// Check if user exists in main user table
 	if userData != nil {
-		isAllowed = true
 		return true, userData, nil
 	}
 
