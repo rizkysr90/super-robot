@@ -19,6 +19,7 @@ type RequiredStore struct {
 	WorkLocation     store.WorkLocation
 	AssignmentRole   store.AssignmentRole
 	TenantPermission store.TenantPermission
+	User             store.User
 }
 type Data struct {
 	Tenant               *store.TenantData
@@ -32,6 +33,7 @@ func NewPermission(
 	workLocation store.WorkLocation,
 	assignmentRole store.AssignmentRole,
 	tenantPermission store.TenantPermission,
+	user store.User,
 ) *Permission {
 	return &Permission{
 		RequiredStore: &RequiredStore{
@@ -39,11 +41,22 @@ func NewPermission(
 			WorkLocation:     workLocation,
 			AssignmentRole:   assignmentRole,
 			TenantPermission: tenantPermission,
+			User:             user,
 		},
 		Data: &Data{},
 	}
 }
 func (p *Permission) Validate(ctx context.Context, tenantID, actionBy, permissionCode string) error {
+	userData, err := p.RequiredStore.User.FindOne(ctx, &store.UserQueryFilter{ID: actionBy})
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return errorHandler.NewNotFound(errorHandler.WithInfo("IsOwnerValidate : user not found"))
+		}
+		return err
+	}
+	if userData.TenantID != tenantID {
+		return errorHandler.NewUnauthorized(errorHandler.WithInfo("invalid access"))
+	}
 	tenantData, err := p.RequiredStore.Tenant.FindOne(ctx, &store.TenantFilter{ID: tenantID})
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {

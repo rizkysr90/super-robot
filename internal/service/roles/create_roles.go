@@ -97,7 +97,9 @@ func (s *Service) Create(ctx context.Context, request *RequestCreateRoles) error
 		s.tenantStore,
 		s.worklocationStore,
 		s.assignmentRoleStore,
-		s.tenantPermissionStore)
+		s.tenantPermissionStore,
+		s.userStore,
+	)
 
 	if err := permission.Validate(
 		ctx,
