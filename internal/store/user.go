@@ -18,6 +18,7 @@ type UserData struct {
 	AuthType     string
 	FullName     string
 	Email        string
+	CreatedBy    sql.NullString
 	PasswordHash sql.NullString
 	GoogleID     sql.NullString
 }

@@ -352,6 +352,58 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/users": {
+            "post": {
+                "description": "Creates a new user with the provided details",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Create User",
+                "parameters": [
+                    {
+                        "description": "User creation request",
+                        "name": "payload",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/rizkysr90-pos_internal_service_admin.RequestCreateAdmin"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "User created successfully",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request payload",
+                        "schema": {
+                            "$ref": "#/definitions/rizkysr90-pos_pkg_errorHandler.HttpError"
+                        }
+                    },
+                    "422": {
+                        "description": "Validation errors",
+                        "schema": {
+                            "$ref": "#/definitions/rizkysr90-pos_pkg_errorHandler.HttpError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/rizkysr90-pos_pkg_errorHandler.HttpError"
+                        }
+                    }
+                }
+            }
+        },
         "/auth/owner/login": {
             "get": {
                 "description": "Initiates the OAuth login flow for owners",
@@ -1047,6 +1099,83 @@ const docTemplate = `{
         },
         "rizkysr90-pos_internal_payload.ResUpdateProduct": {
             "type": "object"
+        },
+        "rizkysr90-pos_internal_service_admin.RequestCreateAdmin": {
+            "description": "Request body for creating a new admin user",
+            "type": "object",
+            "required": [
+                "action_by",
+                "email",
+                "password",
+                "tenant_id",
+                "user_type"
+            ],
+            "properties": {
+                "action_by": {
+                    "description": "ID of the user performing the action\nRequired: true\nMax Length: 100\nMin Length: 1",
+                    "type": "string",
+                    "maxLength": 100,
+                    "minLength": 1,
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
+                "branch_id": {
+                    "description": "Branch ID - UUID of the branch where the user will be assigned\nRequired: true when user_type is BRANCH, optional otherwise\nMax Length: 500\nFormat: uuid\nExample: 550e8400-e29b-41d4-a716-446655440000\nNote: Must be a valid UUID of an existing branch in the system. Required when creating branch users.",
+                    "type": "string",
+                    "maxLength": 500,
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
+                },
+                "email": {
+                    "description": "Email address of the admin user\nRequired: true\nMax Length: 200\nMin Length: 3\nPattern: ^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$",
+                    "type": "string",
+                    "maxLength": 200,
+                    "minLength": 3,
+                    "example": "admin@example.com"
+                },
+                "full_name": {
+                    "description": "Full name\nRequired\nMax Length : 255\nExample : Rizki Susilo R",
+                    "type": "string",
+                    "maxLength": 255,
+                    "example": "Rizki Susilo Ramadhan"
+                },
+                "password": {
+                    "description": "Password for the admin user\nRequired: true\nMax Length: 100\nMin Length: 8",
+                    "type": "string",
+                    "maxLength": 100,
+                    "minLength": 8,
+                    "example": "StrongP@ssw0rd"
+                },
+                "tenant_id": {
+                    "description": "Tenant ID for the admin user\nRequired: true\nMax Length: 500\nMin Length: 1",
+                    "type": "string",
+                    "maxLength": 500,
+                    "minLength": 1,
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
+                },
+                "user_type": {
+                    "description": "Type of user (ADMIN or BRANCH)\nRequired: true\nEnum: ADMIN,BRANCH",
+                    "enum": [
+                        "ADMIN",
+                        "BRANCH"
+                    ],
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/rizkysr90-pos_internal_service_admin.UserType"
+                        }
+                    ],
+                    "example": "ADMIN"
+                }
+            }
+        },
+        "rizkysr90-pos_internal_service_admin.UserType": {
+            "type": "string",
+            "enum": [
+                "ADMIN",
+                "BRANCH"
+            ],
+            "x-enum-varnames": [
+                "Admin",
+                "Branch"
+            ]
         },
         "rizkysr90-pos_internal_service_branches.BranchesData": {
             "type": "object",

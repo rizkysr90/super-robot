@@ -21,4 +21,5 @@ type WorkLocationData struct {
 
 type WorkLocation interface {
 	FindByUserID(ctx context.Context, userID string) ([]WorkLocationData, error)
+	Insert(ctx context.Context, workLocationData *WorkLocationData) error
 }

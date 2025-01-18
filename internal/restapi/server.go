@@ -9,6 +9,7 @@ import (
 	categoryHandler "rizkysr90-pos/internal/restapi/handler/category"
 	producthandler "rizkysr90-pos/internal/restapi/handler/product"
 	"rizkysr90-pos/internal/restapi/middleware"
+	"rizkysr90-pos/internal/service/admin"
 	authService "rizkysr90-pos/internal/service/auth"
 	"rizkysr90-pos/internal/service/branches"
 	categoryService "rizkysr90-pos/internal/service/category"
@@ -92,8 +93,16 @@ func New(
 		workLocationStore,
 		tenantRoleStore,
 	)
-	rolesHandler := handler.NewRolesHandler(rolesService)
+	adminService := admin.NewService(sqlDB, &cfg, tenantStore,
+		userStore,
+		branchStore,
+		assignmentRoleStore,
+		tenantPermissionStore,
+		workLocationStore,
+		tenantRoleStore)
 
+	rolesHandler := handler.NewRolesHandler(rolesService)
+	userAdminHandler := handler.NewUserAdmin(adminService)
 	// server.GET("/oauth", func(ctx *gin.Context) {
 	// 	authClient.HandlerRedirect(ctx, sqlDB, authStateStore)
 	// })
@@ -114,6 +123,10 @@ func New(
 	rolesRoutes := server.Group("/api/v1/roles")
 	{
 		rolesRoutes.POST("/", rolesHandler.Create)
+	}
+	userAdminRoutes := server.Group("/api/v1/users")
+	{
+		userAdminRoutes.POST("/", userAdminHandler.Create)
 	}
 	// Create a route group for categories
 	categoryRoutes := server.Group("/api/v1/categories")

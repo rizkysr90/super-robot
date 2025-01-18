@@ -9,10 +9,19 @@ func ConstructErrorRequired(fieldName string) *errorHandler.HttpError {
 		Message: "",
 	}
 }
+
 func ConstructErrorMaxLen(fieldName string) *errorHandler.HttpError {
 	return &errorHandler.HttpError{
 		Code:    400,
 		Info:    fieldName + " too long",
+		Message: "",
+	}
+}
+
+func ConstructErrorInvalid(fieldName string) *errorHandler.HttpError {
+	return &errorHandler.HttpError{
+		Code:    400,
+		Info:    "invalid " + fieldName,
 		Message: "",
 	}
 }

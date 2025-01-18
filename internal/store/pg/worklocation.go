@@ -3,6 +3,7 @@ package pg
 import (
 	"context"
 	"database/sql"
+	"rizkysr90-pos/internal/constant"
 	"rizkysr90-pos/internal/store"
 
 	"github.com/rizkysr90/rizkysr90-go-pkg/sqldb"
@@ -63,4 +64,37 @@ func (w *WorkLocation) FindByUserID(ctx context.Context, userID string) ([]store
 		return nil, err
 	}
 	return workLocations, nil
+}
+
+func (w *WorkLocation) Insert(ctx context.Context, workLocationData *store.WorkLocationData) error {
+	if workLocationData.BranchID.String == "" {
+		workLocationData.BranchID.String = constant.EmptyUUID
+	}
+	query := `
+		INSERT INTO user_assignments (
+			id,
+			tenant_id,
+			user_id, 
+			branch_id,
+			created_at,
+			created_by
+		) VALUES (
+			 $1, $2, $3, NULLIF($4::uuid, '00000000-0000-0000-0000-000000000000'::uuid), $5, $6 
+		)
+	`
+	createFunc := func(tx sqldb.QueryExecutor) error {
+		_, err := tx.ExecContext(ctx, query,
+			workLocationData.ID,
+			workLocationData.TenantID,
+			workLocationData.UserID,
+			workLocationData.BranchID.String,
+			workLocationData.CreatedAt,
+			workLocationData.CreatedBy,
+		)
+		if err != nil {
+			return err
+		}
+		return nil
+	}
+	return sqldb.WithinTxContextOrError(ctx, createFunc)
 }

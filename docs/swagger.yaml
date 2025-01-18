@@ -147,6 +147,96 @@ definitions:
     type: object
   rizkysr90-pos_internal_payload.ResUpdateProduct:
     type: object
+  rizkysr90-pos_internal_service_admin.RequestCreateAdmin:
+    description: Request body for creating a new admin user
+    properties:
+      action_by:
+        description: |-
+          ID of the user performing the action
+          Required: true
+          Max Length: 100
+          Min Length: 1
+        example: 123e4567-e89b-12d3-a456-426614174000
+        maxLength: 100
+        minLength: 1
+        type: string
+      branch_id:
+        description: |-
+          Branch ID - UUID of the branch where the user will be assigned
+          Required: true when user_type is BRANCH, optional otherwise
+          Max Length: 500
+          Format: uuid
+          Example: 550e8400-e29b-41d4-a716-446655440000
+          Note: Must be a valid UUID of an existing branch in the system. Required when creating branch users.
+        example: 550e8400-e29b-41d4-a716-446655440000
+        maxLength: 500
+        type: string
+      email:
+        description: |-
+          Email address of the admin user
+          Required: true
+          Max Length: 200
+          Min Length: 3
+          Pattern: ^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$
+        example: admin@example.com
+        maxLength: 200
+        minLength: 3
+        type: string
+      full_name:
+        description: |-
+          Full name
+          Required
+          Max Length : 255
+          Example : Rizki Susilo R
+        example: Rizki Susilo Ramadhan
+        maxLength: 255
+        type: string
+      password:
+        description: |-
+          Password for the admin user
+          Required: true
+          Max Length: 100
+          Min Length: 8
+        example: StrongP@ssw0rd
+        maxLength: 100
+        minLength: 8
+        type: string
+      tenant_id:
+        description: |-
+          Tenant ID for the admin user
+          Required: true
+          Max Length: 500
+          Min Length: 1
+        example: 550e8400-e29b-41d4-a716-446655440000
+        maxLength: 500
+        minLength: 1
+        type: string
+      user_type:
+        allOf:
+        - $ref: '#/definitions/rizkysr90-pos_internal_service_admin.UserType'
+        description: |-
+          Type of user (ADMIN or BRANCH)
+          Required: true
+          Enum: ADMIN,BRANCH
+        enum:
+        - ADMIN
+        - BRANCH
+        example: ADMIN
+    required:
+    - action_by
+    - email
+    - password
+    - tenant_id
+    - user_type
+    type: object
+  rizkysr90-pos_internal_service_admin.UserType:
+    enum:
+    - ADMIN
+    - BRANCH
+    type: string
+    x-enum-varnames:
+    - Admin
+    - Branch
   rizkysr90-pos_internal_service_branches.BranchesData:
     properties:
       address:
@@ -535,6 +625,40 @@ paths:
       summary: Create Role
       tags:
       - Roles
+  /api/v1/users:
+    post:
+      consumes:
+      - application/json
+      description: Creates a new user with the provided details
+      parameters:
+      - description: User creation request
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/rizkysr90-pos_internal_service_admin.RequestCreateAdmin'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: User created successfully
+          schema:
+            type: object
+        "400":
+          description: Invalid request payload
+          schema:
+            $ref: '#/definitions/rizkysr90-pos_pkg_errorHandler.HttpError'
+        "422":
+          description: Validation errors
+          schema:
+            $ref: '#/definitions/rizkysr90-pos_pkg_errorHandler.HttpError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/rizkysr90-pos_pkg_errorHandler.HttpError'
+      summary: Create User
+      tags:
+      - Users
   /auth/owner/login:
     get:
       description: Initiates the OAuth login flow for owners
