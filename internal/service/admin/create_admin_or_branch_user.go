@@ -157,9 +157,14 @@ func (s *Service) CreateUser(ctx context.Context, request *RequestCreateAdmin) e
 		return err
 	}
 	// Check duplicate email
-	_, err := s.userStore.FindOne(ctx, &store.UserQueryFilter{Email: input.Email})
+	userData, err := s.userStore.FindOne(ctx, &store.UserQueryFilter{
+		Email: input.Email,
+	})
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		return err
+	}
+	if userData != nil {
+		return errorHandler.NewBadRequest(errorHandler.WithInfo("user duplicate"))
 	}
 	// Check is branch found
 	if input.BranchID != "" {
@@ -197,12 +202,16 @@ func (s *Service) CreateUser(ctx context.Context, request *RequestCreateAdmin) e
 	// Set data
 	newUserID := uuid.NewString()
 	// user data
+	hashPassword, err := utility.HashPassword(input.Password)
+	if err != nil {
+		return err
+	}
 	insertedUserData := &store.UserData{
 		ID:           newUserID,
 		Email:        input.Email,
 		GoogleID:     sql.NullString{String: "", Valid: false},
 		FullName:     input.FullName,
-		PasswordHash: sql.NullString{String: input.Password, Valid: true},
+		PasswordHash: sql.NullString{String: hashPassword, Valid: true},
 		AuthType:     string(Password),
 		UserType:     string(input.Type),
 		TenantID:     input.TenantID,

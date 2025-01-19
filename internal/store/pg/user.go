@@ -32,7 +32,8 @@ func (u *User) Insert(ctx context.Context, userData *store.UserData) error {
 			tenant_id,
 			created_at,
 			last_login_at,
-			created_by
+			created_by,
+			is_verified
 		) VALUES (
 			$1, 
 			$2, 
@@ -44,7 +45,8 @@ func (u *User) Insert(ctx context.Context, userData *store.UserData) error {
 			$8, 
 			$9, 
 			$10,
-			NULLIF($11, '')
+			NULLIF($11, ''),
+			$12
 		)
 	`
 	createFunc := func(tx sqldb.QueryExecutor) error {
@@ -60,6 +62,7 @@ func (u *User) Insert(ctx context.Context, userData *store.UserData) error {
 			userData.CreatedAt,
 			userData.LastLoginAt,
 			userData.CreatedBy.String,
+			userData.IsVerified,
 		)
 		if err != nil {
 			return err
@@ -77,7 +80,7 @@ func (u *User) FindOne(ctx context.Context, filter *store.UserQueryFilter) (*sto
 		SELECT id, email, full_name, google_id, auth_type, user_type, tenant_id
 		FROM users 
 		WHERE $1 = '' OR email = $1 AND
-		$2 = '' OR id = $2::uuid AND 
+		$2 = '00000000-0000-0000-0000-000000000000' OR id = $2::uuid AND 
 		deleted_at IS NULL
 	`
 	data := &store.UserData{}

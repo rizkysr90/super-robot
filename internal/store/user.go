@@ -21,10 +21,12 @@ type UserData struct {
 	CreatedBy    sql.NullString
 	PasswordHash sql.NullString
 	GoogleID     sql.NullString
+	IsVerified   int
 }
 type UserQueryFilter struct {
-	Email string
-	ID    string
+	Email      string
+	ID         string
+	IsVerified int
 }
 type User interface {
 	Insert(ctx context.Context, userData *UserData) error
