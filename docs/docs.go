@@ -1118,11 +1118,10 @@ const docTemplate = `{
                     "minLength": 1,
                     "example": "123e4567-e89b-12d3-a456-426614174000"
                 },
-                "branch_id": {
-                    "description": "Branch ID - UUID of the branch where the user will be assigned\nRequired: true when user_type is BRANCH, optional otherwise\nMax Length: 500\nFormat: uuid\nExample: 550e8400-e29b-41d4-a716-446655440000\nNote: Must be a valid UUID of an existing branch in the system. Required when creating branch users.",
+                "branch_ids": {
+                    "description": "BranchIDs - List of branch UUIDs where the user will be assigned\nRequired: true when user_type is BRANCH, optional otherwise\nMax Length: 1000\nFormat: Comma-separated UUIDs\nExample: 550e8400-e29b-41d4-a716-446655440000,660e8400-e29b-41d4-a716-446655440001\nNote: Must be valid UUIDs of existing branches. Required for branch users.",
                     "type": "string",
-                    "maxLength": 500,
-                    "example": "550e8400-e29b-41d4-a716-446655440000"
+                    "maxLength": 1000
                 },
                 "email": {
                     "description": "Email address of the admin user\nRequired: true\nMax Length: 200\nMin Length: 3\nPattern: ^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$",

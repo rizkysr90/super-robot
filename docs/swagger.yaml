@@ -160,16 +160,15 @@ definitions:
         maxLength: 100
         minLength: 1
         type: string
-      branch_id:
+      branch_ids:
         description: |-
-          Branch ID - UUID of the branch where the user will be assigned
+          BranchIDs - List of branch UUIDs where the user will be assigned
           Required: true when user_type is BRANCH, optional otherwise
-          Max Length: 500
-          Format: uuid
-          Example: 550e8400-e29b-41d4-a716-446655440000
-          Note: Must be a valid UUID of an existing branch in the system. Required when creating branch users.
-        example: 550e8400-e29b-41d4-a716-446655440000
-        maxLength: 500
+          Max Length: 1000
+          Format: Comma-separated UUIDs
+          Example: 550e8400-e29b-41d4-a716-446655440000,660e8400-e29b-41d4-a716-446655440001
+          Note: Must be valid UUIDs of existing branches. Required for branch users.
+        maxLength: 1000
         type: string
       email:
         description: |-
