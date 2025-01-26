@@ -4,6 +4,7 @@ import (
 	"database/sql"
 
 	"rizkysr90-pos/internal/auth"
+	"rizkysr90-pos/internal/commonvalidator/permission"
 	"rizkysr90-pos/internal/config"
 	"rizkysr90-pos/internal/restapi/handler"
 	categoryHandler "rizkysr90-pos/internal/restapi/handler/category"
@@ -93,16 +94,28 @@ func New(
 		workLocationStore,
 		tenantRoleStore,
 	)
+	// Permission Validator
+	permissionValidator := permission.NewRuleBasedValidator(&permission.ValidationStores{
+		UserFinder:           pg.NewUserFinder(sqlDB),
+		TenantFinder:         pg.NewTenantFinder(sqlDB),
+		WorkLocationFinder:   pg.NewWorklocationFinder(sqlDB),
+		AssignmentRoleFinder: pg.NewAssignmentRoleFinder(sqlDB),
+		PermissionFinder:     pg.NewTenantPermissionFinder(sqlDB),
+	}, &permission.UserTenantRule{}, &permission.OwnerRule{}, &permission.RolePermissionRule{})
+
 	adminService := admin.NewService(sqlDB, &cfg, tenantStore,
 		userStore,
 		branchStore,
 		assignmentRoleStore,
 		tenantPermissionStore,
 		workLocationStore,
-		tenantRoleStore)
+		tenantRoleStore,
+		permissionValidator,
+	)
 
 	rolesHandler := handler.NewRolesHandler(rolesService)
 	userAdminHandler := handler.NewUserAdmin(adminService)
+
 	// server.GET("/oauth", func(ctx *gin.Context) {
 	// 	authClient.HandlerRedirect(ctx, sqlDB, authStateStore)
 	// })

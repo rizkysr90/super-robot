@@ -176,29 +176,37 @@ func (s *Service) CreateUser(ctx context.Context, request *RequestCreateAdmin) e
 			return err
 		}
 	}
-	// Check permissions
-	permission := commonvalidator.NewPermission(
-		s.tenantStore,
-		s.worklocationStore,
-		s.assignmentRoleStore,
-		s.tenantPermissionStore,
-		s.userStore,
-	)
 	permissionCode := constant.RbacNewAdmin
 	if input.Type == Branch {
 		permissionCode = constant.RbacNewBranchUser
 	}
-	if err := permission.Validate(
-		ctx,
-		input.TenantID,
-		input.ActionBy,
-		permissionCode,
-	); err != nil {
-		return err
+	_, err = s.permissionValidator.Validate(ctx, input.TenantID, input.ActionBy, permissionCode)
+	if err != nil {
+		return errorHandler.NewUnauthorized(errorHandler.WithInfo(err.Error()))
 	}
-	if !permission.IsAllowed {
-		return errorHandler.NewUnauthorized(errorHandler.WithInfo("permission is not allowed"))
-	}
+	// Check permissions
+	// permission := commonvalidator.NewPermission(
+	// 	s.tenantStore,
+	// 	s.worklocationStore,
+	// 	s.assignmentRoleStore,
+	// 	s.tenantPermissionStore,
+	// 	s.userStore,
+	// )
+	// permissionCode := constant.RbacNewAdmin
+	// if input.Type == Branch {
+	// 	permissionCode = constant.RbacNewBranchUser
+	// }
+	// if err := permission.Validate(
+	// 	ctx,
+	// 	input.TenantID,
+	// 	input.ActionBy,
+	// 	permissionCode,
+	// ); err != nil {
+	// 	return err
+	// }
+	// if !permission.IsAllowed {
+	// 	return errorHandler.NewUnauthorized(errorHandler.WithInfo("permission is not allowed"))
+	// }
 	// Set data
 	newUserID := uuid.NewString()
 	// user data

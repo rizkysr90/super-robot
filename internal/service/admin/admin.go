@@ -2,6 +2,7 @@ package admin
 
 import (
 	"database/sql"
+	"rizkysr90-pos/internal/commonvalidator/permission"
 	"rizkysr90-pos/internal/config"
 	"rizkysr90-pos/internal/store"
 )
@@ -16,6 +17,7 @@ type Service struct {
 	tenantPermissionStore store.TenantPermission
 	worklocationStore     store.WorkLocation
 	tenantRoleStore       store.TenantRole
+	permissionValidator   *permission.RuleBasedValidator
 }
 
 func NewService(
@@ -28,6 +30,7 @@ func NewService(
 	tenantPermissionStore store.TenantPermission,
 	worklocationStore store.WorkLocation,
 	tenantRoleStore store.TenantRole,
+	permissionValidator *permission.RuleBasedValidator,
 ) *Service {
 	return &Service{
 		db:                    sqlDB,
@@ -39,5 +42,6 @@ func NewService(
 		tenantPermissionStore: tenantPermissionStore,
 		worklocationStore:     worklocationStore,
 		tenantRoleStore:       tenantRoleStore,
+		permissionValidator:   permissionValidator,
 	}
 }
