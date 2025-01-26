@@ -23,6 +23,7 @@ func NewRuleBasedValidator(stores *ValidationStores, rules ...Rule) *RuleBasedVa
 func (v *RuleBasedValidator) Validate(ctx context.Context,
 	tenantID,
 	actionBy,
+	branchIDs,
 	permissionCode string) (*PermissionResult, error) {
 	// Initialize the validation context with the result
 	result := &PermissionResult{
@@ -37,6 +38,8 @@ func (v *RuleBasedValidator) Validate(ctx context.Context,
 		PermissionCode: permissionCode,
 		Result:         result,
 		Stores:         v.stores,
+		BranchIDs:      branchIDs,
+		SkipRemaining:  false,
 	}
 
 	// Run each rule in sequence

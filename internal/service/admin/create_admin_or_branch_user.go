@@ -36,7 +36,7 @@ func (req *reqCreateUser) sanitize() {
 	req.ActionBy = strings.TrimSpace(req.ActionBy)
 	req.Email = strings.TrimSpace(req.Email)
 	req.Password = strings.TrimSpace(req.Password)
-	req.BranchID = strings.TrimSpace(req.BranchID)
+	req.BranchIDs = strings.TrimSpace(req.BranchIDs)
 	req.FullName = strings.TrimSpace(req.FullName)
 }
 
@@ -74,7 +74,7 @@ func (req *reqCreateUser) validate() error {
 		validationErrors = append(validationErrors, *utility.ConstructErrorMaxLen("password"))
 	}
 	// Branch ID max length validation (only if provided)
-	if req.BranchID != "" && !commonvalidator.MaxLen(req.BranchID, 500) {
+	if req.BranchIDs != "" && !commonvalidator.MaxLen(req.BranchIDs, 1000) {
 		validationErrors = append(validationErrors, *utility.ConstructErrorMaxLen("branch_id"))
 	}
 
@@ -93,7 +93,7 @@ func (req *reqCreateUser) validate() error {
 		validationErrors = append(validationErrors, *utility.ConstructErrorInvalid("user_type"))
 	}
 	// Branch ID is required only for branch users
-	if req.Type == Branch && !commonvalidator.IsRequired(req.BranchID) {
+	if req.Type == Branch && !commonvalidator.IsRequired(req.BranchIDs) {
 		validationErrors = append(validationErrors, *utility.ConstructErrorRequired("branch_id"))
 	}
 	if len(validationErrors) > 0 {
@@ -134,14 +134,13 @@ type RequestCreateAdmin struct {
 	// Required: true
 	// Enum: ADMIN,BRANCH
 	Type UserType `json:"user_type" binding:"required,oneof=ADMIN BRANCH" example:"ADMIN"`
-
-	// Branch ID - UUID of the branch where the user will be assigned
+	// BranchIDs - List of branch UUIDs where the user will be assigned
 	// Required: true when user_type is BRANCH, optional otherwise
-	// Max Length: 500
-	// Format: uuid
-	// Example: 550e8400-e29b-41d4-a716-446655440000
-	// Note: Must be a valid UUID of an existing branch in the system. Required when creating branch users.
-	BranchID string `json:"branch_id" binding:"omitempty,uuid,max=500" example:"550e8400-e29b-41d4-a716-446655440000"`
+	// Max Length: 1000
+	// Format: Comma-separated UUIDs
+	// Example: 550e8400-e29b-41d4-a716-446655440000,660e8400-e29b-41d4-a716-446655440001
+	// Note: Must be valid UUIDs of existing branches. Required for branch users.
+	BranchIDs string `json:"branch_ids" binding:"omitempty,max=1000"`
 
 	// Full name
 	// Required
@@ -166,21 +165,15 @@ func (s *Service) CreateUser(ctx context.Context, request *RequestCreateAdmin) e
 	if userData != nil {
 		return errorHandler.NewBadRequest(errorHandler.WithInfo("user duplicate"))
 	}
-	// Check is branch found
-	if input.BranchID != "" {
-		_, err := s.branchStore.FindOne(ctx, &store.BranchesFilter{ID: input.BranchID})
-		if err != nil {
-			if errors.Is(err, sql.ErrNoRows) {
-				return errorHandler.NewNotFound(errorHandler.WithInfo("branch not found"))
-			}
-			return err
-		}
-	}
 	permissionCode := constant.RbacNewAdmin
 	if input.Type == Branch {
 		permissionCode = constant.RbacNewBranchUser
 	}
-	_, err = s.permissionValidator.Validate(ctx, input.TenantID, input.ActionBy, permissionCode)
+	_, err = s.permissionValidator.Validate(ctx,
+		input.TenantID,
+		input.ActionBy,
+		input.BranchIDs,
+		permissionCode)
 	if err != nil {
 		return errorHandler.NewUnauthorized(errorHandler.WithInfo(err.Error()))
 	}
@@ -228,28 +221,35 @@ func (s *Service) CreateUser(ctx context.Context, request *RequestCreateAdmin) e
 		CreatedBy:    sql.NullString{String: input.ActionBy, Valid: true},
 	}
 	insertedBranchID := sql.NullString{
-		String: input.BranchID,
+		String: input.BranchIDs,
 		Valid:  true,
 	}
 	if insertedBranchID.String == "" {
 		insertedBranchID.Valid = false
 	}
-	insertedAssignmentData := &store.WorkLocationData{
-		ID:        uuid.NewString(),
-		TenantID:  input.TenantID,
-		UserID:    newUserID,
-		BranchID:  insertedBranchID,
-		CreatedAt: time.Now().UTC(),
-		CreatedBy: input.ActionBy,
+	insertedManyAssignmentData := []store.WorkLocationData{}
+	splitBranchIDs := strings.Split(input.BranchIDs, ",")
+	for _, branchID := range splitBranchIDs {
+		insertedManyAssignmentData = append(insertedManyAssignmentData, store.WorkLocationData{
+			ID:        uuid.NewString(),
+			TenantID:  input.TenantID,
+			UserID:    newUserID,
+			BranchID:  sql.NullString{String: branchID, Valid: true},
+			CreatedAt: time.Now().UTC(),
+			CreatedBy: input.ActionBy,
+		})
 	}
 	err = sqldb.WithinTx(ctx, s.db, func(tx sqldb.QueryExecutor) error {
 		txContext := sqldb.WithTxContext(ctx, tx)
 		if err := s.userStore.Insert(txContext, insertedUserData); err != nil {
 			return err
 		}
-		if err := s.worklocationStore.Insert(txContext, insertedAssignmentData); err != nil {
-			return err
+		for _, insertedAssignmentData := range insertedManyAssignmentData {
+			if err := s.worklocationStore.Insert(txContext, &insertedAssignmentData); err != nil {
+				return err
+			}
 		}
+
 		return nil
 	})
 	if err != nil {

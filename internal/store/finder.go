@@ -21,3 +21,7 @@ type AssignmentRoleFinder interface {
 type TenantPermissionFinder interface {
 	FindByTenantRoleID(ctx context.Context, roleIDs []string) ([]TenantPermissionData, error)
 }
+
+type BranchFinder interface {
+	FindMany(ctx context.Context, branchIDs []string) ([]BranchesData, error)
+}

@@ -101,7 +101,11 @@ func New(
 		WorkLocationFinder:   pg.NewWorklocationFinder(sqlDB),
 		AssignmentRoleFinder: pg.NewAssignmentRoleFinder(sqlDB),
 		PermissionFinder:     pg.NewTenantPermissionFinder(sqlDB),
-	}, &permission.UserTenantRule{}, &permission.OwnerRule{}, &permission.RolePermissionRule{})
+		BranchFinder:         pg.NewBranchFinder(sqlDB),
+	}, &permission.UserTenantRule{},
+		&permission.BranchTenantRule{},
+		&permission.OwnerRule{},
+		&permission.RolePermissionRule{})
 
 	adminService := admin.NewService(sqlDB, &cfg, tenantStore,
 		userStore,

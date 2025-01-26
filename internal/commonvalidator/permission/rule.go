@@ -22,6 +22,7 @@ type ValidationContext struct {
 	TenantID       string
 	ActionBy       string
 	PermissionCode string
+	BranchIDs      string
 
 	// Validation results and collected data
 	Result *PermissionResult
@@ -40,6 +41,7 @@ type ValidationStores struct {
 	WorkLocationFinder   store.WorkLocationFinder
 	AssignmentRoleFinder store.AssignmentRoleFinder
 	PermissionFinder     store.TenantPermissionFinder
+	BranchFinder         store.BranchFinder
 }
 
 type PermissionResult struct {
@@ -53,4 +55,5 @@ type PermissionData struct {
 	WorkLocation         []store.WorkLocationData
 	AssignmentRole       []store.AssignmentRoleData
 	TenantRolePermission []store.TenantPermissionData
+	Branches             []store.BranchesData
 }
